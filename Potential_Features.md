@@ -1,0 +1,1 @@
+- Enforce unique usernames within a room.

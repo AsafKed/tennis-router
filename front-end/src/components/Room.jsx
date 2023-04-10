@@ -23,7 +23,7 @@ export default function Room({ onRoomSelected, onRoomLeft }) {
   };
 
   return (
-    <>
+    <div>
       <h2 className="http">{chatName ? `Current Room: ${chatName}` : "No room selected"}</h2>
       <form className="chat-entry-form" onSubmit={handleChatEntry}>
         <h3 className="chat-entry">Choose a chat to enter</h3>
@@ -45,6 +45,6 @@ export default function Room({ onRoomSelected, onRoomLeft }) {
         <button type="submit" onSubmit={setChatName}>Enter Chat</button>
       </form>
       {chatName && <button onClick={handleRoomLeave}>Leave Room</button>}
-    </>
+    </div>
   );
 }

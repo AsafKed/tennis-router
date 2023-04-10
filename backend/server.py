@@ -56,25 +56,31 @@ def disconnected():
         handle_leave_room(room_to_leave)  # Trigger the leave_room event
 
 @socketio.on("join_room")
-def handle_join_room(room):
+def handle_join_room(data):
+    room = data['room']
+    user_name = data['user_name']
     join_room(room)
     if room not in room_users:
         room_users[room] = []
-    room_users[room].append(request.sid)
+    room_users[room].append({"sid": request.sid, "name": user_name})
     print(f"{request.sid} has joined room {room}")
     print(f"room_users: {room_users}")
     emit("update_room_users", room_users[room], room=room, broadcast=True)
 
 @socketio.on("leave_room")
-def handle_leave_room(room):
+def handle_leave_room(data):
+    room = data['room']
+    user_name = data['user_name']
+    user_sid = request.sid
     leave_room(room)
     if room in room_users:
-        room_users[room].remove(request.sid)
+        room_users[room] = [user for user in room_users[room] if user["sid"] != user_sid]
         if not room_users[room]:
-            del room_users[room] # remove room if no users
-    print(f"{request.sid} has left room {room}")
+            del room_users[room]  # remove room if no users
+    print(f"{user_name} has left room {room}")
     print(f"room_users: {room_users}")
     emit("update_room_users", room_users.get(room, []), room=room, broadcast=True)
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True,port=5001)

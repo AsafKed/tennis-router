@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function UserList({ socket, room }) {
+export default function UserList({ socket, room, userName }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [roomUsers, setRoomUsers] = useState([]);
@@ -31,7 +31,7 @@ export default function UserList({ socket, room }) {
 
   useEffect(() => {
     if (room) {
-      socket.emit("join_room", room);
+      socket.emit("join_room", { room, user_name: userName });
     }
 
     socket.on("update_room_users", (users) => {
@@ -47,11 +47,11 @@ export default function UserList({ socket, room }) {
 
     return () => {
       if (room) {
-        socket.emit("leave_room", room);
+        socket.emit("leave_room", { room, user_name: userName });
       }
       socket.off("update_room_users");
     };
-  }, [socket, room]);
+  }, [socket, room, userName]);
 
   return (
     <div>
@@ -67,7 +67,7 @@ export default function UserList({ socket, room }) {
         <h3>Users in room</h3>
         <ul>
           {roomUsers.map((user, ind) => {
-            return <li key={ind}>{user}</li>;
+            return <li key={ind}>{user.name}</li>;
           })}
         </ul>
       </div>

@@ -8,9 +8,11 @@ function App() {
   const [socketInstance, setSocketInstance] = useState(null);
   const [loading, setLoading] = useState(true);
   const [room, setRoom] = useState("");
+  const [userName, setUserName] = useState("");
 
-  const handleRoomSelected = (roomName) => {
+  const handleRoomSelected = (roomName, userName) => {
     setRoom(roomName);
+    setUserName(userName);
   };
 
   useEffect(() => {
@@ -46,7 +48,7 @@ function App() {
       <div className="line">
         <Room onRoomSelected={handleRoomSelected} />
       </div>
-      {!loading && <UserList socket={socketInstance} room={room} />}
+      {!loading && <UserList socket={socketInstance} room={room} userName={userName} />}
     </div>
   );
 }

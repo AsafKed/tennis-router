@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 
 export default function Room({ onRoomSelected }) {
   const [chatName, setChatName] = useState("");

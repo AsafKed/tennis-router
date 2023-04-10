@@ -5,26 +5,17 @@ import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
 
 function App() {
-  const [socketInstance, setSocketInstance] = useState("");
+  const [socketInstance, setSocketInstance] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [buttonStatus, setButtonStatus] = useState(false);
   const [room, setRoom] = useState("");
-
-  const handleClick = () => {
-    if (buttonStatus === false) {
-      setButtonStatus(true);
-    } else {
-      setButtonStatus(false);
-    }
-  };
 
   const handleRoomSelected = (roomName) => {
     setRoom(roomName);
   };
 
   useEffect(() => {
-    if (buttonStatus === true) {
-      const socket = io("localhost:5001/", {
+    if (!socketInstance) {
+      const socket = io("http://localhost:5001/", {
         transports: ["websocket"],
         cors: {
           origin: "http://localhost:3000/",
@@ -37,17 +28,17 @@ function App() {
         console.log(data);
       });
 
-      setLoading(false);
-
       socket.on("disconnect", (data) => {
         console.log(data);
       });
-
-      return function cleanup() {
-        socket.disconnect();
-      };
     }
-  }, [buttonStatus]);
+  }, [socketInstance]);
+
+  useEffect(() => {
+    if (room && socketInstance) {
+      setLoading(false);
+    }
+  }, [room, socketInstance]);
 
   return (
     <div className="App">
@@ -55,16 +46,7 @@ function App() {
       <div className="line">
         <Room onRoomSelected={handleRoomSelected} />
       </div>
-      {!buttonStatus ? (
-        <button onClick={handleClick}>turn chat on</button>
-      ) : (
-        <>
-          <button onClick={handleClick}>turn chat off</button>
-          <div className="line">
-            {!loading && <UserList socket={socketInstance} room={room} />}
-          </div>
-        </>
-      )}
+      {!loading && <UserList socket={socketInstance} room={room} />}
     </div>
   );
 }

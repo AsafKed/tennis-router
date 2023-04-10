@@ -38,10 +38,18 @@ export default function UserList({ socket, room }) {
       setRoomUsers(users);
     });
 
+    // This ensures that if a window is closed, the user is removed from the room. May not be necessary.
+    window.addEventListener("beforeunload", () => {
+      if (room) {
+        socket.emit("leave_room", room);
+      }
+    });
+
     return () => {
       if (room) {
         socket.emit("leave_room", room);
       }
+      socket.off("update_room_users");
     };
   }, [socket, room]);
 

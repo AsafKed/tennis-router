@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 
-export default function WebSocketCall({ socket }) {
+export default function UserList({ socket, room }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [roomUsers, setRoomUsers] = useState([]);
 
   const handleText = (e) => {
     const inputMessage = e.target.value;
@@ -13,7 +14,7 @@ export default function WebSocketCall({ socket }) {
     if (!message) {
       return;
     }
-    socket.emit("data", message);
+    socket.emit("data", { message, room });
     setMessage("");
   };
 
@@ -28,6 +29,22 @@ export default function WebSocketCall({ socket }) {
     };
   }, [socket, messages]);
 
+  useEffect(() => {
+    if (room) {
+      socket.emit("join_room", room);
+    }
+
+    socket.on("update_room_users", (users) => {
+      setRoomUsers(users);
+    });
+
+    return () => {
+      if (room) {
+        socket.emit("leave_room", room);
+      }
+    };
+  }, [socket, room]);
+
   return (
     <div>
       <h2>WebSocket Communication</h2>
@@ -38,6 +55,14 @@ export default function WebSocketCall({ socket }) {
           return <li key={ind}>{message}</li>;
         })}
       </ul>
+      <div>
+        <h3>Users in room</h3>
+        <ul>
+          {roomUsers.map((user, ind) => {
+            return <li key={ind}>{user}</li>;
+          })}
+        </ul>
+      </div>
     </div>
   );
 }

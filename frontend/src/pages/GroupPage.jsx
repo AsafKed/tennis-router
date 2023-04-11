@@ -16,25 +16,34 @@ function GroupPage() {
   };
 
   useEffect(() => {
-    if (!socketInstance) {
-      const socket = io("http://localhost:5001/", {
-        transports: ["websocket"],
-        cors: {
-          origin: "http://localhost:3000/",
-        },
-      });
+    // if (!socketInstance) {
+    //   const socket = process.env.REACT_APP_BACKEND_URL || io("http://localhost:5001", {
+    //     transports: ["websocket"],
+    //     cors: {
+    //       origin: "http://localhost:3000/",
+    //     },
+    //   });
 
-      setSocketInstance(socket);
+      if (!socketInstance) {
+        const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
+        const socket = io(backendUrl, {
+          transports: ["websocket"],
+          cors: {
+            origin: "http://localhost:3000/",
+          },
+        });
 
-      socket.on("connect", (data) => {
-        console.log(data);
-      });
+        setSocketInstance(socket);
 
-      socket.on("disconnect", (data) => {
-        console.log(data);
-      });
-    }
-  }, [socketInstance]);
+        socket.on("connect", (data) => {
+          console.log(data);
+        });
+
+        socket.on("disconnect", (data) => {
+          console.log(data);
+        });
+      }
+    }, [socketInstance]);
 
   useEffect(() => {
     if (room && socketInstance) {

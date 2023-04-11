@@ -1,11 +1,15 @@
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_cors import CORS
+from engineio.payload import Payload
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 CORS(app,resources={r"/*":{"origins":"*"}})
-socketio = SocketIO(app,cors_allowed_origins="*")
+Payload.max_decode_packets = 500
+socketio = SocketIO(app, cors_allowed_origins="*")
+socketio.init_app(app, cors_allowed_origins="*")
 
 #################
 # HTTP endpoints
@@ -83,4 +87,6 @@ def handle_leave_room(data):
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True,port=5001)
+    host = os.environ.get("BACKEND_HOST", "0.0.0.0") # get from environment, if not present, use second value
+    port = int(os.environ.get("BACKEND_PORT", "5001"))
+    socketio.run(app, host="0.0.0.0", port=port, debug=True)

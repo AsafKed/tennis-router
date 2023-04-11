@@ -1,11 +1,29 @@
 # Simple ReactJS + Flask App using WebSockets (socket.io)
+## Running the services individually
+The backend and frontend use sockets to communicate. This makes it so that updates (to group members, for example) are instantly accessible to all users of the relevant data. 
 
-This simple App connects a Flask server to a React client
-and opens a two way interactive communication using WebSocket technology with the socket.io library.
-With WebSockets you can send messages to a server and receive event driven responses without having
-to poll a server.
+For this to work, the backend must run before the frontend. 
 
-This repo was created to help users create WebSocket communication protocols along with regular HTTP communication using a Python Flask server and a Javascript React client.
+1. Navigate to the backend directory
+2. Run `python3 server.py` (on Linux)
+3. Navigate to the frontend directory
+4. Run `npm run start`
+
+## Running the services using Docker
+Locally, in the main directory, run this command:
+> docker compose -f docker-compose.dev.yml up -d
+
+In production (on an online server, such as Ubuntu 22.04), run this command:
+> docker compose -f docker-compose.prod.yml up -d
+
+This is recommended especially for use in the server. Before pushing changes, however, ensure that running them with Docker works locally.
+
+## Running on a server
+It's set up using Nginx on an Ubuntu 22 server. The docker-compose.yml file should have 2 changes when on the server: instead of having
+> build: ./backend
+That line should say:
+> image: musashishi/backend:latest
+This pulls it from the Docker Hub, which means the server doesn't need to spend resources to build the docker image. The same thing should be done for the frontend.
 
 ## Tech Stack
 

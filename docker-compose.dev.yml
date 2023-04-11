@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5001:5001"
+    environment:
+      - BACKEND_HOST=0.0.0.0
+      - BACKEND_PORT=5001
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:5001
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:1.21
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro

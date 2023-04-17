@@ -15,6 +15,7 @@ function GroupPage() {
     setUserName(userName);
   };
 
+  // Connection to socket
   useEffect(() => {
     // if (!socketInstance) {
     //   const socket = process.env.REACT_APP_BACKEND_URL || io("http://localhost:5001", {
@@ -24,26 +25,26 @@ function GroupPage() {
     //     },
     //   });
 
-      if (!socketInstance) {
-        const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
-        const socket = io(backendUrl, {
-          transports: ["websocket"],
-          cors: {
-            origin: "http://localhost:3000/",
-          },
-        });
+    if (!socketInstance) {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
+      const socket = io(backendUrl, {
+        transports: ["websocket"],
+        cors: {
+          origin: "http://localhost:3000/",
+        },
+      });
 
-        setSocketInstance(socket);
+      setSocketInstance(socket);
 
-        socket.on("connect", (data) => {
-          console.log(data);
-        });
+      socket.on("connect", (data) => {
+        console.log(data);
+      });
 
-        socket.on("disconnect", (data) => {
-          console.log(data);
-        });
-      }
-    }, [socketInstance]);
+      socket.on("disconnect", (data) => {
+        console.log(data);
+      });
+    }
+  }, [socketInstance]);
 
   useEffect(() => {
     if (room && socketInstance) {

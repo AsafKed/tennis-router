@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_cors import CORS
 from engineio.payload import Payload
 import os
+from Neo4j_Worker import App
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -22,6 +23,23 @@ def http_call():
 
 users = []
 room_users = {}
+
+##############################
+# Requests from the front end
+##############################
+@app.route("/register", methods=["POST"])
+def register_user():
+    user_data = request.json
+    user_id = user_data["user_id"]
+    email = user_data["email"]
+    name = user_data["name"]
+
+    neo4j_worker = App()
+    user = neo4j_worker.create_user(name, user_id, email)
+    neo4j_worker.close()
+
+    return jsonify(user), 201
+
 
 #################
 # SocketIO events

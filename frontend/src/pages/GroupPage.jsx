@@ -17,14 +17,6 @@ function GroupPage() {
 
   // Connection to socket
   useEffect(() => {
-    // if (!socketInstance) {
-    //   const socket = process.env.REACT_APP_BACKEND_URL || io("http://localhost:5001", {
-    //     transports: ["websocket"],
-    //     cors: {
-    //       origin: "http://localhost:3000/",
-    //     },
-    //   });
-
     if (!socketInstance) {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
       const socket = io(backendUrl, {

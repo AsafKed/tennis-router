@@ -25,23 +25,23 @@ class App:
         # Don't forget to close the driver connection when you are finished with it
         self.driver.close()
 
-    def create_user(self, name, user_id, image_url):
+    def create_user(self, name, user_id, email):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self._create_and_return_user, name, user_id, image_url)
+                self._create_and_return_user, name, user_id, email)
 
             return result
 
     @staticmethod
-    def _create_and_return_user(tx, name, user_id, image_url):
+    def _create_and_return_user(tx, name, user_id, email):
         # MERGE will try to match the entire pattern and if it does not exist, it creates it.
         query = (
             """ MERGE (p:Person { name: $name, user_id: $user_id })
-                SET p.image_url = $image_url
-                RETURN p.name AS name, p.user_id AS user_id, p.image_url AS image_url
+                SET p.email = $email
+                RETURN p.name AS name, p.user_id AS user_id, p.email AS email
             """
         )
-        result = tx.run(query, name=name, user_id=user_id, image_url=image_url)
+        result = tx.run(query, name=name, user_id=user_id, email=email)
                         # session_id=session_id, today=today,
                         # joined=joined)
 
@@ -196,14 +196,14 @@ class App:
             """
             MATCH (p:Person)-[:ATTENDED]->(s:Session)
             WHERE s.session_id = $session_id
-            RETURN p.name AS name, p.image_url AS image_url
+            RETURN p.name AS name, p.email AS email
             """
         )
         result = tx.run(query, session_id=session_id).data()
         return result
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # Aura queries use an encrypted connection using the "neo4j+s" URI scheme
-    app = App()
-    app.create_user("Asaf Kedem", "123", "https://www.google.com", 0, "18:07")
-    app.close()
+    # app = App()
+    # app.create_user("Asaf Kedem", "123", "https://www.google.com", 0, "18:07")
+    # app.close()

@@ -8,19 +8,35 @@ function Register() {
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('');
+    const [displayName, setDisplayName] = useState('');
     const [error, setError] = useState('');
+
+    const sendUserDataToServer = async (userId, userEmail, userName) => {
+        const response = await fetch("http://localhost:5001/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                email: userEmail,
+                name: userName,
+            }),
+        });
+        const data = await response.json();
+        console.log("Server response:", data);
+    };
 
     const onSubmit = async (e) => {
         e.preventDefault()
 
         await createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
+            .then(async (userCredential) => {
                 // Signed in
                 const user = userCredential.user;
                 console.log(user);
+                await sendUserDataToServer(user.uid, user.email, displayName);
                 navigate("/user")
-                // TODO save user.uid, user.email in the DB
-                // ...
             })
             .catch((error) => {
                 const errorCode = error.code;
@@ -29,7 +45,6 @@ function Register() {
                 console.log(errorMessage);
                 setError(errorMessage);
             });
-
 
     }
 
@@ -40,6 +55,19 @@ function Register() {
                     <div>
                         <h1> FocusApp </h1>
                         <form>
+                            <div>
+                                <label htmlFor="display-name">
+                                    Display name
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Display Name"
+                                    value={displayName}
+                                    onChange={(e) => setDisplayName(e.target.value)}
+                                    required
+                                />
+                            </div>
+
                             <div>
                                 <label htmlFor="email-address">
                                     Email address
@@ -92,4 +120,4 @@ function Register() {
     )
 }
 
-export default Register
+export default Register;

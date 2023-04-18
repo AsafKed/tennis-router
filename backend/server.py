@@ -4,6 +4,7 @@ from flask_cors import CORS
 from engineio.payload import Payload
 import os
 from Neo4j_Worker import App
+import uuid
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -39,6 +40,15 @@ def register_user():
     neo4j_worker.close()
 
     return jsonify(user), 201
+
+@app.route("/users/<user_id>", methods=["GET"])
+def get_user(user_id):
+    print(user_id)
+    neo4j_worker = App()
+    user = neo4j_worker.get_user(user_id)
+    neo4j_worker.close()
+
+    return jsonify(user), 200
 
 
 #################
@@ -77,31 +87,41 @@ def disconnected():
     if room_to_leave:
         handle_leave_room(room_to_leave)  # Trigger the leave_room event
 
-@socketio.on("join_room")
-def handle_join_room(data):
-    room = data['room']
-    user_name = data['user_name']
-    join_room(room)
-    if room not in room_users:
-        room_users[room] = []
-    room_users[room].append({"sid": request.sid, "name": user_name})
-    print(f"{request.sid} has joined room {room}")
-    print(f"room_users: {room_users}")
-    emit("update_room_users", room_users[room], room=room, broadcast=True)
+# TODO send list of users in group from Neo4j to front end
 
-@socketio.on("leave_room")
+@socketio.on("join_group")
+def handle_join_room(data):
+    print()
+    print(data)
+    print()
+    group_name = data['group']
+    group_id = str(uuid.uuid4())
+    name = data['user']['name']
+    user_id = data['user']['user_id']
+
+    # Neo4j join group
+    neo4j_worker = App()
+    neo4j_worker.create_group(group_name, group_id)
+    neo4j_worker.add_user_to_group(user_id=user_id, group_id=group_id)
+    neo4j_worker.close()
+
+    # TODO Get list of users in group from Neo4j, send to front end
+    emit("update_room_users", [], room=group_id, broadcast=True)
+
+@socketio.on("leave_group")
 def handle_leave_room(data):
-    room = data['room']
+    # TODO Neo4j leave group
+    group = data['group']
     user_name = data['user_name']
     user_sid = request.sid
-    leave_room(room)
-    if room in room_users:
-        room_users[room] = [user for user in room_users[room] if user["sid"] != user_sid]
-        if not room_users[room]:
-            del room_users[room]  # remove room if no users
-    print(f"{user_name} has left room {room}")
+    leave_room(group)
+    if group in room_users:
+        room_users[group] = [user for user in room_users[group] if user["sid"] != user_sid]
+        if not room_users[group]:
+            del room_users[group]  # remove room if no users
+    print(f"{user_name} has left room {group}")
     print(f"room_users: {room_users}")
-    emit("update_room_users", room_users.get(room, []), room=room, broadcast=True)
+    emit("update_room_users", room_users.get(group, []), room=group, broadcast=True)
 
 
 if __name__ == '__main__':

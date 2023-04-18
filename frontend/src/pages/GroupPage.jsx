@@ -1,19 +1,52 @@
 import "../App.css";
-import Room from "../components/Room";
+import Group from "../components/Group";
 import UserList from "../components/UserList";
 import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase";
 
 function GroupPage() {
   const [socketInstance, setSocketInstance] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [room, setRoom] = useState("");
+  const [group, setGroup] = useState("");
   const [userName, setUserName] = useState("");
+  const [user, setUser] = useState([]);
 
-  const handleRoomSelected = (roomName, userName) => {
-    setRoom(roomName);
+  const handleGroupSelected = (groupName, userName) => {
+    setGroup(groupName);
     setUserName(userName);
   };
+
+  const getUserDataFromServer = async (userId) => {
+    const response = await fetch(`http://localhost:5001/users/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    setUser(data);
+    console.log("Server response:", data);
+  };
+      
+  useEffect(()=>{
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // User is signed in, see docs for a list of available properties
+          // https://firebase.google.com/docs/reference/js/firebase.User
+          // TODO get request from backend to get the user
+          const uid = user.uid;
+          getUserDataFromServer(uid);
+          console.log("uid", uid)
+        } else {
+          // User is signed out
+          // ...
+          console.log("user is logged out")
+        }
+      });
+     
+}, [])
 
   // Connection to socket
   useEffect(() => {
@@ -39,18 +72,18 @@ function GroupPage() {
   }, [socketInstance]);
 
   useEffect(() => {
-    if (room && socketInstance) {
+    if (group && socketInstance) {
       setLoading(false);
     }
-  }, [room, socketInstance]);
+  }, [group, socketInstance]);
 
   return (
     <div>
-      <h1>React/Flask App + socket.io</h1>
+      <h1>Group Entry</h1>
       <div className="line">
-        <Room onRoomSelected={handleRoomSelected} />
+        <Group onGroupSelected={handleGroupSelected} user={user} />
       </div>
-      {!loading && <UserList socket={socketInstance} room={room} userName={userName} />}
+      {!loading && <UserList socket={socketInstance} group={group} user={user} />}
     </div>
   );
 }

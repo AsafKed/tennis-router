@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
-export default function UserList({ socket, room, userName }) {
+export default function UserList({ socket, group, user }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [roomUsers, setRoomUsers] = useState([]);
+  const [groupUsers, setGroupUsers] = useState([]);
 
   const handleText = (e) => {
     const inputMessage = e.target.value;
@@ -14,7 +14,7 @@ export default function UserList({ socket, room, userName }) {
     if (!message) {
       return;
     }
-    socket.emit("data", { message, room });
+    socket.emit("data", { message, group });
     setMessage("");
   };
 
@@ -30,28 +30,28 @@ export default function UserList({ socket, room, userName }) {
   }, [socket, messages]);
 
   useEffect(() => {
-    if (room) {
-      socket.emit("join_room", { room, user_name: userName });
+    if (group) {
+      socket.emit("join_group", { group, user: user });
     }
 
-    socket.on("update_room_users", (users) => {
-      setRoomUsers(users);
+    socket.on("update_group_users", (users) => {
+      setGroupUsers(users);
     });
 
-    // This ensures that if a window is closed, the user is removed from the room. May not be necessary.
+    // This ensures that if a window is closed, the user is removed from the group. May not be necessary.
     window.addEventListener("beforeunload", () => {
-      if (room) {
-        socket.emit("leave_room", room);
+      if (group) {
+        socket.emit("leave_group", group);
       }
     });
 
     return () => {
-      if (room) {
-        socket.emit("leave_room", { room, user_name: userName });
+      if (group) {
+        socket.emit("leave_group", { group, user: user });
       }
-      socket.off("update_room_users");
+      socket.off("update_group_users");
     };
-  }, [socket, room, userName]);
+  }, [socket, group, user]);
 
   return (
     <div>
@@ -64,9 +64,9 @@ export default function UserList({ socket, room, userName }) {
         })}
       </ul>
       <div>
-        <h3>Users in room</h3>
+        <h3>Users in group</h3>
         <ul>
-          {roomUsers.map((user, ind) => {
+          {groupUsers.map((user, ind) => {
             return <li key={ind}>{user.name}</li>;
           })}
         </ul>

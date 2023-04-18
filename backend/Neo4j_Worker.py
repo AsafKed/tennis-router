@@ -176,22 +176,46 @@ class App:
         result = tx.run(query, user_id=user_id)
         return [row["name"] for row in result]
 
-    def get_users_by_session(self, session_id):
+    ############################
+    # Get users by group_id
+    ############################
+    def get_users_by_group(self, group_id):
         with self.driver.session(database="neo4j") as session:
-            result = session.execute_read(self._get_users_by_session, session_id)
+            result = session.execute_read(self._get_users_by_group, group_id)
             for row in result:
                 print("Found person: {row}".format(row=row))
 
             return result
 
     @staticmethod
-    def _get_users_by_session(tx, session_id):
+    def _get_users_by_group(tx, group_id):
         query = """
-            MATCH (p:Person)-[:ATTENDED]->(s:Session)
-            WHERE s.session_id = $session_id
-            RETURN p.name AS name, p.email AS email
+            MATCH (u:User)-[:WITH]->(g:Group)
+            WHERE g.group_id = $group_id
+            RETURN u.name AS name, u.user_id AS user_id
             """
-        result = tx.run(query, session_id=session_id).data()
+        result = tx.run(query, group_id=group_id).data()
+        return result
+    
+    ############################
+    # Get groups by user_id
+    ############################
+    def get_groups_by_user(self, user_id):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(self._get_groups_by_user, user_id)
+            for row in result:
+                print("Found person: {row}".format(row=row))
+
+            return result
+        
+    @staticmethod
+    def _get_groups_by_user(tx, user_id):
+        query = """
+            MATCH (u:User)-[:WITH]->(g:Group)
+            WHERE u.user_id = $user_id
+            RETURN g.group_name AS group_name, g.group_id AS group_id
+            """
+        result = tx.run(query, user_id=user_id).data()
         return result
 
 

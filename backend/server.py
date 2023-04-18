@@ -95,18 +95,48 @@ def handle_join_room(data):
     print(data)
     print()
     group_name = data['group']
-    group_id = str(uuid.uuid4())
     name = data['user']['name']
     user_id = data['user']['user_id']
 
     # Neo4j join group
     neo4j_worker = App()
-    neo4j_worker.create_group(group_name, group_id)
-    neo4j_worker.add_user_to_group(user_id=user_id, group_id=group_id)
+    # Check if the user is already in the group
+    if user_in_group(user_id, group_name):
+        group_id = get_group_id(group_name, user_id)
+    else:
+        group_id = str(uuid.uuid4())
+        neo4j_worker.create_group(group_name, group_id)
+        neo4j_worker.add_user_to_group(user_id=user_id, group_id=group_id)
+
+    # Add the user to the socket IO room (for sending messages to the group)
+    join_room(group_id)
+    
+    users = neo4j_worker.get_users_by_group(group_id)
+    print()
+    print("Users in the group are:", users)
+    print()
     neo4j_worker.close()
 
     # TODO Get list of users in group from Neo4j, send to front end
-    emit("update_room_users", [], room=group_id, broadcast=True)
+    emit("update_group_users", users, room=group_id, broadcast=True)
+
+def user_in_group(user_id, group_name):
+    neo4j_worker = App()
+    groups = neo4j_worker.get_groups_by_user(user_id=user_id)
+    neo4j_worker.close()
+    for group in groups:
+        if group["group_name"] == group_name:
+            return True
+    return False
+
+def get_group_id(group_name, user_id):
+    neo4j_worker = App()
+    groups = neo4j_worker.get_groups_by_user(user_id=user_id)
+    neo4j_worker.close()
+    for group in groups:
+        if group["group_name"] == group_name:
+            return group["group_id"]
+    return None
 
 @socketio.on("leave_group")
 def handle_leave_room(data):

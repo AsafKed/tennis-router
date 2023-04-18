@@ -35,6 +35,7 @@ export default function UserList({ socket, group, user }) {
     }
 
     socket.on("update_group_users", (users) => {
+      console.log("users", users);
       setGroupUsers(users);
     });
 

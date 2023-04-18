@@ -18,7 +18,8 @@ function Register() {
                 // Signed in
                 const user = userCredential.user;
                 console.log(user);
-                navigate("/login")
+                navigate("/user")
+                // TODO save user.uid, user.email in the DB
                 // ...
             })
             .catch((error) => {

@@ -101,25 +101,7 @@ class App:
         result = tx.run(query_date, group_id=group_id, today=today).data()
         Uniqueness_Check(result)
         return result[0]
-
-    ############################
-    # Get user info
-    ############################
-    def get_user(self, user_id):
-        with self.driver.session(database="neo4j") as user:
-            result = user.execute_read(self._get_user, user_id)
-
-            return result
-
-    @staticmethod
-    def _get_user(tx, user_id):
-        query = """ MATCH (u:User { user_id: $user_id })
-                RETURN u.user_id AS user_id, u.name AS name, u.email AS email
-            """
-        result = tx.run(query, user_id=user_id).data()
-        Uniqueness_Check(result)
-        return result[0]
-
+    
     ############################
     # Add user to group
     ############################
@@ -147,6 +129,46 @@ class App:
         Uniqueness_Check(result)
         person = result[0]
         return person
+    
+    ############################
+    # Remove user from group
+    ############################
+    def remove_user_from_group(self, user_id: str, group_name: str):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self._remove_user_from_group, user_id, group_name
+            )
+
+            return result
+        
+    @staticmethod
+    def _remove_user_from_group(tx, user_id: str, group_name: str):
+        query = """ MATCH (u:User { user_id: $user_id })-[r:WITH]->(g:Group { group_name: $group_name })
+                DELETE r
+                RETURN u.name AS name, u.user_id AS user_id, g.group_name AS group_name
+            """
+        result = tx.run(query, user_id=user_id, group_name=group_name).data()
+        Uniqueness_Check(result)
+        person = result[0]
+        return person
+
+    ############################
+    # Get user info
+    ############################
+    def get_user(self, user_id):
+        with self.driver.session(database="neo4j") as user:
+            result = user.execute_read(self._get_user, user_id)
+
+            return result
+
+    @staticmethod
+    def _get_user(tx, user_id):
+        query = """ MATCH (u:User { user_id: $user_id })
+                RETURN u.user_id AS user_id, u.name AS name, u.email AS email
+            """
+        result = tx.run(query, user_id=user_id).data()
+        Uniqueness_Check(result)
+        return result[0]
 
     ############################
     # Find person

@@ -85,19 +85,6 @@ def disconnected():
     print("user disconnected")
     emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
 
-    # May or may not be necessary
-    # Find room that the user was in and remove them from the room
-    room_to_leave = None
-    for room, users_list in room_users.items():
-        if request.sid in users_list:
-            room_to_leave = room
-            break
-
-    if room_to_leave:
-        handle_leave_room(room_to_leave)  # Trigger the leave_room event
-
-# TODO send list of users in group from Neo4j to front end
-
 @socketio.on("join_group")
 def handle_join_room(data):
     print()
@@ -139,14 +126,16 @@ def handle_leave_room(data):
     group_name = data['group']
     user_id = data['user']['user_id']
     
-    group_id = get_group_id(group_name, user_id)
-    leave_room(group_id)
-
     neo4j_worker = App()
+    neo4j_worker.remove_user_from_group(user_id, group_name)
+    group_id = neo4j_worker.get_group_id(group_name)
     users = neo4j_worker.get_users_by_group(group_id)
     neo4j_worker.close()
 
-    emit("update_room_users", users, room=group_id, broadcast=True)
+    emit("update_group_users", users, room=group_id, broadcast=True)
+
+    # Must be at the end of the logic to get the last update
+    leave_room(group_id)
 
 if __name__ == '__main__':
     host = os.environ.get("BACKEND_HOST", "0.0.0.0") # get from environment, if not present, use second value

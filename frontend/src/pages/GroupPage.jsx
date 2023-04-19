@@ -10,6 +10,7 @@ function GroupPage() {
   const [socketInstance, setSocketInstance] = useState(null);
   const [loading, setLoading] = useState(true);
   const [group, setGroup] = useState("");
+  const [leavingGroup, setLeavingGroup] = useState(false);
   const [userName, setUserName] = useState("");
   const [user, setUser] = useState([]);
 
@@ -17,6 +18,21 @@ function GroupPage() {
     setGroup(groupName);
     setUserName(userName);
   };
+
+  const handleGroupLeave = () => {
+    setGroup("");
+    setLeavingGroup(true);
+  };
+
+  useEffect(() => {
+    if (leavingGroup && socketInstance) {
+      socketInstance.on("update_group_users", (users) => {
+        console.log("users", users);
+        setLeavingGroup(false);
+        window.location.reload(false);
+      });     
+    }
+  }, [leavingGroup, socketInstance]);
 
   const getUserDataFromServer = async (userId) => {
     const response = await fetch(`http://localhost:5001/users/${userId}`, {
@@ -81,9 +97,9 @@ function GroupPage() {
     <div>
       <h1>Group Entry</h1>
       <div className="line">
-        <Group onGroupSelected={handleGroupSelected} user={user} />
+        <Group onGroupSelected={handleGroupSelected} onGroupLeft={handleGroupLeave} user={user} />
       </div>
-      {!loading && <UserList socket={socketInstance} group={group} user={user} />}
+      {!loading && <UserList socket={socketInstance} group={group} user={user} leavingGroup={leavingGroup} />}
     </div>
   );
 }

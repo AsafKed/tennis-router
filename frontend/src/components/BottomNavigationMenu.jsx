@@ -1,4 +1,3 @@
-// BottomNavigationMenu.js
 import React from 'react';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 import { useTheme } from '@mui/material/styles';

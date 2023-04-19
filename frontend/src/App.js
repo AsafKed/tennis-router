@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import UserPage from "./pages/UserPage";
 import BottomNavigationMenu from "./components/BottomNavigationMenu";
+import TopNavigationMenu from "./components/TopNavigationMenu";
 
 // Material UI (better font styling)
 import '@fontsource/roboto/300.css';
@@ -16,6 +17,7 @@ function App() {
   return (
     <div className="App" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <BrowserRouter>
+        <TopNavigationMenu />
         <Routes>
           <Route path="/" element={<WelcomePage />} />
           <Route path="/group" element={<GroupPage />} />

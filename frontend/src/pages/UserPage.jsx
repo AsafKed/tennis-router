@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 function UserPage() {
     const navigate = useNavigate();
 
+    const [groups, setGroups] = useState([]);
+
     const handleLogout = () => {
         signOut(auth).then(() => {
             // Sign-out successful.
@@ -19,6 +21,18 @@ function UserPage() {
         });
     }
 
+    const getGroups = async (userId) => {
+        const response = await fetch(`http://localhost:5001/user-groups/${userId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+          });
+          const data = await response.json();
+          console.log("Server response:", data);
+          setGroups(data);
+    };
+
     useEffect(()=>{
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -27,6 +41,7 @@ function UserPage() {
               const uid = user.uid;
               // ...
               console.log("uid", uid)
+              getGroups(uid);
             } else {
               // User is signed out
               // ...
@@ -39,6 +54,13 @@ function UserPage() {
   return (
     <div>
         <h1>User</h1>
+        <h3>Groups you're in</h3>
+        <ul>
+            {groups.map((group, ind) => (
+              // TODO: add link to group page (should go to that group's page when clicked)
+                <li key={ind}>{group.group_name}</li>
+            ))}
+        </ul>
         <button onClick={handleLogout}>Logout</button>
     </div>
   )

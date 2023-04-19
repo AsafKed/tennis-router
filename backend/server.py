@@ -5,6 +5,7 @@ from engineio.payload import Payload
 import os
 from Neo4j_Worker import App
 import uuid
+from Neo4j_Helpers import user_in_group, get_group_id
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -49,6 +50,14 @@ def get_user(user_id):
     neo4j_worker.close()
 
     return jsonify(user), 200
+
+@app.route("/user-groups/<user_id>", methods=["GET"])
+def get_user_groups(user_id):
+    neo4j_worker = App()
+    groups = neo4j_worker.get_groups_by_user(user_id)
+    neo4j_worker.close()
+
+    return jsonify(groups), 200
 
 
 #################
@@ -95,11 +104,11 @@ def handle_join_room(data):
     print(data)
     print()
     group_name = data['group']
-    name = data['user']['name']
     user_id = data['user']['user_id']
 
     # Neo4j join group
     neo4j_worker = App()
+    # TODO current logic is to create a new group FOR EACH USER, that's DUMB DUDE, ez fixy
     # Check if the user is already in the group
     if user_in_group(user_id, group_name):
         group_id = get_group_id(group_name, user_id)
@@ -109,8 +118,9 @@ def handle_join_room(data):
         neo4j_worker.add_user_to_group(user_id=user_id, group_id=group_id)
 
     # Add the user to the socket IO room (for sending messages to the group)
+    print("Joining room:", group_id)
     join_room(group_id)
-    
+
     users = neo4j_worker.get_users_by_group(group_id)
     print()
     print("Users in the group are:", users)
@@ -120,39 +130,20 @@ def handle_join_room(data):
     # TODO Get list of users in group from Neo4j, send to front end
     emit("update_group_users", users, room=group_id, broadcast=True)
 
-def user_in_group(user_id, group_name):
-    neo4j_worker = App()
-    groups = neo4j_worker.get_groups_by_user(user_id=user_id)
-    neo4j_worker.close()
-    for group in groups:
-        if group["group_name"] == group_name:
-            return True
-    return False
-
-def get_group_id(group_name, user_id):
-    neo4j_worker = App()
-    groups = neo4j_worker.get_groups_by_user(user_id=user_id)
-    neo4j_worker.close()
-    for group in groups:
-        if group["group_name"] == group_name:
-            return group["group_id"]
-    return None
-
 @socketio.on("leave_group")
 def handle_leave_room(data):
     # TODO Neo4j leave group
-    group = data['group']
-    user_name = data['user_name']
-    user_sid = request.sid
-    leave_room(group)
-    if group in room_users:
-        room_users[group] = [user for user in room_users[group] if user["sid"] != user_sid]
-        if not room_users[group]:
-            del room_users[group]  # remove room if no users
-    print(f"{user_name} has left room {group}")
-    print(f"room_users: {room_users}")
-    emit("update_room_users", room_users.get(group, []), room=group, broadcast=True)
+    group_name = data['group']
+    user_id = data['user']['user_id']
+    
+    group_id = get_group_id(group_name, user_id)
+    leave_room(group_id)
 
+    neo4j_worker = App()
+    users = neo4j_worker.get_users_by_group(group_id)
+    neo4j_worker.close()
+
+    emit("update_room_users", users, room=group_id, broadcast=True)
 
 if __name__ == '__main__':
     host = os.environ.get("BACKEND_HOST", "0.0.0.0") # get from environment, if not present, use second value

@@ -26,6 +26,9 @@ class App:
         # Don't forget to close the driver connection when you are finished with it
         self.driver.close()
 
+    ############################
+    # Create user
+    ############################
     def create_user(self, name, user_id, email):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
@@ -118,33 +121,36 @@ class App:
         return result[0]
 
     ############################
-    # Add user to session
+    # Add user to group
     ############################
-    def add_user_to_group(self, user_id, group_id):
+    def add_user_to_group(self, user_id: str, group_name: str):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self._add_user_to_session, user_id, group_id
+                self._add_user_to_group, user_id, group_name
             )
 
             return result
 
     @staticmethod
-    def _add_user_to_session(tx, user_id, group_id):
+    def _add_user_to_group(tx, user_id: str, group_name: str):
         # Get today's date in the format YYYY-MM-DD
         today = datetime.today().strftime("%Y-%m-%d")
 
         query = """ MATCH (u:User { user_id: $user_id })
-                MATCH (g:Group { group_id: $group_id })
+                MATCH (g:Group { group_name: $group_name })
                 MERGE (u)-[r:WITH { date: $today }]->(g)
-                RETURN u.name AS name, u.user_id AS user_id, g.group_id AS group_id, r.date AS date
+                RETURN u.name AS name, u.user_id AS user_id, g.group_name AS group_name, r.date AS date
             """
         result = tx.run(
-            query, user_id=user_id, group_id=group_id, today=today
+            query, user_id=user_id, group_name=group_name, today=today
         ).data()
         Uniqueness_Check(result)
         person = result[0]
         return person
 
+    ############################
+    # Find person
+    ############################
     def find_person(self, person_name):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_read(self._find_and_return_person, person_name)
@@ -216,6 +222,44 @@ class App:
             RETURN g.group_name AS group_name, g.group_id AS group_id
             """
         result = tx.run(query, user_id=user_id).data()
+        return result
+    
+    ############################
+    # Check if group exists
+    ############################
+    def group_exists(self, group_name):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(self._group_exists, group_name)
+            if len(result) == 0:
+                return False
+            return True
+        
+    @staticmethod
+    def _group_exists(tx, group_name):
+        query = """
+            MATCH (g:Group)
+            WHERE g.group_name = $group_name
+            RETURN g.group_name AS group_name
+            """
+        result = tx.run(query, group_name=group_name).data()
+        return result
+    
+    ############################
+    # Get group id
+    ############################
+    def get_group_id(self, group_name):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(self._get_group_id, group_name)
+            return result[0]["group_id"]
+    
+    @staticmethod
+    def _get_group_id(tx, group_name):
+        query = """
+            MATCH (g:Group)
+            WHERE g.group_name = $group_name
+            RETURN g.group_id AS group_id
+            """
+        result = tx.run(query, group_name=group_name).data()
         return result
 
 

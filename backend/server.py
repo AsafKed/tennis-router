@@ -59,6 +59,16 @@ def get_user_groups(user_id):
 
     return jsonify(groups), 200
 
+@app.route("/users/<user_id>/preferences", methods=["PUT"])
+def update_user_preferences(user_id):
+    preferences_data = request.json
+    print()
+    print("Preferences data\n", preferences_data)
+    print()
+    # preference1 = preferences_data["preference1"]
+    # preference2 = preferences_data["preference2"]
+    # sliderValue = preferences_data["sliderValue"]
+
 
 #################
 # SocketIO events

@@ -232,6 +232,31 @@ class App:
         return [row["name"] for row in result]
 
     ############################
+    # Update user preferences
+    ############################
+    def update_user_preferences(self, user_id, preference1, preference2, preference3):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self._update_user_preferences,
+                user_id,
+                preference1,
+                preference2,
+                preference3,
+            )
+
+            return result
+        
+    @staticmethod
+    def _update_user_preferences(tx, user_id, preference1, preference2, preference3):
+        query = """ MATCH (u:User { user_id: $user_id })
+                SET u.preference1 = $preference1, u.preference2 = $preference2, u.preference3 = $preference3
+                RETURN u.name AS name, u.user_id AS user_id, u.preference1 AS preference1, u.preference2 AS preference2, u.preference3 AS preference3
+            """
+        result = tx.run(query, user_id=user_id, preference1=preference1, preference2=preference2, preference3=preference3).data()
+        person = result[0]
+        return person
+
+    ############################
     # Get users by group_id
     ############################
     def get_users_by_group(self, group_id):

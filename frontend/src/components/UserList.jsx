@@ -18,12 +18,12 @@ export default function UserList({ socket, group, user, leavingGroup }) {
     });
 
     return () => {
-      if (group) {
+      if (group && leavingGroup) {
         socket.emit("leave_group", { group, user: user });
       }
       socket.off("update_group_users");
     };
-  }, [socket, group, user]);
+  }, [socket, group, user, leavingGroup]);
 
   return (
     <div>

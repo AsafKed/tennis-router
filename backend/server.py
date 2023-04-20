@@ -62,12 +62,17 @@ def get_user_groups(user_id):
 @app.route("/users/<user_id>/preferences", methods=["PUT"])
 def update_user_preferences(user_id):
     preferences_data = request.json
-    print()
-    print("Preferences data\n", preferences_data)
-    print()
-    # preference1 = preferences_data["preference1"]
-    # preference2 = preferences_data["preference2"]
-    # sliderValue = preferences_data["sliderValue"]
+    print(f"\nPreferences data {preferences_data}\n")
+    # Update this in neo4j
+    neo4j_worker = App()
+    # TODO make these actual preferences
+    preference1 = preferences_data["preference1"]
+    preference2 = preferences_data["preference2"]
+    sliderValue = preferences_data["sliderValue"]
+    neo4j_worker.update_user_preferences(user_id, preference1, preference2, sliderValue)
+    neo4j_worker.close()
+
+    return jsonify(preferences_data), 201
 
 
 #################
@@ -97,9 +102,7 @@ def disconnected():
 
 @socketio.on("join_group")
 def handle_join_room(data):
-    print()
-    print(data)
-    print()
+    print(f"\n{data}\n")
     group_name = data['group']
     user_id = data['user']['user_id']
 
@@ -122,19 +125,17 @@ def handle_join_room(data):
     join_room(group_id)
 
     users = neo4j_worker.get_users_by_group(group_id)
-    print()
-    print("Users in the group are:", users)
-    print()
+    print(f"\nUsers in the group are: {users}\n")
     neo4j_worker.close()
 
-    # TODO Get list of users in group from Neo4j, send to front end
     emit("update_group_users", users, room=group_id, broadcast=True)
 
 @socketio.on("leave_group")
 def handle_leave_room(data):
-    # TODO Neo4j leave group
     group_name = data['group']
     user_id = data['user']['user_id']
+    
+    print(f"\nTriggered leave group for {user_id} from {group_name}\n")
     
     neo4j_worker = App()
     neo4j_worker.remove_user_from_group(user_id, group_name)

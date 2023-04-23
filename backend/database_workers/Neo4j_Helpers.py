@@ -1,4 +1,4 @@
-from Neo4j_Worker import App
+from . Neo4j_Worker import App
 
 def user_in_group(user_id, group_name):
     neo4j_worker = App()

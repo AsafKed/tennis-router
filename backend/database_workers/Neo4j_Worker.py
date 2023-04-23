@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 
 # Import error raises
-from Neo4j_Errors import Uniqueness_Check
+from . Neo4j_Errors import Uniqueness_Check
 
 # This enables os.getenv() to read the .env file
 from dotenv import load_dotenv
@@ -105,13 +105,41 @@ class App:
     ############################
     # Add user to group
     ############################
-    def add_user_to_group(self, user_id: str, group_name: str):
+    # Check if user is already in group
+    def user_in_group(self, user_id: str, group_name: str):
         with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self._add_user_to_group, user_id, group_name
+            result = session.execute_read(
+                self._user_in_group, user_id, group_name
             )
+            # If user_id in list of returned users, return true, otherwise, false
+            if len(result) > 0:
+                for user in result:
+                    if user["user_id"] == user_id:
+                        return True
+            return False
+        
+    @staticmethod
+    def _user_in_group(tx, user_id: str, group_name: str):
+        query = """ MATCH (u:User { user_id: $user_id })
+                MATCH (g:Group { group_name: $group_name })
+                MATCH (u)-[r:WITH]->(g)
+                RETURN u.name AS name, u.user_id AS user_id, g.group_name AS group_name, r.date AS date
+            """
+        result = tx.run(
+            query, user_id=user_id, group_name=group_name
+        ).data()
+        return result
 
-            return result
+    # Add user to group
+    def add_user_to_group(self, user_id: str, group_name: str):
+        user_in_group = self.user_in_group(user_id, group_name)
+        if not user_in_group:
+            with self.driver.session(database="neo4j") as session:
+                result = session.execute_write(
+                    self._add_user_to_group, user_id, group_name
+                )
+
+                return result
 
     @staticmethod
     def _add_user_to_group(tx, user_id: str, group_name: str):

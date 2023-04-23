@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 
 # Import error raises
-from . Neo4j_Errors import Uniqueness_Check
+from .Neo4j_Errors import Uniqueness_Check
 
 # This enables os.getenv() to read the .env file
 from dotenv import load_dotenv

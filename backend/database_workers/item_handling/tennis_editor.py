@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from .. Neo4j_Player_Worker import Player_Worker as Worker
 from tqdm import tqdm
 
@@ -90,9 +91,22 @@ class TennisEditor:
             person = self.make_person(id)
             all_players.append(person)
 
-        # Get list of all matches as dictionaries, without columns related to the general winner or loser data
-        all_matches = self.data[[col for col in self.data.columns if 'loser' not in col and 'winner' not in col]].to_dict('records')
-        
+       
+        # Get a list of column names that contain winner and loser, and remove winner_id and loser_id from them
+        winner_loser_cols = [col for col in self.data.columns if 'loser' in col or 'winner' in col]
+        winner_loser_cols.remove('winner_id')
+        winner_loser_cols.remove('loser_id')
+        winner_loser_cols.remove('winner_name')
+        winner_loser_cols.remove('loser_name')
+
+        # Create a dataframe without these columns
+        all_matches = self.data.drop(columns=winner_loser_cols)
+        all_matches['match_name'] = all_matches['winner_name'] + ' vs ' + all_matches['loser_name']
+        all_matches = all_matches.drop(columns=['winner_name', 'loser_name'])
+
+        # Turn all_matches into a list of dictionaries
+        all_matches = all_matches.replace({np.nan: None}).to_dict('records')
+
         # Create a dictionary of all people and all matches
         self.players = all_players
         self.matches = all_matches
@@ -124,9 +138,12 @@ class TennisEditor:
         worker = Worker()
         for match in tqdm(self.matches):
             # Create a new match in the database
-            worker.create_match(tourney_id=match['tourney_id'], tourney_name=match['tourney_name'],
+            worker.create_match(match_name=match['match_name'],
+                                match_date=match['tourney_date'], match_time='00:00',
+                                surface=match['surface'], draw_size=match['draw_size'],
+                                tourney_level=match['tourney_level'], 
+                                tourney_id=match['tourney_id'], tourney_name=match['tourney_name'],
                                 tourney_date=match['tourney_date'], match_num=match['match_num'],
-                                winner_id=match['winner_id'], loser_id=match['loser_id'],
                                 score=match['score'], best_of=match['best_of'], round=match['round'],
                                 minutes=match['minutes'], w_ace=match['w_ace'], w_df=match['w_df'],
                                 w_svpt=match['w_svpt'], w_1stIn=match['w_1stIn'], w_1stWon=match['w_1stWon'],
@@ -137,17 +154,12 @@ class TennisEditor:
                                 l_bpFaced=match['l_bpFaced'])
         worker.close()
 
-    def connect_player_to_match(self):
-        """Connects all players to all matches"""
-        # worker = Worker()
-        # for player in self.players:
-        #     # Get all matches for the player
-        #     matches = worker.find_matches_by_player_id(player['id'])
-        #     for match in matches:
-        #         # Connect the player to the match
-        #         worker.connect_player_to_match(player['id'], match['id'])
-        # worker.close()
-        pass
+    def create_player_match_relationships(self):
+        worker = Worker()
+        for match in tqdm(self.matches):
+            worker.create_player_match_relationship(match['winner_id'], match['match_num'], match['tourney_id'], 'WON')
+            worker.create_player_match_relationship(match['loser_id'], match['match_num'], match['tourney_id'], 'LOST')
+
 
     def find_match_by_player_name(self, player_name):
         """Finds a match by player name"""

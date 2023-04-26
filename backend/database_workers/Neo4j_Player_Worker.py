@@ -114,50 +114,34 @@ class Player_Worker:
     ############################
     # Create match
     ############################
-    def create_match(self, match_name, match_id, match_date, match_time, 
-                     tourney_id, tourney_name, surface, draw_size, 
-                     tourney_level, tourney_date, match_num, score, best_of, round, 
-                     minutes, w_ace, w_df, w_svpt, w_1stIn, w_1stWon, w_2ndWon, w_SvGms, 
-                     w_bpSaved, w_bpFaced, l_ace, l_df, l_svpt, l_1stIn, l_1stWon, l_2ndWon, 
-                     l_SvGms, l_bpSaved, l_bpFaced):
+    def create_match(self, match_name, match_date, match_time, 
+                 tourney_id, tourney_name, surface, draw_size,
+                 tourney_level, tourney_date, match_num, score, best_of, round,
+                 minutes, w_ace, w_df, w_svpt, w_1stIn, w_1stWon, w_2ndWon, w_SvGms,
+                 w_bpSaved, w_bpFaced, l_ace, l_df, l_svpt, l_1stIn, l_1stWon, l_2ndWon,
+                 l_SvGms, l_bpSaved, l_bpFaced):
         with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(self._create_and_return_match, match_name, match_id, match_date, match_time, 
-                                           tourney_id, tourney_name, surface, draw_size,
-                                           tourney_level, tourney_date, match_num, score, best_of, round,
-                                           minutes, w_ace, w_df, w_svpt, w_1stIn, w_1stWon, w_2ndWon, w_SvGms,
-                                           w_bpSaved, w_bpFaced, l_ace, l_df, l_svpt, l_1stIn, l_1stWon, l_2ndWon,
-                                           l_SvGms, l_bpSaved, l_bpFaced)
+            result = session.execute_write(self._create_and_return_match, match_name=match_name, match_date=match_date, match_time=match_time, 
+                                            tourney_id=tourney_id, tourney_name=tourney_name, surface=surface, draw_size=draw_size,
+                                            tourney_level=tourney_level, tourney_date=tourney_date, match_num=match_num, score=score, best_of=best_of, round=round,
+                                            minutes=minutes, w_ace=w_ace, w_df=w_df, w_svpt=w_svpt, w_1stIn=w_1stIn, w_1stWon=w_1stWon, w_2ndWon=w_2ndWon, w_SvGms=w_SvGms,
+                                            w_bpSaved=w_bpSaved, w_bpFaced=w_bpFaced, l_ace=l_ace, l_df=l_df, l_svpt=l_svpt, l_1stIn=l_1stIn, l_1stWon=l_1stWon, l_2ndWon=l_2ndWon,
+                                            l_SvGms=l_SvGms, l_bpSaved=l_bpSaved, l_bpFaced=l_bpFaced)
 
-            print("Result in main method:", result)
         return result
 
     @staticmethod 
-    def _create_and_return_match(tx, match_name, match_id, match_date, match_time,
-                                    tourney_id, tourney_name, surface, draw_size,
-                                    tourney_level, tourney_date, match_num, score, best_of, round,
-                                    minutes, w_ace, w_df, w_svpt, w_1stIn, w_1stWon, w_2ndWon, w_SvGms,
-                                    w_bpSaved, w_bpFaced, l_ace, l_df, l_svpt, l_1stIn, l_1stWon, l_2ndWon,
-                                    l_SvGms, l_bpSaved, l_bpFaced):
-        query = """ MERGE (m:Match { match_name: $match_name, match_id: $match_id, match_date: $match_date, match_time: $match_time,
-                    tourney_id: $tourney_id, tourney_name: $tourney_name, surface: $surface, draw_size: $draw_size,
-                    tourney_level: $tourney_level, tourney_date: $tourney_date, match_num: $match_num, score: $score, best_of: $best_of, round: $round,
-                    minutes: $minutes, w_ace: $w_ace, w_df: $w_df, w_svpt: $w_svpt, w_1stIn: $w_1stIn, w_1stWon: $w_1stWon, w_2ndWon: $w_2ndWon, w_SvGms: $w_SvGms,
-                    w_bpSaved: $w_bpSaved, w_bpFaced: $w_bpFaced, l_ace: $l_ace, l_df: $l_df, l_svpt: $l_svpt, l_1stIn: $l_1stIn, l_1stWon: $l_1stWon, l_2ndWon: $l_2ndWon,
-                    l_SvGms: $l_SvGms, l_bpSaved: $l_bpSaved, l_bpFaced: $l_bpFaced })
-                    RETURN m.match_name AS match_name, m.match_id AS match_id, m.match_date AS match_date, m.match_time AS match_time,
-                    m.tourney_id AS tourney_id, m.tourney_name AS tourney_name, m.surface AS surface, m.draw_size AS draw_size,
-                    m.tourney_level AS tourney_level, m.tourney_date AS tourney_date, m.match_num AS match_num, m.score AS score, m.best_of AS best_of, m.round AS round,
-                    m.minutes AS minutes, m.w_ace AS w_ace, m.w_df AS w_df, m.w_svpt AS w_svpt, m.w_1stIn AS w_1stIn, m.w_1stWon AS w_1stWon, m.w_2ndWon AS w_2ndWon, m.w_SvGms AS w_SvGms,
-                    m.w_bpSaved AS w_bpSaved, m.w_bpFaced AS w_bpFaced, m.l_ace AS l_ace, m.l_df AS l_df, m.l_svpt AS l_svpt, m.l_1stIn AS l_1stIn, m.l_1stWon AS l_1stWon, m.l_2ndWon AS l_2ndWon,
-                    m.l_SvGms AS l_SvGms, m.l_bpSaved AS l_bpSaved, m.l_bpFaced AS l_bpFaced
-                    """
-        result = tx.run(query, match_name=match_name, match_id=match_id, match_date=match_date, match_time=match_time,
-                        tourney_id=tourney_id, tourney_name=tourney_name, surface=surface, draw_size=draw_size,
-                        tourney_level=tourney_level, tourney_date=tourney_date, match_num=match_num, score=score, best_of=best_of, round=round,
-                        minutes=minutes, w_ace=w_ace, w_df=w_df, w_svpt=w_svpt, w_1stIn=w_1stIn, w_1stWon=w_1stWon, w_2ndWon=w_2ndWon, w_SvGms=w_SvGms,
-                        w_bpSaved=w_bpSaved, w_bpFaced=w_bpFaced, l_ace=l_ace, l_df=l_df, l_svpt=l_svpt, l_1stIn=l_1stIn, l_1stWon=l_1stWon, l_2ndWon=l_2ndWon,
-                        l_SvGms=l_SvGms, l_bpSaved=l_bpSaved, l_bpFaced=l_bpFaced)
-        return result.data()
+    def _create_and_return_match(tx, **kwargs):
+        query = """ MERGE (m:Match {match_num: $match_num, match_name: $match_name, tourney_id: $tourney_id})
+                    ON CREATE SET m += $props
+                    ON MATCH SET m += $props
+                    RETURN m
+                """
+
+        non_null_properties = {k: v for k, v in kwargs.items() if v is not None}
+        result = tx.run(query, {'match_num': kwargs['match_num'], 'match_name': kwargs['match_name'], 'tourney_id': kwargs['tourney_id'], 'props': non_null_properties})
+        return result.single()[0]
+
     
     ############################
     # Add player to match
@@ -187,30 +171,17 @@ class Player_Worker:
         ).data()
         return result
 
-    # Add player to match
-    def add_player_to_match(self, player_id: str, match_name: str):
-        player_in_match = self.player_in_match(player_id, match_name)
-        if not player_in_match:
-            with self.driver.session(database="neo4j") as session:
-                result = session.execute_write(
-                    self._add_player_to_match, player_id, match_name
-                )
-
-                return result
+    def create_player_match_relationship(self, player_id, match_num, tourney_id, relationship_type):
+        with self.driver.session(database="neo4j") as session:
+            session.execute_write(self._create_player_match_relationship, player_id, match_num, tourney_id, relationship_type)
 
     @staticmethod
-    def _add_player_to_match(tx, player_id: str, match_name: str):
-        # Get today's date in the format YYYY-MM-DD
-        today = datetime.today().strftime("%Y-%m-%d")
-
-        query = """ MATCH (p:Player { player_id: $player_id })
-                MATCH (m:Match { match_name: $match_name })
-                MERGE (p)-[r:PLAYS]->(m)
-                RETURN p.name AS name, p.player_id AS player_id, m.match_name AS match_name, m.date AS date, m.time AS time
-            """
-        result = tx.run(
-            query, player_id=player_id, match_name=match_name, today=today
-        ).data()
-        Uniqueness_Check(result)
-        person = result[0]
-        return person
+    def _create_player_match_relationship(tx, player_id, match_num, tourney_id, relationship_type):
+        query = """
+            MATCH (p:Player {player_id: $player_id})
+            MATCH (m:Match {match_num: $match_num, tourney_id: $tourney_id})
+            MERGE (p)-[r:PLAYED {result: $relationship_type}]->(m)
+        """
+        tx.run(query, {'player_id': player_id, 'match_num': match_num, 
+                        'tourney_id': tourney_id,
+                        'relationship_type': relationship_type})

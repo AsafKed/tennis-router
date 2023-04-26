@@ -3,7 +3,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_cors import CORS
 from engineio.payload import Payload
 import os
-from backend.database_workers.Neo4j_User_Worker import App
+from database_workers.Neo4j_User_Worker import App
 import uuid
 from database_workers.Neo4j_Helpers import user_in_group, get_group_id
 

@@ -5,9 +5,11 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
 import HomeIcon from '@mui/icons-material/Home';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useNavigate } from 'react-router-dom';
 
-const TopNavigationMenu = () => {
+const TopNavigationMenu = ({ loggedIn }) => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isTabletOrSmaller = useMediaQuery(theme.breakpoints.down('md'));
@@ -29,12 +31,30 @@ const TopNavigationMenu = () => {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Tennis Router
         </Typography>
-        <IconButton color="inherit" onClick={() => handleNavigation('/group')}>
-          <GroupIcon />
-        </IconButton>
-        <IconButton color="inherit" onClick={() => handleNavigation('/user')}>
-          <PersonIcon />
-        </IconButton>
+
+        {/* Only show these pages if the user is logged in */}
+        {loggedIn && (
+          <>
+            <IconButton color="inherit" onClick={() => handleNavigation('/group')}>
+              <GroupIcon />
+            </IconButton>
+            <IconButton color="inherit" onClick={() => handleNavigation('/user')}>
+              <PersonIcon />
+            </IconButton>
+          </>
+        )}
+
+        {/* Only show these pages if the user is not logged in */}
+        {!loggedIn && (
+          <>
+            <IconButton color="inherit" onClick={() => handleNavigation('/login')}>
+              <LoginIcon />
+            </IconButton>
+            <IconButton color="inherit" onClick={() => handleNavigation('/register')}>
+              <PersonAddIcon />
+            </IconButton>
+          </>
+        )}
       </Toolbar>
     </AppBar>
   );

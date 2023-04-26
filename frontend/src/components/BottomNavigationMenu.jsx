@@ -6,8 +6,10 @@ import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
 import HomeIcon from '@mui/icons-material/Home';
 import { useNavigate } from 'react-router-dom';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
-const BottomNavigationMenu = () => {
+const BottomNavigationMenu = ({ loggedIn }) => {
   const [value, setValue] = React.useState(0);
   const navigate = useNavigate();
   const theme = useTheme();
@@ -32,16 +34,38 @@ const BottomNavigationMenu = () => {
         icon={<HomeIcon />}
         onClick={() => handleNavigation('/')}
       />
-      <BottomNavigationAction
-        label="Groups"
-        icon={<GroupIcon />}
-        onClick={() => handleNavigation('/group')}
-      />
-      <BottomNavigationAction
-        label="User"
-        icon={<PersonIcon />}
-        onClick={() => handleNavigation('/user')}
-      />
+      
+      {/* Only show these pages if the user is logged in */}
+      {loggedIn && (
+        <>
+          <BottomNavigationAction
+            label="Groups"
+            icon={<GroupIcon />}
+            onClick={() => handleNavigation('/group')}
+          />
+          <BottomNavigationAction
+            label="User"
+            icon={<PersonIcon />}
+            onClick={() => handleNavigation('/user')}
+          />
+        </>
+      )}
+
+      {/* Only show these pages if the user is not logged in */}
+      {!loggedIn && (
+        <>
+          <BottomNavigationAction
+            label="Login"
+            icon={<LoginIcon />}
+            onClick={() => handleNavigation('/login')}
+          />
+          <BottomNavigationAction
+            label="Register"
+            icon={<PersonAddIcon />}
+            onClick={() => handleNavigation('/register')}
+          />
+        </>
+      )}
     </BottomNavigation>
   );
 };

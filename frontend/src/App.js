@@ -1,10 +1,14 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useState, useEffect } from "react";
+// Pre-login pages
 import WelcomePage from "./pages/WelcomePage";
-import GroupPage from "./pages/GroupPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+
+// Post-login pages
+import GroupPage from "./pages/GroupPage";
 import UserPage from "./pages/UserPage";
+import PlayerSelectionPage from "./pages/PlayerSelectionPage";
 import BottomNavigationMenu from "./components/BottomNavigationMenu";
 import TopNavigationMenu from "./components/TopNavigationMenu";
 
@@ -44,6 +48,7 @@ function App() {
             <>
               <Route path="/group" element={<GroupPage />} />
               <Route path="/user" element={<UserPage />} />
+              <Route path="/player-selection" element={<PlayerSelectionPage />} />
             </>
           )}
           {!loggedIn && (

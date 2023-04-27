@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class App:
+class User_Worker:
     def __init__(self):
         uri = os.getenv("NEO4J_URI")
         user = os.getenv("NEO4J_USERNAME")
@@ -367,6 +367,6 @@ class App:
 
 # if __name__ == "__main__":
 # Aura queries use an encrypted connection using the "neo4j+s" URI scheme
-# app = App()
+# app = User_Worker()
 # app.create_user("Asaf Kedem", "123", "https://www.google.com", 0, "18:07")
 # app.close()

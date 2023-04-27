@@ -185,3 +185,37 @@ class Player_Worker:
         tx.run(query, {'player_id': player_id, 'match_num': match_num, 
                         'tourney_id': tourney_id,
                         'relationship_type': relationship_type})
+
+    ############################
+    # Get all players
+    ############################
+    def get_all_players(self):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(self._get_all_players)
+            return result
+        
+    @staticmethod
+    def _get_all_players(tx):
+        query = """ MATCH (p:Player)
+                    RETURN p.name AS name, p.player_id AS player_id
+                    ORDER BY p.name
+                """
+        result = tx.run(query).data()
+        return result
+    
+    ############################
+    # Get player by id
+    ############################
+    def get_player_by_id(self, player_id):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(self._get_player_by_id, player_id)
+            print(f"\n Players \n{result}\n")
+            return result
+        
+    @staticmethod
+    def _get_player_by_id(tx, player_id):
+        query = """ MATCH (p:Player {player_id: $player_id})
+                    RETURN p.name AS name, p.player_id AS player_id
+                """
+        result = tx.run(query, player_id=player_id).data()
+        return result

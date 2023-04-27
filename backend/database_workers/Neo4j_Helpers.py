@@ -1,7 +1,7 @@
-from . Neo4j_User_Worker import App
+from . Neo4j_User_Worker import User_Worker
 
 def user_in_group(user_id, group_name):
-    neo4j_worker = App()
+    neo4j_worker = User_Worker()
     groups = neo4j_worker.get_groups_by_user(user_id=user_id)
     neo4j_worker.close()
     for group in groups:
@@ -10,7 +10,7 @@ def user_in_group(user_id, group_name):
     return False
 
 def get_group_id(group_name, user_id):
-    neo4j_worker = App()
+    neo4j_worker = User_Worker()
     groups = neo4j_worker.get_groups_by_user(user_id=user_id)
     neo4j_worker.close()
     for group in groups:

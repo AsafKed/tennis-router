@@ -3,7 +3,8 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_cors import CORS
 from engineio.payload import Payload
 import os
-from database_workers.Neo4j_User_Worker import App
+from database_workers.Neo4j_User_Worker import User_Worker
+from database_workers.Neo4j_Player_Worker import Player_Worker
 import uuid
 from database_workers.Neo4j_Helpers import user_in_group, get_group_id
 
@@ -36,7 +37,7 @@ def register_user():
     email = user_data["email"]
     name = user_data["name"]
 
-    neo4j_worker = App()
+    neo4j_worker = User_Worker()
     user = neo4j_worker.create_user(name, user_id, email)
     neo4j_worker.close()
 
@@ -45,7 +46,7 @@ def register_user():
 @app.route("/users/<user_id>", methods=["GET"])
 def get_user(user_id):
     print(user_id)
-    neo4j_worker = App()
+    neo4j_worker = User_Worker()
     user = neo4j_worker.get_user(user_id)
     neo4j_worker.close()
 
@@ -53,7 +54,7 @@ def get_user(user_id):
 
 @app.route("/user-groups/<user_id>", methods=["GET"])
 def get_user_groups(user_id):
-    neo4j_worker = App()
+    neo4j_worker = User_Worker()
     groups = neo4j_worker.get_groups_by_user(user_id)
     neo4j_worker.close()
 
@@ -64,7 +65,7 @@ def update_user_preferences(user_id):
     preferences_data = request.json
     print(f"\nPreferences data {preferences_data}\n")
     # Update this in neo4j
-    neo4j_worker = App()
+    neo4j_worker = User_Worker()
     # TODO make these actual preferences
     preference1 = preferences_data["preference1"]
     preference2 = preferences_data["preference2"]
@@ -77,11 +78,24 @@ def update_user_preferences(user_id):
 
 @app.route("/group-users/<group_id>", methods=["GET"])
 def get_group_users(group_id):
-    neo4j_worker = App()
+    neo4j_worker = User_Worker()
     users = neo4j_worker.get_users_by_group(group_id)
     neo4j_worker.close()
 
     return jsonify(users), 200
+
+
+# Player interactions
+@app.route('/players', methods=['GET'])
+def get_players():
+    try:
+        neo4j_worker = Player_Worker()
+        players_list = neo4j_worker.get_all_players()
+        neo4j_worker.close()
+        return jsonify(players_list), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Error while getting players'}), 500
 
 
 #################
@@ -116,7 +130,7 @@ def handle_join_room(data):
     user_id = data['user']['user_id']
 
     # Neo4j join group
-    neo4j_worker = App()
+    neo4j_worker = User_Worker()
     # TODO current logic is to create a new group FOR EACH USER, that's DUMB DUDE, ez fixy
     # Check if the user is already in the group
     if neo4j_worker.group_exists(group_name):
@@ -146,7 +160,7 @@ def handle_leave_room(data):
     
     print(f"\nTriggered leave group for {user_id} from {group_name}\n")
     
-    neo4j_worker = App()
+    neo4j_worker = User_Worker()
     neo4j_worker.remove_user_from_group(user_id, group_name)
     group_id = neo4j_worker.get_group_id(group_name)
     users = neo4j_worker.get_users_by_group(group_id)

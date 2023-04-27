@@ -1,11 +1,11 @@
 import "../App.css";
 import Group from "../components/Group";
+import GroupCard from "../components/GroupCard";
 import UserList from "../components/UserList";
 import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
-import { Card, CardContent, Typography } from "@material-ui/core";
 
 function GroupPage() {
   const [socketInstance, setSocketInstance] = useState(null);
@@ -16,6 +16,17 @@ function GroupPage() {
   const [groups, setGroups] = useState([]);
   const [expandedGroup, setExpandedGroup] = useState(null);
   const [expandedGroupUsers, setExpandedGroupUsers] = useState([]);
+
+  // When the page is clicked, collapse the card
+  const handlePageClick = () => {
+    setExpandedGroup(null);
+    setExpandedGroupUsers([]);
+  };
+
+  // When the card is clicked, prevent the page from collapsing
+  const handleCardClick = (event) => {
+    event.stopPropagation();
+  };
 
   const handleGroupSelected = (groupName) => {
     setGroup(groupName);
@@ -65,16 +76,21 @@ function GroupPage() {
 
   // To expand the group and show the users in the group
   const handleGroupClicked = async (groupId) => {
-    setExpandedGroup(groupId);
-    const response = await fetch(`http://localhost:5001/group-users/${groupId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await response.json();
-    console.log("Server response:", data);
-    setExpandedGroupUsers(data);
+    if (expandedGroup !== groupId) {
+      setExpandedGroup(groupId);
+      const response = await fetch(`http://localhost:5001/group-users/${groupId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      console.log("Server response:", data);
+      setExpandedGroupUsers(data);
+    } else {
+      setExpandedGroup(null);
+      setExpandedGroupUsers([]);
+    }
   };
 
   useEffect(() => {
@@ -126,20 +142,18 @@ function GroupPage() {
   }, [group, socketInstance]);
 
   return (
-    <div>
+    <div onClick={handlePageClick}>
       <div>
-      <h1>Groups you're in</h1>
+        <h1>Groups you're in</h1>
         <div>
           {groups.map((group, ind) => (
-            <Card
+            <GroupCard
               key={ind}
-              onClick={() => handleGroupClicked(group.group_id)}
-              style={{ marginBottom: 10 }}
-            >
-              <CardContent>
-                <Typography>{group.group_name}</Typography>
-              </CardContent>
-            </Card>
+              group={group}
+              onGroupClicked={handleGroupClicked}
+              users={expandedGroupUsers}
+              expandedGroup={expandedGroup}
+            />
           ))}
         </div>
       </div>

@@ -75,6 +75,15 @@ def update_user_preferences(user_id):
     return jsonify(preferences_data), 201
 
 
+@app.route("/group-users/<group_id>", methods=["GET"])
+def get_group_users(group_id):
+    neo4j_worker = App()
+    users = neo4j_worker.get_users_by_group(group_id)
+    neo4j_worker.close()
+
+    return jsonify(users), 200
+
+
 #################
 # SocketIO events
 #################

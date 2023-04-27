@@ -14,7 +14,7 @@ import UserPreferences from '../components/UserPreferences';
 function UserPage() {
   const navigate = useNavigate();
 
-  const [groups, setGroups] = useState([]);
+  const [name, setName] = useState("");
 
   const handleLogout = () => {
     signOut(auth).then(() => {
@@ -27,8 +27,8 @@ function UserPage() {
     });
   }
 
-  const getGroups = async (userId) => {
-    const response = await fetch(`http://localhost:5001/user-groups/${userId}`, {
+  const getName = async (userId) => {
+    const response = await fetch(`http://localhost:5001/users/${userId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -36,7 +36,7 @@ function UserPage() {
     });
     const data = await response.json();
     console.log("Server response:", data);
-    setGroups(data);
+    setName(data.name);
   };
 
   useEffect(() => {
@@ -44,10 +44,10 @@ function UserPage() {
       if (user) {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
+        // TODO get request from backend to get the user
         const uid = user.uid;
-        // ...
         console.log("uid", uid)
-        getGroups(uid);
+        getName(uid);
       } else {
         // User is signed out
         // ...
@@ -60,13 +60,7 @@ function UserPage() {
   return (
     <div>
       <h1>User</h1>
-      <h3>Groups you're in</h3>
-      <ul>
-        {groups.map((group, ind) => (
-          // TODO: add link to group page (should go to that group's page when clicked)
-          <li key={ind}>{group.group_name}</li>
-        ))}
-      </ul>
+      <h2>Name: {name}</h2>
       <button onClick={handleLogout}>Logout</button>
       <UserPreferences />
     </div>

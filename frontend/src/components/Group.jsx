@@ -10,7 +10,7 @@ export default function Group({ onGroupSelected, onGroupLeft, user }) {
     setChatName(newChatName);
     localStorage.setItem("chatName", newChatName);
     console.log("chatName", newChatName);
-    onGroupSelected(newChatName, user);
+    onGroupSelected(newChatName);
   };
 
   const handleGroupLeave = () => {

@@ -11,17 +11,19 @@ function GroupPage() {
   const [loading, setLoading] = useState(true);
   const [group, setGroup] = useState("");
   const [leavingGroup, setLeavingGroup] = useState(false);
-  const [userName, setUserName] = useState("");
   const [user, setUser] = useState([]);
+  const [groups, setGroups] = useState([]);
 
-  const handleGroupSelected = (groupName, userName) => {
+  const handleGroupSelected = (groupName) => {
     setGroup(groupName);
-    setUserName(userName);
+    getGroups(user.uid);
   };
 
+  // TODO fix this functionality (currently not working)
   const handleGroupLeave = () => {
     setGroup("");
     setLeavingGroup(true);
+    getGroups(user.uid);
   };
 
   useEffect(() => {
@@ -30,7 +32,7 @@ function GroupPage() {
         console.log("users", users);
         setLeavingGroup(false);
         window.location.reload(false);
-      });     
+      });
     }
   }, [leavingGroup, socketInstance]);
 
@@ -45,24 +47,37 @@ function GroupPage() {
     setUser(data);
     console.log("Server response:", data);
   };
-      
-  useEffect(()=>{
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-          // User is signed in, see docs for a list of available properties
-          // https://firebase.google.com/docs/reference/js/firebase.User
-          // TODO get request from backend to get the user
-          const uid = user.uid;
-          getUserDataFromServer(uid);
-          console.log("uid", uid)
-        } else {
-          // User is signed out
-          // ...
-          console.log("user is logged out")
-        }
-      });
-     
-}, [])
+
+  const getGroups = async (userId) => {
+    const response = await fetch(`http://localhost:5001/user-groups/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    console.log("Server response:", data);
+    setGroups(data);
+  };
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (new_user) => {
+      if (new_user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/firebase.User
+        // TODO get request from backend to get the user
+        const uid = new_user.uid;
+        console.log("uid", uid)
+        getUserDataFromServer(uid);
+        getGroups(uid);
+      } else {
+        // User is signed out
+        // ...
+        console.log("user is logged out")
+      }
+    });
+
+  }, [])
 
   // Connection to socket
   useEffect(() => {
@@ -95,11 +110,22 @@ function GroupPage() {
 
   return (
     <div>
-      <h1>Group Entry</h1>
-      <div className="line">
-        <Group onGroupSelected={handleGroupSelected} onGroupLeft={handleGroupLeave} user={user} />
+      <div>
+        <h1>Groups you're in</h1>
+        <ul>
+          {groups.map((group, ind) => (
+            // TODO: add link to group page (should go to that group's page when clicked)
+            <li key={ind}>{group.group_name}</li>
+          ))}
+        </ul>
       </div>
-      {!loading && <UserList socket={socketInstance} group={group} user={user} leavingGroup={leavingGroup} />}
+      <div>
+        <h1>Group Entry</h1>
+        <div className="line">
+          <Group onGroupSelected={handleGroupSelected} onGroupLeft={handleGroupLeave} user={user} />
+        </div>
+        {!loading && <UserList socket={socketInstance} group={group} user={user} leavingGroup={leavingGroup} />}
+      </div>
     </div>
   );
 }

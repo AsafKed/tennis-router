@@ -23,11 +23,6 @@ function GroupPage() {
     setExpandedGroupUsers([]);
   };
 
-  // When the card is clicked, prevent the page from collapsing
-  const handleCardClick = (event) => {
-    event.stopPropagation();
-  };
-
   const handleGroupSelected = (groupName) => {
     setGroup(groupName);
     getGroups(user.uid);

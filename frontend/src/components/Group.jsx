@@ -18,6 +18,7 @@ export default function Group({ onGroupSelected, onGroupLeft, user }) {
     onGroupLeft();
   };
 
+  // TODO fix joining and leaving group
   return (
     <div>
       <h2 className="http">{chatName ? `Current Group: ${chatName}` : "No group selected"}</h2>

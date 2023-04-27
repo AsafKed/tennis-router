@@ -5,6 +5,7 @@ import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
+import { Card, CardContent, Typography } from "@material-ui/core";
 
 function GroupPage() {
   const [socketInstance, setSocketInstance] = useState(null);
@@ -13,6 +14,8 @@ function GroupPage() {
   const [leavingGroup, setLeavingGroup] = useState(false);
   const [user, setUser] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [expandedGroup, setExpandedGroup] = useState(null);
+  const [expandedGroupUsers, setExpandedGroupUsers] = useState([]);
 
   const handleGroupSelected = (groupName) => {
     setGroup(groupName);
@@ -58,6 +61,20 @@ function GroupPage() {
     const data = await response.json();
     console.log("Server response:", data);
     setGroups(data);
+  };
+
+  // To expand the group and show the users in the group
+  const handleGroupClicked = async (groupId) => {
+    setExpandedGroup(groupId);
+    const response = await fetch(`http://localhost:5001/group-users/${groupId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    console.log("Server response:", data);
+    setExpandedGroupUsers(data);
   };
 
   useEffect(() => {
@@ -111,20 +128,35 @@ function GroupPage() {
   return (
     <div>
       <div>
-        <h1>Groups you're in</h1>
-        <ul>
+      <h1>Groups you're in</h1>
+        <div>
           {groups.map((group, ind) => (
-            // TODO: add link to group page (should go to that group's page when clicked)
-            <li key={ind}>{group.group_name}</li>
+            <Card
+              key={ind}
+              onClick={() => handleGroupClicked(group.group_id)}
+              style={{ marginBottom: 10 }}
+            >
+              <CardContent>
+                <Typography>{group.group_name}</Typography>
+              </CardContent>
+            </Card>
           ))}
-        </ul>
+        </div>
       </div>
       <div>
         <h1>Group Entry</h1>
         <div className="line">
           <Group onGroupSelected={handleGroupSelected} onGroupLeft={handleGroupLeave} user={user} />
         </div>
-        {!loading && <UserList socket={socketInstance} group={group} user={user} leavingGroup={leavingGroup} />}
+        {!loading && (
+          <UserList
+            socket={socketInstance}
+            group={expandedGroup}
+            user={user}
+            leavingGroup={leavingGroup}
+            users={expandedGroupUsers}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function UserList({ socket, group, user, leavingGroup }) {
-  const [groupUsers, setGroupUsers] = useState([]);
+export default function UserList({ socket, group, user, leavingGroup, users }) {
 
   useEffect(() => {
     if (group) {
@@ -14,7 +13,6 @@ export default function UserList({ socket, group, user, leavingGroup }) {
 
     socket.on("update_group_users", (users) => {
       console.log("users", users);
-      setGroupUsers(users);
     });
 
     return () => {
@@ -30,7 +28,7 @@ export default function UserList({ socket, group, user, leavingGroup }) {
       <h2>Users in Group</h2>
       <div>
         <ul>
-          {groupUsers.map((user, ind) => {
+          {users.map((user, ind) => {
             return <li key={ind}>{user.name}</li>;
           })}
         </ul>

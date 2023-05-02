@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
+import SportsTennisIcon from '@mui/icons-material/SportsTennis';
 import HomeIcon from '@mui/icons-material/Home';
 import { useNavigate, useLocation } from 'react-router-dom';
 import LoginIcon from '@mui/icons-material/Login';
@@ -51,6 +52,12 @@ const BottomNavigationMenu = ({ loggedIn }) => {
             label="Groups"
             icon={<GroupIcon />}
             onClick={() => handleNavigation('/group')}
+          />,
+          <BottomNavigationAction
+            key="player-selection"
+            label="Player Selection"
+            icon={<SportsTennisIcon />}
+            onClick={() => handleNavigation('/player-selection')}
           />,
           <BottomNavigationAction
             key="user"

@@ -92,6 +92,15 @@ def get_players():
         neo4j_worker = Player_Worker()
         players_list = neo4j_worker.get_all_players()
         neo4j_worker.close()
+        # Print all unique values of player['rank']
+        ranks = set()
+        rank_types = set()
+        for player in players_list:
+            ranks.add(player['rank'])
+            rank_types.add(type(player['rank']))
+        print(sorted(ranks))
+        print(sorted(rank_types))
+
         return jsonify(players_list), 200
     except Exception as e:
         print(e)

@@ -1,82 +1,80 @@
 import React, { useState, useEffect } from 'react';
-import { Autocomplete } from '@mui/material';
-import { TextField, Button } from '@mui/material';
-import { auth } from '../firebase';
+import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem } from '@mui/material';
 
 const PlayerSelectionPage = () => {
-  const [players, setPlayers] = useState([]);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [user, setUser] = useState(null);
+    const [players, setPlayers] = useState([]);
+    const [filteredPlayers, setFilteredPlayers] = useState([]);
+    const [sortOption, setSortOption] = useState('alphabetical');
 
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      const response = await fetch('/players');
-      const data = await response.json();
-      console.log(data);
-      setPlayers(data);
+    useEffect(() => {
+        const fetchPlayers = async () => {
+            const response = await fetch('/players');
+            const data = await response.json();
+
+            // Map players and set rank to null if it's Infinity
+            const cleanedData = data.map(player => {
+                if (player.rank === Infinity) {
+                    player.rank = null;
+                }
+                return player;
+            });
+
+            setPlayers(cleanedData);
+        };
+        fetchPlayers();
+    }, []);
+
+    useEffect(() => {
+        let sortedPlayers = [...players];
+
+        if (sortOption === 'alphabetical') {
+            sortedPlayers.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortOption === 'rank') {
+            sortedPlayers.sort((a, b) => a.rank - b.rank);
+        }
+
+        setFilteredPlayers(sortedPlayers);
+    }, [players, sortOption]);
+
+    const handleSortChange = (event) => {
+        setSortOption(event.target.value);
     };
 
-    fetchPlayers();
-
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  const handleLike = async (like) => {
-    if (!selectedPlayer || !user) return;
-
-    const response = await fetch(`/like-player/${user.uid}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        playerId: selectedPlayer.id,
-        like: like,
-      }),
-    });
-
-    if (response.ok) {
-      alert('Your preference has been saved.');
-    } else {
-      alert('Error while saving your preference.');
-    }
-  };
-
-  return (
-    <div>
-      <h1>Player Selection</h1>
-      <Autocomplete
-        options={players}
-        getOptionLabel={(option) => option.name}
-        style={{ width: 300 }}
-        onChange={(_, value) => setSelectedPlayer(value)}
-        renderInput={(params) => <TextField {...params} label="Select a player" />}
-      />
-      {selectedPlayer && (
+    return (
         <div>
-          <h2>Player Details</h2>
-          <p>Name: {selectedPlayer.name}</p>
-          <p>ID: {selectedPlayer.id}</p>
-          <Button variant="contained" color="primary" onClick={() => handleLike(true)}>
-            Like
-          </Button>
-          <Button variant="contained" color="secondary" onClick={() => handleLike(false)}>
-            Dislike
-          </Button>
+            <h1>Player Selection</h1>
+            <TextField
+                select
+                label="Sort by"
+                value={sortOption}
+                onChange={handleSortChange}
+                variant="outlined"
+                style={{ marginBottom: '16px' }}
+            >
+                <MenuItem value="alphabetical">Alphabetical</MenuItem>
+                <MenuItem value="rank">Rank</MenuItem>
+            </TextField>
+            <Grid container spacing={4}>
+                {filteredPlayers.map((player) => (
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={player.player_id}>
+                        <Card>
+                            <CardMedia
+                                component="img"
+                                height="300"
+                                image={player.image}
+                                alt={player.name}
+                            />
+                            <CardContent>
+                                <Typography gutterBottom variant="h5" component="div">
+                                    {player.name}
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default PlayerSelectionPage;

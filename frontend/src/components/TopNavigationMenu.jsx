@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
+import SportsTennisIcon from '@mui/icons-material/SportsTennis';
 import HomeIcon from '@mui/icons-material/Home';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -37,6 +38,10 @@ const TopNavigationMenu = ({ loggedIn }) => {
           <>
             <IconButton color="inherit" onClick={() => handleNavigation('/group')}>
               <GroupIcon />
+            </IconButton>
+            <IconButton color="inherit" onClick={() => handleNavigation('/player-selection')}>
+              {/* Suitable Icon */}
+              <SportsTennisIcon />
             </IconButton>
             <IconButton color="inherit" onClick={() => handleNavigation('/user')}>
               <PersonIcon />

@@ -7,7 +7,8 @@ from .Neo4j_Errors import Uniqueness_Check
 import os
 from dotenv import load_dotenv
 
-from datetime import datetime
+# Other imports
+import math
 
 # Load the .env file
 load_dotenv()
@@ -192,12 +193,17 @@ class Player_Worker:
     def get_all_players(self):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_read(self._get_all_players)
+            print(f"\n Player 0 \n{result[0]}\n")
+            # If a player has a NaN rank, set the rank to "Unranked"
+            for player in result:
+                if math.isnan(player["rank"]):
+                    player["rank"] = float('inf')
             return result
         
     @staticmethod
     def _get_all_players(tx):
         query = """ MATCH (p:Player)
-                    RETURN p.name AS name, p.player_id AS player_id
+                    RETURN p.name AS name, p.player_id AS player_id, p.rank AS rank
                     ORDER BY p.name
                 """
         result = tx.run(query).data()
@@ -209,7 +215,6 @@ class Player_Worker:
     def get_player_by_id(self, player_id):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_read(self._get_player_by_id, player_id)
-            print(f"\n Players \n{result}\n")
             return result
         
     @staticmethod

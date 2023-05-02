@@ -7,6 +7,7 @@ from database_workers.Neo4j_User_Worker import User_Worker
 from database_workers.Neo4j_Player_Worker import Player_Worker
 import uuid
 from database_workers.Neo4j_Helpers import user_in_group, get_group_id
+import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -92,16 +93,17 @@ def get_players():
         neo4j_worker = Player_Worker()
         players_list = neo4j_worker.get_all_players()
         neo4j_worker.close()
+        print(players_list)
         # Print all unique values of player['rank']
-        ranks = set()
-        rank_types = set()
-        for player in players_list:
-            ranks.add(player['rank'])
-            rank_types.add(type(player['rank']))
-        print(sorted(ranks))
-        print(sorted(rank_types))
+        # ranks = set()
+        # rank_types = set()
+        # for player in players_list:
+        #     ranks.add(player['rank'])
+        #     rank_types.add(type(player['rank']))
+        # print(sorted(ranks))
+        # print(sorted(rank_types))
 
-        return jsonify(players_list), 200
+        return json.dumps(players_list), 200
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error while getting players'}), 500

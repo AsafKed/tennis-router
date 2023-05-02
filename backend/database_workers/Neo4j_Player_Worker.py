@@ -197,13 +197,16 @@ class Player_Worker:
             # If a player has a NaN rank, set the rank to "Unranked"
             for player in result:
                 if math.isnan(player["rank"]):
-                    player["rank"] = float('inf')
+                    player["rank"] = 10000 # Set to 10000 so that unranked players are at the end of the list
+                # If the rank is a float, convert it to an int
+                elif isinstance(player["rank"], float):
+                    player["rank"] = int(player["rank"])
             return result
         
     @staticmethod
     def _get_all_players(tx):
         query = """ MATCH (p:Player)
-                    RETURN p.name AS name, p.player_id AS player_id, p.rank AS rank
+                    RETURN p.name AS name, p.player_id AS player_id, p.rank as rank
                     ORDER BY p.name
                 """
         result = tx.run(query).data()

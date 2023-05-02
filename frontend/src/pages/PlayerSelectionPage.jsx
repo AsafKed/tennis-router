@@ -9,7 +9,9 @@ const PlayerSelectionPage = () => {
     useEffect(() => {
         const fetchPlayers = async () => {
             const response = await fetch('/players');
-            const data = await response.json();
+            const text = await response.text(); // if this doesn't work, try response.json()
+            console.log(text);
+            const data = JSON.parse(text)
 
             // Map players and set rank to null if it's Infinity
             const cleanedData = data.map(player => {

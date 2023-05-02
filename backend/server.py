@@ -94,7 +94,6 @@ def get_players():
         neo4j_worker = Player_Worker()
         players_list = neo4j_worker.get_all_players()
         neo4j_worker.close()
-        print(players_list)
         return json.dumps(players_list), 200
     except Exception as e:
         print(e)
@@ -106,16 +105,51 @@ def like_player():
     try:
         user_id = request.json['user_id']
         player_id = request.json['player_id']
-        print(f'User {user_id} likes player {player_id}')
+        # Liking a player updates recommended players
         neo4j_worker = Relation_Worker()
         neo4j_worker.create_likes_relation(user_id, player_id)
+        neo4j_worker.delete_recommend_relations(user_id)
+        similar_players = neo4j_worker.get_similar_players(user_id)
+        neo4j_worker.create_recommend_relations(user_id, similar_players)
         neo4j_worker.close()
-        return jsonify({'message': 'Successfully liked player'}), 200
+        return jsonify({'message': 'Successfully liked player and updated recommendations'}), 200
     except Exception as e:
         print(e)
-        return jsonify({'error': 'Error while liking player'}), 500
+        return jsonify({'error': 'Error while liking player and updating recommendations'}), 500
 
 
+# User unlikes player
+@app.route('/players/unlike', methods=['POST'])
+def unlike_player():
+    try:
+        user_id = request.json['user_id']
+        player_id = request.json['player_id']
+        neo4j_worker = Player_Worker()
+        neo4j_worker.remove_likes_relation(user_id, player_id)
+        neo4j_worker.delete_recommend_relations(user_id)
+        similar_players = neo4j_worker.get_similar_players(user_id)
+        neo4j_worker.create_recommend_relations(user_id, similar_players)
+        neo4j_worker.close()
+        return jsonify({'message': 'Successfully unliked player and updated recommendations'}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Error while unliking player and updating recommendations'}), 500
+
+# TODO add dislike player
+
+# Get liked players
+@app.route('/players/liked/<user_id>', methods=['GET'])
+def get_liked_players(user_id):
+    print(f'Getting liked players for user {user_id}')
+    try:
+        neo4j_worker = Relation_Worker()
+        liked_players = neo4j_worker.get_liked_players(user_id)
+        neo4j_worker.close()
+        return json.dumps(liked_players), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Error while getting liked players'}), 500
+    
 #################
 # SocketIO events
 #################

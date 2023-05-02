@@ -8,7 +8,9 @@ const PlayerSelectionPage = () => {
     const [filteredPlayers, setFilteredPlayers] = useState([]);
     const [sortOption, setSortOption] = useState('alphabetical');
     const [userId, setId] = useState("");
+    const [likedPlayers, setLikedPlayers] = useState([]);
 
+    // Get all players
     useEffect(() => {
         const fetchPlayers = async () => {
             const response = await fetch('/players');
@@ -26,8 +28,25 @@ const PlayerSelectionPage = () => {
 
             setPlayers(cleanedData);
         };
+
         fetchPlayers();
     }, []);
+
+    // Get liked players (only after userId is known)
+    useEffect(() => {
+        if (userId) {
+            const fetchLikedPlayers = async () => {
+                const response = await fetch(`/players/liked/${userId}`);
+                const text = await response.text();
+                console.log("Liked players\n", text);
+                const data = JSON.parse(text);
+                setLikedPlayers(data);
+            };
+    
+            fetchLikedPlayers();
+        }
+    }, [userId]);
+    
 
     useEffect(() => {
         let sortedPlayers = [...players];
@@ -47,17 +66,17 @@ const PlayerSelectionPage = () => {
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
-          if (user) {
-            const uid = user.uid;
-            console.log("uid", uid)
-            setId(uid);
-          } else {
-            // User is signed out
-            console.log("user is logged out")
-          }
+            if (user) {
+                const uid = user.uid;
+                console.log("uid", uid)
+                setId(uid);
+            } else {
+                // User is signed out
+                console.log("user is logged out")
+            }
         });
-    
-      }, [])
+
+    }, [])
 
     // Liking -> create user-player relationship
     const handleLike = async (playerId) => {
@@ -69,7 +88,7 @@ const PlayerSelectionPage = () => {
                 },
                 body: JSON.stringify({ user_id: userId, player_id: playerId }),
             });
-    
+
             if (!response.ok) {
                 throw new Error('Failed to like player');
             }
@@ -77,7 +96,29 @@ const PlayerSelectionPage = () => {
             console.error(error);
         }
     };
-    
+
+    const handleUnlike = async (playerId) => {
+        try {
+            const user_id = "some_user_id"; // Replace this with a method to get the logged-in user's ID
+            const response = await fetch(`/players/unlike`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id, player_id: playerId }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to unlike player');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const isLiked = (playerId) => {
+        return likedPlayers.some(likedPlayer => likedPlayer.player_id === playerId);
+    };
 
     return (
         <div>
@@ -93,6 +134,28 @@ const PlayerSelectionPage = () => {
                 <MenuItem value="alphabetical">Alphabetical</MenuItem>
                 <MenuItem value="rank">Rank</MenuItem>
             </TextField>
+            <h2>Liked Players</h2>
+            <Grid container spacing={4} style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
+                {likedPlayers.map((player) => (
+                    <Card key={player.player_id}>
+                        <CardMedia
+                            component="img"
+                            height="300"
+                            image={player.image}
+                            alt={player.name}
+                        />
+                        <CardContent>
+                            <Typography gutterBottom variant="h5" component="div">
+                                {player.name}
+                            </Typography>
+                            <Button onClick={() => handleUnlike(player.player_id)}>
+                                Unlike
+                            </Button>
+                        </CardContent>
+                    </Card>
+                ))}
+            </Grid>
+            <h2>Other Players</h2>
             <Grid container spacing={4}>
                 {filteredPlayers.map((player) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={player.player_id}>

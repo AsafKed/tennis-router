@@ -43,7 +43,6 @@ class Player_Worker:
             result = session.execute_write(
                 self._create_and_return_player, name, player_id)
 
-            print(f"{result} has been created")
         
     @staticmethod
     def _create_and_return_player(tx, name, player_id):
@@ -193,7 +192,6 @@ class Player_Worker:
     def get_all_players(self):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_read(self._get_all_players)
-            print(f"\n Player 0 \n{result[0]}\n")
             # If a player has a NaN rank, set the rank to "Unranked"
             for player in result:
                 if math.isnan(player["rank"]):

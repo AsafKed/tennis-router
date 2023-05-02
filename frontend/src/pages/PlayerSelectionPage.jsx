@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem } from '@mui/material';
+import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, Button } from '@mui/material';
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from '../firebase';
 
 const PlayerSelectionPage = () => {
     const [players, setPlayers] = useState([]);
     const [filteredPlayers, setFilteredPlayers] = useState([]);
     const [sortOption, setSortOption] = useState('alphabetical');
+    const [userId, setId] = useState("");
 
     useEffect(() => {
         const fetchPlayers = async () => {
@@ -42,6 +45,40 @@ const PlayerSelectionPage = () => {
         setSortOption(event.target.value);
     };
 
+    useEffect(() => {
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            const uid = user.uid;
+            console.log("uid", uid)
+            setId(uid);
+          } else {
+            // User is signed out
+            console.log("user is logged out")
+          }
+        });
+    
+      }, [])
+
+    // Liking -> create user-player relationship
+    const handleLike = async (playerId) => {
+        try {
+            const response = await fetch(`/players/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId, player_id: playerId }),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to like player');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    
+
     return (
         <div>
             <h1>Player Selection</h1>
@@ -70,6 +107,9 @@ const PlayerSelectionPage = () => {
                                 <Typography gutterBottom variant="h5" component="div">
                                     {player.name}
                                 </Typography>
+                                <Button variant="contained" color="primary" onClick={() => handleLike(player.player_id)}>
+                                    Like
+                                </Button>
                             </CardContent>
                         </Card>
                     </Grid>

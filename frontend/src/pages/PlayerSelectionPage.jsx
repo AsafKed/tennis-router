@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, Button } from '@mui/material';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
@@ -17,36 +17,28 @@ const PlayerSelectionPage = () => {
             const text = await response.text(); // if this doesn't work, try response.json()
             console.log(text);
             const data = JSON.parse(text)
-
-            // Map players and set rank to null if it's Infinity
-            const cleanedData = data.map(player => {
-                if (player.rank === Infinity) {
-                    player.rank = null;
-                }
-                return player;
-            });
-
-            setPlayers(cleanedData);
+            setPlayers(data);
         };
 
         fetchPlayers();
     }, []);
 
+    // Update liked players (only after UID is known though)
+    const fetchLikedPlayers = useCallback(async () => {
+        const response = await fetch(`/players/liked/${userId}`);
+        const text = await response.text();
+        console.log("Liked players\n", text);
+        const data = JSON.parse(text);
+        setLikedPlayers(data);
+    }, [userId]);
+
+
     // Get liked players (only after userId is known)
     useEffect(() => {
         if (userId) {
-            const fetchLikedPlayers = async () => {
-                const response = await fetch(`/players/liked/${userId}`);
-                const text = await response.text();
-                console.log("Liked players\n", text);
-                const data = JSON.parse(text);
-                setLikedPlayers(data);
-            };
-    
             fetchLikedPlayers();
         }
-    }, [userId]);
-    
+    }, [userId, fetchLikedPlayers]);
 
     useEffect(() => {
         let sortedPlayers = [...players];
@@ -92,6 +84,8 @@ const PlayerSelectionPage = () => {
             if (!response.ok) {
                 throw new Error('Failed to like player');
             }
+
+            fetchLikedPlayers();
         } catch (error) {
             console.error(error);
         }
@@ -99,18 +93,22 @@ const PlayerSelectionPage = () => {
 
     const handleUnlike = async (playerId) => {
         try {
-            const user_id = "some_user_id"; // Replace this with a method to get the logged-in user's ID
             const response = await fetch(`/players/unlike`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ user_id, player_id: playerId }),
+                body: JSON.stringify({ user_id: userId, player_id: playerId }),
             });
 
             if (!response.ok) {
                 throw new Error('Failed to unlike player');
             }
+
+            fetchLikedPlayers();
+
+            // Update the likedPlayers state
+            setLikedPlayers(likedPlayers.filter(likedPlayer => likedPlayer.player_id !== playerId));
         } catch (error) {
             console.error(error);
         }

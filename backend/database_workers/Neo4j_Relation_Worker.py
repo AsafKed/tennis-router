@@ -26,7 +26,7 @@ class Relation_Worker:
         self.driver.close()
         
     ##############################
-    # Add user-player relation
+    # Add user LIKES player
     ##############################
     def create_likes_relation(self, user_id, player_id):
         with self.driver.session(database="neo4j") as session:
@@ -36,6 +36,20 @@ class Relation_Worker:
     def _create_likes_relation(tx, user_id, player_id):
         query = """ MATCH (u:User {user_id: $user_id}), (p:Player {player_id: $player_id})
                     MERGE (u)-[:LIKES]->(p)
+                """
+        tx.run(query, user_id=user_id, player_id=player_id)
+
+    ##############################
+    # Delete user LIKES player
+    ##############################
+    def delete_likes_relation(self, user_id, player_id):
+        with self.driver.session(database="neo4j") as session:
+            session.execute_write(self._delete_likes_relation, user_id, player_id)
+
+    @staticmethod
+    def _delete_likes_relation(tx, user_id, player_id):
+        query = """ MATCH (u:User {user_id: $user_id})-[r:LIKES]->(p:Player {player_id: $player_id})
+                    DELETE r
                 """
         tx.run(query, user_id=user_id, player_id=player_id)
 
@@ -62,6 +76,7 @@ class Relation_Worker:
     ##############################
     # Get recommended players
     ##############################
+    # TODO: use built in similarity function for this
     def create_recommend_relations(self, user_id, similar_players):
         with self.driver.session(database="neo4j") as session:
             session.execute_write(self._create_recommend_relations, user_id, similar_players)

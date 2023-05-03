@@ -124,8 +124,8 @@ def unlike_player():
     try:
         user_id = request.json['user_id']
         player_id = request.json['player_id']
-        neo4j_worker = Player_Worker()
-        neo4j_worker.remove_likes_relation(user_id, player_id)
+        neo4j_worker = Relation_Worker()
+        neo4j_worker.delete_likes_relation(user_id, player_id)
         neo4j_worker.delete_recommend_relations(user_id)
         similar_players = neo4j_worker.get_similar_players(user_id)
         neo4j_worker.create_recommend_relations(user_id, similar_players)

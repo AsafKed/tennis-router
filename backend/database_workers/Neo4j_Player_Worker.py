@@ -1,14 +1,12 @@
 from neo4j import GraphDatabase
 
-# Import error raises
+# Import helpers
 from .Neo4j_Errors import Uniqueness_Check
+from .Neo4j_Helpers import normalize_players
 
 # This enables os.getenv() to read the .env file
 import os
 from dotenv import load_dotenv
-
-# Other imports
-import math
 
 # Load the .env file
 load_dotenv()
@@ -193,13 +191,7 @@ class Player_Worker:
         with self.driver.session(database="neo4j") as session:
             result = session.execute_read(self._get_all_players)
             # If a player has a NaN rank, set the rank to "Unranked"
-            for player in result:
-                if math.isnan(player["rank"]):
-                    player["rank"] = 10000 # Set to 10000 so that unranked players are at the end of the list
-                # If the rank is a float, convert it to an int
-                elif isinstance(player["rank"], float):
-                    player["rank"] = int(player["rank"])
-            return result
+            return normalize_players(result)
         
     @staticmethod
     def _get_all_players(tx):

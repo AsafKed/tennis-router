@@ -11,6 +11,7 @@ function UserPreferences() {
     const [preference1, setPreference1] = useState('');
     const [preference2, setPreference2] = useState('');
     const [sliderValue, setSliderValue] = useState(0);
+    const [preference3, setPreference3] = useState('');
 
     const handleSavePreferences = async () => {
         const userId = auth.currentUser.uid;
@@ -79,6 +80,22 @@ function UserPreferences() {
                     valueLabelDisplay="auto"
                     onChange={(e, newValue) => setSliderValue(newValue)}
                 />
+            </Box>
+            <Box sx={{ minWidth: 120, marginTop: 2 }}>
+                <FormControl fullWidth>
+                    <InputLabel id="preference3-label">Preference 3</InputLabel>
+                    <Select
+                        labelId="preference3-label"
+                        id="preference3-select"
+                        value={preference3}
+                        label="Preference 3"
+                        onChange={(e) => setPreference3(e.target.value)}
+                    >
+                        <MenuItem value={'option1'}>Option 1</MenuItem>
+                        <MenuItem value={'option2'}>Option 2</MenuItem>
+                        <MenuItem value={'option3'}>Option 3</MenuItem>
+                    </Select>
+                </FormControl>
             </Box>
             <Box sx={{ marginTop: 2 }}>
                 <Button onClick={handleSavePreferences} variant="contained">

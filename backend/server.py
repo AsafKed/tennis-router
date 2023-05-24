@@ -7,7 +7,6 @@ from database_workers.Neo4j_User_Worker import User_Worker
 from database_workers.Neo4j_Player_Worker import Player_Worker
 from database_workers.Neo4j_Relation_Worker import Relation_Worker
 import uuid
-from database_workers.Neo4j_Helpers import user_in_group, get_group_id
 import json
 
 app = Flask(__name__)
@@ -16,6 +15,26 @@ CORS(app,resources={r"/*":{"origins":"*"}})
 Payload.max_decode_packets = 500
 socketio = SocketIO(app, cors_allowed_origins="*")
 socketio.init_app(app, cors_allowed_origins="*")
+
+########################
+# Initialized variables
+########################
+attribute_weights = {
+    "rank": 1,
+    "rank_points": 1,
+    "win_count": 1,
+    "loss_count": 1,
+    "tournaments_played": 1,
+    "win_percent": 1,
+    "aces_avg": 1,
+    "double_faults_avg": 1,
+    "service_points_avg": 1,
+    "first_serve_points_won_avg": 1,
+    "second_serve_points_won_avg": 1,
+    "serve_games_avg": 1,
+    "break_points_saved_avg": 1,
+    "break_points_faced_avg": 1
+}
 
 #################
 # HTTP endpoints
@@ -102,6 +121,7 @@ def get_players():
 # User likes player
 @app.route('/players/like', methods=['POST'])
 def like_player():
+    global attribute_weights
     try:
         user_id = request.json['user_id']
         player_id = request.json['player_id']
@@ -109,7 +129,7 @@ def like_player():
         neo4j_worker = Relation_Worker()
         neo4j_worker.create_likes_relation(user_id, player_id)
         neo4j_worker.delete_recommend_relations(user_id)
-        similar_players = neo4j_worker.get_similar_players(user_id)
+        similar_players = neo4j_worker.get_similar_players_based_on_attributes(user_id, attribute_weights)
         neo4j_worker.create_recommend_relations(user_id, similar_players)
         neo4j_worker.close()
         return jsonify({'message': 'Successfully liked player and updated recommendations'}), 200
@@ -117,17 +137,17 @@ def like_player():
         print(e)
         return jsonify({'error': 'Error while liking player and updating recommendations'}), 500
 
-
 # User unlikes player
 @app.route('/players/unlike', methods=['POST'])
 def unlike_player():
+    global attribute_weights
     try:
         user_id = request.json['user_id']
         player_id = request.json['player_id']
         neo4j_worker = Relation_Worker()
         neo4j_worker.delete_likes_relation(user_id, player_id)
         neo4j_worker.delete_recommend_relations(user_id)
-        similar_players = neo4j_worker.get_similar_players(user_id)
+        similar_players = neo4j_worker.get_similar_players_based_on_attributes(user_id, attribute_weights)
         neo4j_worker.create_recommend_relations(user_id, similar_players)
         neo4j_worker.close()
         return jsonify({'message': 'Successfully unliked player and updated recommendations'}), 200
@@ -135,6 +155,7 @@ def unlike_player():
         print(e)
         return jsonify({'error': 'Error while unliking player and updating recommendations'}), 500
 
+# TODO add attribute weights assigned by the user
 # TODO add dislike player
 
 # Get liked players

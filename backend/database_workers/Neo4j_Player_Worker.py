@@ -27,7 +27,7 @@ class Player_Worker:
     # Create player
     ############################
     # Male
-    def create_player_male(self, name):
+    def create_player(self, name):
         """Create a player in the database
         
         Arguments:
@@ -39,45 +39,13 @@ class Player_Worker:
         """
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self._create_and_return_player_male, name)
+                self._create_and_return_player, name)
 
         
     @staticmethod
-    def _create_and_return_player_male(tx, name):
+    def _create_and_return_player(tx, name):
         # MERGE will try to match the entire pattern and if it does not exist, it creates it.
-        query = """ MERGE (p:PlayerMale { name: $name })
-                    RETURN p.name AS name
-                """
-        result = tx.run(query, name=name)
-
-        # Turn the result into a list of dictionaries
-        result = result.data()
-
-        # Check that only one person with this name and id exists
-        Uniqueness_Check(result)
-
-        person = result[0]
-        return person
-    
-    # Female
-    def create_player_female(self, name):
-        """Create a player in the database
-        
-        Arguments:
-            name {string} -- The name of the player
-
-        Returns:
-            Player (dictionary) -- As uploaded to the database
-
-        """
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self._create_and_return_player_female, name)
-            
-    @staticmethod
-    def _create_and_return_player_female(tx, name):
-        # MERGE will try to match the entire pattern and if it does not exist, it creates it.
-        query = """ MERGE (p:PlayerFemale { name: $name })
+        query = """ MERGE (p:Player { name: $name })
                     RETURN p.name AS name
                 """
         result = tx.run(query, name=name)
@@ -142,25 +110,25 @@ class Player_Worker:
         return person
     
     # Add personal data to player with the following properties: country, rank, status, experience, play_style, previous_win_year, style, age, height, favorite_shot, hand, personality_tags, personality_long, grass_advantage, career_high_rank, years_on_tour, coach
-    def add_personal_data_to_player(self, name, country, rank, rank_level, status, experience, play_style, previous_win_year, style, age, height, favorite_shot, hand, personality_tags, personality_long, grass_advantage, career_high_rank, years_on_tour, coach):
+    def add_personal_data_to_player(self, name, country, rank, rank_level, status, experience, play_style, previous_win_year, style, age, height, favorite_shot, hand, personality_tags, personality_long, grass_advantage, career_high_rank, years_on_tour, coach, image_url, gender):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self._add_personal_data_to_player, name, country, rank, rank_level, status, experience, play_style, previous_win_year, style, age, height, favorite_shot, hand, personality_tags, personality_long, grass_advantage, career_high_rank, years_on_tour, coach)
+                self._add_personal_data_to_player, name, country, rank, rank_level, status, experience, play_style, previous_win_year, style, age, height, favorite_shot, hand, personality_tags, personality_long, grass_advantage, career_high_rank, years_on_tour, coach, image_url, gender)
 
             return result
         
     @staticmethod
-    def _add_personal_data_to_player(tx, name, country, rank, rank_level, status, experience, play_style, previous_win_year, style, age, height, favorite_shot, hand, personality_tags, personality_long, grass_advantage, career_high_rank, years_on_tour, coach):
+    def _add_personal_data_to_player(tx, name, country, rank, rank_level, status, experience, play_style, previous_win_year, style, age, height, favorite_shot, hand, personality_tags, personality_long, grass_advantage, career_high_rank, years_on_tour, coach, image_url, gender):
         query = """ MATCH (p { name: $name })
                     SET p.country = $country, p.rank = $rank, p.rank_level = $rank_level, p.status = $status, p.experience = $experience, p.play_style = $play_style, p.previous_win_year = $previous_win_year,
                     p.style = $style, p.age = $age, p.height = $height, p.favorite_shot = $favorite_shot, p.hand = $hand, p.personality_tags = $personality_tags, p.personality_long = $personality_long,
-                    p.grass_advantage = $grass_advantage, p.career_high_rank = $career_high_rank, p.years_on_tour = $years_on_tour, p.coach = $coach
+                    p.grass_advantage = $grass_advantage, p.career_high_rank = $career_high_rank, p.years_on_tour = $years_on_tour, p.coach = $coach, p.image_url = $image_url, p.gender = $gender
                     RETURN p.name, p.player_id, p.country, p.rank, p.rank_level, p.status, p.experience, p.play_style, p.style, p.age, p.height, p.favorite_shot, p.hand, p.personality_tags, p.personality_long,
-                    p.grass_advantage, p.career_high_rank, p.years_on_tour, p.coach
+                    p.grass_advantage, p.career_high_rank, p.years_on_tour, p.coach, p.image_url, p.gender
                 """
         result = tx.run(query, name=name, country=country, rank=rank, rank_level=rank_level, status=status, experience=experience, play_style=play_style, previous_win_year=previous_win_year,
                         style=style, age=age, height=height, favorite_shot=favorite_shot, hand=hand, personality_tags=personality_tags, personality_long=personality_long,
-                        grass_advantage=grass_advantage, career_high_rank=career_high_rank, years_on_tour=years_on_tour, coach=coach)
+                        grass_advantage=grass_advantage, career_high_rank=career_high_rank, years_on_tour=years_on_tour, coach=coach, image_url=image_url, gender=gender)
 
         # Turn the result into a list of dictionaries
         result = result.data()
@@ -259,7 +227,7 @@ class Player_Worker:
     @staticmethod
     def _get_all_players(tx):
         query = """ MATCH (p:Player)
-                    RETURN p.name AS name, p.player_id AS player_id, p.rank as rank
+                    RETURN p.name AS name, p.rank as rank, p.image_url as image_url, p.gender as gender
                     ORDER BY p.name
                 """
         result = tx.run(query).data()

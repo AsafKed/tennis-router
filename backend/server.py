@@ -124,10 +124,10 @@ def like_player():
     global attribute_weights
     try:
         user_id = request.json['user_id']
-        player_id = request.json['player_id']
+        player_name = request.json['name']
         # Liking a player updates recommended players
         neo4j_worker = Relation_Worker()
-        neo4j_worker.create_likes_relation(user_id, player_id)
+        neo4j_worker.create_likes_relation(user_id, player_name)
         neo4j_worker.delete_recommend_relations(user_id)
         similar_players = neo4j_worker.get_similar_players_based_on_attributes(user_id, attribute_weights)
         neo4j_worker.create_recommend_relations(user_id, similar_players)
@@ -143,9 +143,9 @@ def unlike_player():
     global attribute_weights
     try:
         user_id = request.json['user_id']
-        player_id = request.json['player_id']
+        player_name = request.json['name']
         neo4j_worker = Relation_Worker()
-        neo4j_worker.delete_likes_relation(user_id, player_id)
+        neo4j_worker.delete_likes_relation(user_id, player_name)
         neo4j_worker.delete_recommend_relations(user_id)
         similar_players = neo4j_worker.get_similar_players_based_on_attributes(user_id, attribute_weights)
         neo4j_worker.create_recommend_relations(user_id, similar_players)

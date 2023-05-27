@@ -15,7 +15,6 @@ const PlayerSelectionPage = () => {
         const fetchPlayers = async () => {
             const response = await fetch('/players');
             const text = await response.text(); // if this doesn't work, try response.json()
-            console.log(text);
             const data = JSON.parse(text)
             setPlayers(data);
         };
@@ -71,14 +70,14 @@ const PlayerSelectionPage = () => {
     }, [])
 
     // Liking -> create user-player relationship
-    const handleLike = async (playerId) => {
+    const handleLike = async (playerName) => {
         try {
             const response = await fetch(`/players/like`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ user_id: userId, player_id: playerId }),
+                body: JSON.stringify({ user_id: userId, name: playerName }),
             });
 
             if (!response.ok) {
@@ -91,14 +90,14 @@ const PlayerSelectionPage = () => {
         }
     };
 
-    const handleUnlike = async (playerId) => {
+    const handleUnlike = async (playerName) => {
         try {
             const response = await fetch(`/players/unlike`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ user_id: userId, player_id: playerId }),
+                body: JSON.stringify({ user_id: userId, name: playerName }),
             });
 
             if (!response.ok) {
@@ -108,14 +107,14 @@ const PlayerSelectionPage = () => {
             fetchLikedPlayers();
 
             // Update the likedPlayers state
-            setLikedPlayers(likedPlayers.filter(likedPlayer => likedPlayer.player_id !== playerId));
+            setLikedPlayers(likedPlayers.filter(likedPlayer => likedPlayer.name !== playerName));
         } catch (error) {
             console.error(error);
         }
     };
 
-    const isLiked = (playerId) => {
-        return likedPlayers.some(likedPlayer => likedPlayer.player_id === playerId);
+    const isLiked = (playerName) => {
+        return likedPlayers.some(likedPlayer => likedPlayer.name === playerName);
     };
 
     return (
@@ -135,18 +134,18 @@ const PlayerSelectionPage = () => {
             <h2>Liked Players</h2>
             <Grid container spacing={4} style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
                 {likedPlayers.map((player) => (
-                    <Card key={player.player_id}>
+                    <Card key={player.name}>
                         <CardMedia
                             component="img"
                             height="300"
-                            image={player.image}
+                            image={player.image_url}
                             alt={player.name}
                         />
                         <CardContent>
                             <Typography gutterBottom variant="h5" component="div">
                                 {player.name}
                             </Typography>
-                            <Button onClick={() => handleUnlike(player.player_id)}>
+                            <Button onClick={() => handleUnlike(player.name)}>
                                 Unlike
                             </Button>
                         </CardContent>
@@ -156,19 +155,19 @@ const PlayerSelectionPage = () => {
             <h2>Other Players</h2>
             <Grid container spacing={4}>
                 {filteredPlayers.map((player) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} key={player.player_id}>
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
                         <Card>
                             <CardMedia
                                 component="img"
                                 height="300"
-                                image={player.image}
+                                image={player.image_url}
                                 alt={player.name}
                             />
                             <CardContent>
                                 <Typography gutterBottom variant="h5" component="div">
                                     {player.name}
                                 </Typography>
-                                <Button variant="contained" color="primary" onClick={() => handleLike(player.player_id)}>
+                                <Button variant="contained" color="primary" onClick={() => handleLike(player.name)}>
                                     Like
                                 </Button>
                             </CardContent>

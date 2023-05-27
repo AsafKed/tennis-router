@@ -1,8 +1,4 @@
 from neo4j import GraphDatabase
-
-# Import helpers
-from .Neo4j_Helpers import normalize_players
-
 # This enables os.getenv() to read the .env file
 import os
 from dotenv import load_dotenv
@@ -25,30 +21,30 @@ class Relation_Worker:
     ##############################
     # Add user LIKES player
     ##############################
-    def create_likes_relation(self, user_id, player_id):
+    def create_likes_relation(self, user_id, player_name):
         with self.driver.session(database="neo4j") as session:
-            session.execute_write(self._create_likes_relation, user_id, player_id)
+            session.execute_write(self._create_likes_relation, user_id, player_name)
 
     @staticmethod
-    def _create_likes_relation(tx, user_id, player_id):
-        query = """ MATCH (u:User {user_id: $user_id}), (p:Player {player_id: $player_id})
+    def _create_likes_relation(tx, user_id, player_name):
+        query = """ MATCH (u:User {user_id: $user_id}), (p:Player {name: $player_name})
                     MERGE (u)-[:LIKES]->(p)
                 """
-        tx.run(query, user_id=user_id, player_id=player_id)
+        tx.run(query, user_id=user_id, player_name=player_name)
 
     ##############################
     # Delete user LIKES player
     ##############################
-    def delete_likes_relation(self, user_id, player_id):
+    def delete_likes_relation(self, user_id, player_name):
         with self.driver.session(database="neo4j") as session:
-            session.execute_write(self._delete_likes_relation, user_id, player_id)
+            session.execute_write(self._delete_likes_relation, user_id, player_name)
 
     @staticmethod
-    def _delete_likes_relation(tx, user_id, player_id):
-        query = """ MATCH (u:User {user_id: $user_id})-[r:LIKES]->(p:Player {player_id: $player_id})
+    def _delete_likes_relation(tx, user_id, player_name):
+        query = """ MATCH (u:User {user_id: $user_id})-[r:LIKES]->(p:Player {name: $player_name})
                     DELETE r
                 """
-        tx.run(query, user_id=user_id, player_id=player_id)
+        tx.run(query, user_id=user_id, player_name=player_name)
 
     ##############################
     # Delete recommend relations
@@ -70,20 +66,13 @@ class Relation_Worker:
     def get_liked_players(self, user_id):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_read(self._get_liked_players, user_id)
-            result = normalize_players(result)
-            print(result)
             return result
 
     @staticmethod
     def _get_liked_players(tx, user_id):
         query = """ MATCH (u:User {user_id: $user_id})-[:LIKES]->(p:Player)
-                    RETURN p.name AS name, p.player_id AS player_id, p.rank as rank, p.image as image,
-                    p.rank_points as rank_points, p.win_count as win_count, p.loss_count as loss_count,
-                    p.tournaments_played as tournaments_played, p.win_percent as win_percent,
-                    p.aces_avg as aces_avg, p.double_faults_avg as double_faults_avg,
-                    p.service_points_avg as service_points_avg, p.first_serve_points_won_avg as first_serve_points_won_avg,
-                    p.second_serve_points_won_avg as second_serve_points_won_avg, p.serve_games_avg as serve_games_avg,
-                    p.break_points_saved_avg as break_points_saved_avg, p.break_points_faced_avg as break_points_faced_avg
+                    RETURN p.name as name, p.country as country, p.rank as rank, p.rank_level as rank_level, p.status as status, p.experience as experience, p.play_style as play_style, p.age as age, p.height as height, p.favorite_shot as favorite_shot, p.hand as hand, p.personality_tags as personality_tags, p.personality_long as personality_long,
+                    p.grass_advantage as grass_advantage, p.career_high_rank as career_high_rank, p.years_on_tour as years_on_tour, p.coach as coach, p.image_url as image_url, p.gender as gender
                     ORDER BY p.name
                 """
         result = tx.run(query, user_id=user_id).data()
@@ -176,12 +165,12 @@ class Relation_Worker:
                         collect(attrs_weighted_sum),
                         collect(player_weighted_sum)
                     ) AS similarity
-                RETURN p.player_id AS player_id, similarity
+                RETURN p.name AS name, similarity
                 ORDER BY similarity DESC
                 LIMIT 10
                 """
         result = tx.run(query, user_id=user_id, liked_players_attributes=liked_players_attributes, attribute_weights_keys=attribute_weights_keys, attribute_weights_values=attribute_weights_values)
-        return [record["player_id"] for record in result]
+        return [record["player_name"] for record in result]
 
 
 
@@ -196,7 +185,7 @@ class Relation_Worker:
     @staticmethod
     def _create_recommend_relations(tx, user_id, similar_players):
         query = """ UNWIND $similar_players AS similar_player
-                    MATCH (u:User {user_id: $user_id}), (p:Player {player_id: similar_player.player_id})
+                    MATCH (u:User {user_id: $user_id}), (p:Player {player_name: similar_player.player_name})
                     MERGE (u)-[:RECOMMEND]->(p)
                 """
         tx.run(query, user_id=user_id, similar_players=similar_players)

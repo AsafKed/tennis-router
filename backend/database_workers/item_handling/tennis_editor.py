@@ -178,7 +178,9 @@ class TennisEditor:
                 'grass_advantage': row['Grass'],
                 'career_high_rank': row['Career high'],
                 'years_on_tour': row['Years since turning pro'],
-                'coach': row['Coach']
+                'coach': row['Coach'],
+                'image_url': row['ImageURL'], 
+                'gender': row['Gender']
             }
 
             players.append(player)
@@ -193,10 +195,10 @@ class TennisEditor:
         worker = Worker()
         for player in tqdm(males):
             # Create new player in the database
-            worker.create_player_male(name=player['name'])
+            worker.create_player(name=player['name'])
         for player in tqdm(females):
             # Create new player in the database
-            worker.create_player_female(name=player['name'])
+            worker.create_player(name=player['name'])
 
         # Concatenate the male and female lists
         all_players = males + females
@@ -206,14 +208,15 @@ class TennisEditor:
             worker.add_personal_data_to_player(name=player['name'], country=player['country'], rank=player['rank'], 
                                            rank_level=player['rank_level'], status=player['status'], 
                                            experience=player['experience'], play_style=player['style'], 
-                                           previous_win_year=player['winning_year'], style=player['style'], 
+                                           previous_win_year=player['winning_year'],
                                            age=player['age'], height=player['height'], 
                                            favorite_shot=player['favorite_shot'], hand=player['hand'], 
                                            personality_tags=player['personality_tags'], 
                                            personality_long=player['personality_long'], 
                                            grass_advantage=player['grass_advantage'], 
                                            career_high_rank=player['career_high_rank'], 
-                                           years_on_tour=player['years_on_tour'], coach=player['coach'])
+                                           years_on_tour=player['years_on_tour'], coach=player['coach'],
+                                           image_url=player['image_url'], gender=player['gender'])
 
     
         worker.close()

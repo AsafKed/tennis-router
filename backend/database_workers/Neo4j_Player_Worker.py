@@ -141,21 +141,26 @@ class Player_Worker:
         person = result[0]
         return person
     
-    # Add personal data to player with the following properties: country, rank, status, experience, play_style, previous_win_year
-    def add_personal_data_to_player(self, name, country, rank, rank_level, status, experience, play_style, previous_win_year):
+    # Add personal data to player with the following properties: country, rank, status, experience, play_style, previous_win_year, style, age, height, favorite_shot, hand, personality_tags, personality_long, grass_advantage, career_high_rank, years_on_tour, coach
+    def add_personal_data_to_player(self, name, country, rank, rank_level, status, experience, play_style, previous_win_year, style, age, height, favorite_shot, hand, personality_tags, personality_long, grass_advantage, career_high_rank, years_on_tour, coach):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self._add_personal_data_to_player, name, country, rank, rank_level, status, experience, play_style, previous_win_year)
+                self._add_personal_data_to_player, name, country, rank, rank_level, status, experience, play_style, previous_win_year, style, age, height, favorite_shot, hand, personality_tags, personality_long, grass_advantage, career_high_rank, years_on_tour, coach)
 
             return result
         
     @staticmethod
-    def _add_personal_data_to_player(tx, name, country, rank, rank_level, status, experience, play_style, previous_win_year):
+    def _add_personal_data_to_player(tx, name, country, rank, rank_level, status, experience, play_style, previous_win_year, style, age, height, favorite_shot, hand, personality_tags, personality_long, grass_advantage, career_high_rank, years_on_tour, coach):
         query = """ MATCH (p { name: $name })
-                    SET p.country = $country, p.rank = $rank, p.rank_level = $rank_level, p.status = $status, p.experience = $experience, p.play_style = $play_style, p.previous_win_year = $previous_win_year
-                    RETURN p.name, p.player_id, p.country, p.rank, p.rank_level, p.status, p.experience, p.play_style
+                    SET p.country = $country, p.rank = $rank, p.rank_level = $rank_level, p.status = $status, p.experience = $experience, p.play_style = $play_style, p.previous_win_year = $previous_win_year,
+                    p.style = $style, p.age = $age, p.height = $height, p.favorite_shot = $favorite_shot, p.hand = $hand, p.personality_tags = $personality_tags, p.personality_long = $personality_long,
+                    p.grass_advantage = $grass_advantage, p.career_high_rank = $career_high_rank, p.years_on_tour = $years_on_tour, p.coach = $coach
+                    RETURN p.name, p.player_id, p.country, p.rank, p.rank_level, p.status, p.experience, p.play_style, p.style, p.age, p.height, p.favorite_shot, p.hand, p.personality_tags, p.personality_long,
+                    p.grass_advantage, p.career_high_rank, p.years_on_tour, p.coach
                 """
-        result = tx.run(query, name=name, country=country, rank=rank, rank_level=rank_level, status=status, experience=experience, play_style=play_style, previous_win_year=previous_win_year)
+        result = tx.run(query, name=name, country=country, rank=rank, rank_level=rank_level, status=status, experience=experience, play_style=play_style, previous_win_year=previous_win_year,
+                        style=style, age=age, height=height, favorite_shot=favorite_shot, hand=hand, personality_tags=personality_tags, personality_long=personality_long,
+                        grass_advantage=grass_advantage, career_high_rank=career_high_rank, years_on_tour=years_on_tour, coach=coach)
 
         # Turn the result into a list of dictionaries
         result = result.data()
@@ -165,6 +170,7 @@ class Player_Worker:
 
         person = result[0]
         return person
+
 
     ############################
     # Create match

@@ -167,17 +167,17 @@ class TennisEditor:
                 'rank_level': rank_level,
                 'style': row['Style'],
                 'status': status,
-                'winning-year': winning_year,
+                'winning_year': winning_year,
                 'experience': experience,
                 'age': row['Age'],
                 'height': row['Height (cm)'],
                 'favorite_shot': row['Favorite shot'],
                 'hand': row['Hand'],
-                'personality-tags': row['Personality-tags'],
-                'personality-long': row['Personality-long'],
-                'grass-advantage': row['Grass'],
-                'career-high-rank': row['Career high'],
-                'years-on-tour': row['Years since turning pro'],
+                'personality_tags': row['Personality-tags'],
+                'personality_long': row['Personality-long'],
+                'grass_advantage': row['Grass'],
+                'career_high_rank': row['Career high'],
+                'years_on_tour': row['Years since turning pro'],
                 'coach': row['Coach']
             }
 
@@ -194,23 +194,29 @@ class TennisEditor:
         for player in tqdm(males):
             # Create new player in the database
             worker.create_player_male(name=player['name'])
-            # Using worker.add_personal_data_to_player, upload the following data points: name, country, rank, rank_level, status, experience, play_style
-            worker.add_personal_data_to_player(name=player['name'], country=player['country'], 
-                                               rank=player['rank'], rank_level=player['rank_level'],
-                                               status=player['status'], experience=player['experience'],
-                                               play_style=player['style'], previous_win_year=player['winning-year'])
-            
-        print(f'Successfully uploaded {len(males)} male players!')
-
         for player in tqdm(females):
             # Create new player in the database
             worker.create_player_female(name=player['name'])
-            # Using worker.add_personal_data_to_player, upload the following data points: name, country, rank, rank_level, status, experience, play_style
-            worker.add_personal_data_to_player(name=player['name'], country=player['country'],
-                                                  rank=player['rank'], rank_level=player['rank_level'],
-                                                    status=player['status'], experience=player['experience'],
-                                                    play_style=player['style'], previous_win_year=player['winning-year'])
 
+        # Concatenate the male and female lists
+        all_players = males + females
+
+        # Add details to the database
+        for player in tqdm(all_players):
+            worker.add_personal_data_to_player(name=player['name'], country=player['country'], rank=player['rank'], 
+                                           rank_level=player['rank_level'], status=player['status'], 
+                                           experience=player['experience'], play_style=player['style'], 
+                                           previous_win_year=player['winning_year'], style=player['style'], 
+                                           age=player['age'], height=player['height'], 
+                                           favorite_shot=player['favorite_shot'], hand=player['hand'], 
+                                           personality_tags=player['personality_tags'], 
+                                           personality_long=player['personality_long'], 
+                                           grass_advantage=player['grass_advantage'], 
+                                           career_high_rank=player['career_high_rank'], 
+                                           years_on_tour=player['years_on_tour'], coach=player['coach'])
+
+    
+        worker.close()
 
     def upload_players_to_db_from_historic_data(self):
         """Uploads all players to the database"""

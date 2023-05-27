@@ -26,12 +26,12 @@ class Player_Worker:
     ############################
     # Create player
     ############################
-    def create_player(self, name, player_id):
+    # Male
+    def create_player_male(self, name):
         """Create a player in the database
         
         Arguments:
             name {string} -- The name of the player
-            player_id {string} -- The id of the player
 
         Returns:
             Player (dictionary) -- As uploaded to the database
@@ -39,16 +39,48 @@ class Player_Worker:
         """
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self._create_and_return_player, name, player_id)
+                self._create_and_return_player_male, name)
 
         
     @staticmethod
-    def _create_and_return_player(tx, name, player_id):
+    def _create_and_return_player_male(tx, name):
         # MERGE will try to match the entire pattern and if it does not exist, it creates it.
-        query = """ MERGE (p:Player { name: $name, player_id: $player_id })
-                    RETURN p.name AS name, p.player_id AS player_id
+        query = """ MERGE (p:PlayerMale { name: $name })
+                    RETURN p.name AS name
                 """
-        result = tx.run(query, name=name, player_id=player_id)
+        result = tx.run(query, name=name)
+
+        # Turn the result into a list of dictionaries
+        result = result.data()
+
+        # Check that only one person with this name and id exists
+        Uniqueness_Check(result)
+
+        person = result[0]
+        return person
+    
+    # Female
+    def create_player_female(self, name):
+        """Create a player in the database
+        
+        Arguments:
+            name {string} -- The name of the player
+
+        Returns:
+            Player (dictionary) -- As uploaded to the database
+
+        """
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self._create_and_return_player_female, name)
+            
+    @staticmethod
+    def _create_and_return_player_female(tx, name):
+        # MERGE will try to match the entire pattern and if it does not exist, it creates it.
+        query = """ MERGE (p:PlayerFemale { name: $name })
+                    RETURN p.name AS name
+                """
+        result = tx.run(query, name=name)
 
         # Turn the result into a list of dictionaries
         result = result.data()
@@ -99,6 +131,31 @@ class Player_Worker:
                     RETURN p.name, p.player_id, p.rank, p.rank_points, p.win_count, p.loss_count, p.tournaments_played, p.win_percent, p.aces_avg, p.double_faults_avg, p.service_points_avg, p.first_serve_points_won_avg, p.second_serve_points_won_avg, p.serve_games_avg, p.break_points_saved_avg, p.break_points_faced_avg
                 """
         result = tx.run(query, name=name, player_id=player_id, rank=rank, rank_points=rank_points, win_count=win_count, loss_count=loss_count, tournaments_played=tournaments_played, win_percent=win_percent, aces_avg=aces_avg, double_faults_avg=double_faults_avg, service_points_avg=service_points_avg, first_serve_points_won_avg=first_serve_points_won_avg, second_serve_points_won_avg=second_serve_points_won_avg, serve_games_avg=serve_games_avg, break_points_saved_avg=break_points_saved_avg, break_points_faced_avg=break_points_faced_avg)
+
+        # Turn the result into a list of dictionaries
+        result = result.data()
+
+        # Check that only one person with this name and id exists
+        Uniqueness_Check(result)
+
+        person = result[0]
+        return person
+    
+    # Add personal data to player with the following properties: country, rank, status, experience, play_style, previous_win_year
+    def add_personal_data_to_player(self, name, country, rank, rank_level, status, experience, play_style, previous_win_year):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self._add_personal_data_to_player, name, country, rank, rank_level, status, experience, play_style, previous_win_year)
+
+            return result
+        
+    @staticmethod
+    def _add_personal_data_to_player(tx, name, country, rank, rank_level, status, experience, play_style, previous_win_year):
+        query = """ MATCH (p { name: $name })
+                    SET p.country = $country, p.rank = $rank, p.rank_level = $rank_level, p.status = $status, p.experience = $experience, p.play_style = $play_style, p.previous_win_year = $previous_win_year
+                    RETURN p.name, p.player_id, p.country, p.rank, p.rank_level, p.status, p.experience, p.play_style
+                """
+        result = tx.run(query, name=name, country=country, rank=rank, rank_level=rank_level, status=status, experience=experience, play_style=play_style, previous_win_year=previous_win_year)
 
         # Turn the result into a list of dictionaries
         result = result.data()

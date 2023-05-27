@@ -1,25 +1,30 @@
 import pandas as pd
 import numpy as np
-from .. Neo4j_Player_Worker import Player_Worker as Worker
+from ..Neo4j_Player_Worker import Player_Worker as Worker
 from tqdm import tqdm
 
 class TennisEditor:
-    def __init__(self, data):
+    def __init__(self, historic_data=None, personal_data_source=None):
         """Preferably, data should come from https://github.com/JeffSackmann/tennis_atp"""
-        self.data = data
-        self.prepare_historic_data()
+        self.historic_data = historic_data
+        """Read data from an Excel file"""
+        self.male_data = pd.read_excel(personal_data_source, sheet_name='Competitors-Male')
+        self.female_data = pd.read_excel(personal_data_source, sheet_name='Competitors-Female')
+        
+        if self.historic_data is not None:
+            self.prepare_historic_data()
 
     def find_matches_by_id(self, id):
         """Needed for aggregating data about individuals"""
         # Initialize the dataframes as empty but with the same columns as the original dataframe
-        id_won_matches_2022 = pd.DataFrame(columns=self.data.columns)
-        id_lost_matches_2022 = pd.DataFrame(columns=self.data.columns)
+        id_won_matches_2022 = pd.DataFrame(columns=self.historic_data.columns)
+        id_lost_matches_2022 = pd.DataFrame(columns=self.historic_data.columns)
 
         # Find the rows where name is present in the winner_name or loser_name columns
-        if len(self.data[self.data['winner_id'] == id]) > 0:
-            id_won_matches_2022 = self.data[self.data['winner_id'] == id]
-        if len(self.data[self.data['loser_id'] == id]) > 0:
-            id_lost_matches_2022 = self.data[self.data['loser_id'] == id]
+        if len(self.historic_data[self.historic_data['winner_id'] == id]) > 0:
+            id_won_matches_2022 = self.historic_data[self.historic_data['winner_id'] == id]
+        if len(self.historic_data[self.historic_data['loser_id'] == id]) > 0:
+            id_lost_matches_2022 = self.historic_data[self.historic_data['loser_id'] == id]
         id_matches_2022 = pd.concat([id_won_matches_2022, id_lost_matches_2022])
         
         id_matches_index = id_matches_2022.index
@@ -35,9 +40,9 @@ class TennisEditor:
         index = self.find_matches_by_id(id)['matches']
 
         # Get the rows from the matches dataframe based on the index, split into won and lost
-        matches = self.data.iloc[index[0]]
-        won_matches = matches.loc[self.data['winner_id'] == id]
-        lost_matches = matches.loc[self.data['loser_id'] == id]
+        matches = self.historic_data.iloc[index[0]]
+        won_matches = matches.loc[self.historic_data['winner_id'] == id]
+        lost_matches = matches.loc[self.historic_data['loser_id'] == id]
 
         # Do it this way to prevent single positional indexer is out-of-bounds error
         use_won_matches = True if len(won_matches) > 0 else False
@@ -83,7 +88,7 @@ class TennisEditor:
 
     def prepare_historic_data(self):
         """Prepares the data for the database"""
-        unique_ids = set(list(self.data['winner_id'].unique()) + list(self.data['loser_id'].unique()))
+        unique_ids = set(list(self.historic_data['winner_id'].unique()) + list(self.historic_data['loser_id'].unique()))
 
         # Do this using tqdm to show progress
         all_players = []
@@ -93,14 +98,14 @@ class TennisEditor:
 
        
         # Get a list of column names that contain winner and loser, and remove winner_id and loser_id from them
-        winner_loser_cols = [col for col in self.data.columns if 'loser' in col or 'winner' in col]
+        winner_loser_cols = [col for col in self.historic_data.columns if 'loser' in col or 'winner' in col]
         winner_loser_cols.remove('winner_id')
         winner_loser_cols.remove('loser_id')
         winner_loser_cols.remove('winner_name')
         winner_loser_cols.remove('loser_name')
 
         # Create a dataframe without these columns
-        all_matches = self.data.drop(columns=winner_loser_cols)
+        all_matches = self.historic_data.drop(columns=winner_loser_cols)
         all_matches['match_name'] = all_matches['winner_name'] + ' vs ' + all_matches['loser_name']
         all_matches = all_matches.drop(columns=['winner_name', 'loser_name'])
 
@@ -111,13 +116,108 @@ class TennisEditor:
         self.players = all_players
         self.matches = all_matches
 
+    def prepare_personal_data(self, gender):
+        """Processes a DataFrame and returns a list of dictionaries representing players"""
+        data = self.male_data if gender == 'Male' else self.female_data
 
-    def upload_players_to_db(self):
+        players = []
+        for index, row in data.iterrows():
+            # Set status 
+            status = ''
+            if row['CurrentTop10'] == True:
+                status = 'Top 10'
+            elif row['FormerTop10'] == True:
+                status = 'Former Top 10'
+            elif row['CurrentAllTimeHigh'] == True:
+                status = 'All Time High'
+
+            # Set winning year
+            if row['Previous Libema Winner']:
+                winning_year = row['Libema Winning Year']
+            else:
+                winning_year = 0
+        
+            # Turn years played into an experience level (out of 3)
+            years_played = sorted(data['Years since turning pro'])
+            one_third = years_played[int(len(years_played) / 3)]
+            two_thirds = years_played[int(len(years_played) * 2 / 3)]
+            if row['Years since turning pro'] < one_third:
+                experience = 1
+            elif row['Years since turning pro'] < two_thirds:
+                experience = 2
+            else:
+                experience = 3
+
+            # Do the same thing with rank level
+            ranks = sorted(data['Rank'])
+            one_third = ranks[int(len(ranks) / 3)]
+            two_thirds = ranks[int(len(ranks) * 2 / 3)]
+            if row['Rank'] < one_third:
+                rank_level = 1
+            elif row['Rank'] < two_thirds:
+                rank_level = 2
+            else:
+                rank_level = 3
+
+            # Create a player dictionary
+            player = {
+                'name': row['Player'],
+                'country': row['Country'],
+                'rank': row['Rank'],
+                'rank_level': rank_level,
+                'style': row['Style'],
+                'status': status,
+                'winning-year': winning_year,
+                'experience': experience,
+                'age': row['Age'],
+                'height': row['Height (cm)'],
+                'favorite_shot': row['Favorite shot'],
+                'hand': row['Hand'],
+                'personality-tags': row['Personality-tags'],
+                'personality-long': row['Personality-long'],
+                'grass-advantage': row['Grass'],
+                'career-high-rank': row['Career high'],
+                'years-on-tour': row['Years since turning pro'],
+                'coach': row['Coach']
+            }
+
+            players.append(player)
+        
+        return players
+        
+    def upload_players_with_personal_data(self):
+        """Uploads all players to the database"""
+        males = self.prepare_personal_data('Male')
+        females = self.prepare_personal_data('Female')
+
+        worker = Worker()
+        for player in tqdm(males):
+            # Create new player in the database
+            worker.create_player_male(name=player['name'])
+            # Using worker.add_personal_data_to_player, upload the following data points: name, country, rank, rank_level, status, experience, play_style
+            worker.add_personal_data_to_player(name=player['name'], country=player['country'], 
+                                               rank=player['rank'], rank_level=player['rank_level'],
+                                               status=player['status'], experience=player['experience'],
+                                               play_style=player['style'], previous_win_year=player['winning-year'])
+            
+        print(f'Successfully uploaded {len(males)} male players!')
+
+        for player in tqdm(females):
+            # Create new player in the database
+            worker.create_player_female(name=player['name'])
+            # Using worker.add_personal_data_to_player, upload the following data points: name, country, rank, rank_level, status, experience, play_style
+            worker.add_personal_data_to_player(name=player['name'], country=player['country'],
+                                                  rank=player['rank'], rank_level=player['rank_level'],
+                                                    status=player['status'], experience=player['experience'],
+                                                    play_style=player['style'], previous_win_year=player['winning-year'])
+
+
+    def upload_players_to_db_from_historic_data(self):
         """Uploads all players to the database"""
         worker = Worker()
         for player in tqdm(self.players):
             # Create a new player in the database
-            worker.create_player(name=player['name'], player_id=player['id'])
+            worker.create_player_male(name=player['name'], player_id=player['id'])
             # Using worker.add_data_to_player, upload the following data points: name, player_id, rank, rank_points, win_count, loss_count, tournaments_played, win_percent, aces_avg, double_faults_avg, service_points_avg, first_serve_points_won_avg, second_serve_points_won_avg, serve_games_avg, break_points_saved_avg, break_points_faced_avg
             worker.add_data_to_player(name=player['name'], player_id=player['id'], rank=player['rank'], 
                                       rank_points=player['rank_points'], win_count=player['won_matches_2022'], 

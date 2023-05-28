@@ -146,7 +146,6 @@ class Player_Worker:
         with self.driver.session(database="neo4j") as session:
             result = session.execute_read(
                 self._get_player_data, name)
-
             return result
 
     @staticmethod
@@ -165,6 +164,10 @@ class Player_Worker:
         Uniqueness_Check(result)
 
         person = result[0]
+
+        # Split the personality_tags string into a list
+        person['personality_tags'] = person['personality_tags'].lower().split(', ')
+
         return person
 
     

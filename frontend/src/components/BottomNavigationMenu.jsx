@@ -1,5 +1,6 @@
 import React from 'react';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
+import Paper from '@mui/material/Paper';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import GroupIcon from '@mui/icons-material/Group';
@@ -39,50 +40,52 @@ const BottomNavigationMenu = ({ loggedIn }) => {
   }
 
   return (
-    <BottomNavigation value={value} onChange={handleChange} showLabels>
-      <BottomNavigationAction
-        label="Welcome"
-        icon={<HomeIcon />}
-        onClick={() => handleNavigation('/')}
-      />
-      {loggedIn ? (
-        [
-          <BottomNavigationAction
-            key="groups"
-            label="Groups"
-            icon={<GroupIcon />}
-            onClick={() => handleNavigation('/group')}
-          />,
-          <BottomNavigationAction
-            key="preferences"
-            label="Preferences solicitation"
-            icon={<SportsTennisIcon />}
-            onClick={() => handleNavigation('/preferences')}
-          />,
-          <BottomNavigationAction
-            key="user"
-            label="User"
-            icon={<PersonIcon />}
-            onClick={() => handleNavigation('/user')}
-          />,
-        ]
-      ) : (
-        [
-          <BottomNavigationAction
-            key="login"
-            label="Login"
-            icon={<LoginIcon />}
-            onClick={() => handleNavigation('/login')}
-          />,
-          <BottomNavigationAction
-            key="register"
-            label="Register"
-            icon={<PersonAddIcon />}
-            onClick={() => handleNavigation('/register')}
-          />,
-        ]
-      )}
-    </BottomNavigation>
+    <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
+      <BottomNavigation value={value} onChange={handleChange} showLabels>
+        <BottomNavigationAction
+          label="Welcome"
+          icon={<HomeIcon />}
+          onClick={() => handleNavigation('/')}
+        />
+        {loggedIn ? (
+          [
+            <BottomNavigationAction
+              key="groups"
+              label="Groups"
+              icon={<GroupIcon />}
+              onClick={() => handleNavigation('/group')}
+            />,
+            <BottomNavigationAction
+              key="preferences"
+              label="Preferences solicitation"
+              icon={<SportsTennisIcon />}
+              onClick={() => handleNavigation('/preferences')}
+            />,
+            <BottomNavigationAction
+              key="user"
+              label="User"
+              icon={<PersonIcon />}
+              onClick={() => handleNavigation('/user')}
+            />,
+          ]
+        ) : (
+          [
+            <BottomNavigationAction
+              key="login"
+              label="Login"
+              icon={<LoginIcon />}
+              onClick={() => handleNavigation('/login')}
+            />,
+            <BottomNavigationAction
+              key="register"
+              label="Register"
+              icon={<PersonAddIcon />}
+              onClick={() => handleNavigation('/register')}
+            />,
+          ]
+        )}
+      </BottomNavigation>
+    </Paper >
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import PlayerSelectionPage from './PlayerSelectionPage';
+import PlayerSelectionPage from '../components/PlayerSelection';
 import UserPreferences from "../components/UserPreferences";
 
 

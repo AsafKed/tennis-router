@@ -3,7 +3,7 @@ import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, Bu
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
 
-const PlayerSelectionPage = () => {
+const PlayerSelection = () => {
     const [players, setPlayers] = useState([]);
     const [filteredPlayers, setFilteredPlayers] = useState([]);
     const [sortOption, setSortOption] = useState('alphabetical');
@@ -179,4 +179,4 @@ const PlayerSelectionPage = () => {
     );
 };
 
-export default PlayerSelectionPage;
+export default PlayerSelection;

@@ -140,6 +140,7 @@ const PlayerSelection = () => {
                             height="300"
                             image={player.image_url}
                             alt={player.name}
+                            sx={{ objectFit: 'contain' }}
                         />
                         <CardContent>
                             <Typography gutterBottom variant="h5" component="div">
@@ -162,6 +163,7 @@ const PlayerSelection = () => {
                                 height="300"
                                 image={player.image_url}
                                 alt={player.name}
+                                sx={{ objectFit: 'contain', padding: '1em' }}
                             />
                             <CardContent>
                                 <Typography gutterBottom variant="h5" component="div">

@@ -3,6 +3,8 @@ import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, Bu
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
 import PlayerCard from './PlayerCard';
+// Country flags
+import ReactCountryFlag from "react-country-flag";
 
 const PlayerSelection = () => {
     const [players, setPlayers] = useState([]);
@@ -166,11 +168,11 @@ const PlayerSelection = () => {
                     </Card>
                 ))}
             </Grid>
-            <h2>Other Players</h2>
+            <h2>All Competitors</h2>
             <Grid container spacing={4}>
                 {filteredPlayers.map((player) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
-                        <Card onClick={() => handlePlayerClick(player.name)}>
+                        <Card onClick={() => handlePlayerClick(player.name)} style={{ position: 'relative' }}>
                             <CardMedia
                                 component="img"
                                 height="300"
@@ -178,15 +180,35 @@ const PlayerSelection = () => {
                                 alt={player.name}
                                 sx={{ objectFit: 'contain', padding: '1em' }}
                             />
+                            {/* Only display the flag if the player.country_code is not empty */}
+                            {player.country_code && (
+
+                                <ReactCountryFlag
+                                    countryCode={player.country_code}
+                                    style={{
+                                        width: '3em',
+                                        height: '3em',
+                                        position: 'absolute',
+                                        top: '10px',
+                                        left: '10px',
+                                        zIndex: 1, // make the flag appear above the image
+                                    }}
+                                    svg
+                                />
+                            )}
                             <CardContent>
                                 <Typography gutterBottom variant="h5" component="div">
                                     {player.name}
+                                </Typography>
+                                <Typography variant="body1" color="text.secondary">
+                                    Rank: {player.rank}
                                 </Typography>
                                 <Button variant="contained" color="primary" onClick={() => handleLike(player.name)}>
                                     Like
                                 </Button>
                             </CardContent>
                         </Card>
+
                     </Grid>
                 ))}
             </Grid>

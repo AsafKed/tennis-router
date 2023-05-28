@@ -54,10 +54,10 @@ const BottomNavigationMenu = ({ loggedIn }) => {
             onClick={() => handleNavigation('/group')}
           />,
           <BottomNavigationAction
-            key="player-selection"
-            label="Player Selection"
+            key="preferences"
+            label="Preferences solicitation"
             icon={<SportsTennisIcon />}
-            onClick={() => handleNavigation('/player-selection')}
+            onClick={() => handleNavigation('/preferences')}
           />,
           <BottomNavigationAction
             key="user"

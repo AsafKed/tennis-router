@@ -113,7 +113,8 @@ def get_players():
         neo4j_worker = Player_Worker()
         players_list = neo4j_worker.get_all_players()
         neo4j_worker.close()
-        return json.dumps(players_list), 200
+        print(f'\nPlayers list:\n{players_list}\n')
+        return json.dumps(players_list, ensure_ascii=False), 200
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error while getting players'}), 500
@@ -166,7 +167,8 @@ def get_liked_players(user_id):
         neo4j_worker = Relation_Worker()
         liked_players = neo4j_worker.get_liked_players(user_id)
         neo4j_worker.close()
-        return json.dumps(liked_players), 200
+        print(f'\nLiked players:\n{liked_players}')
+        return json.dumps(liked_players, ensure_ascii=False), 200
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error while getting liked players'}), 500

@@ -7,10 +7,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
 import { signOut } from "firebase/auth";
 
-// Components
-import UserPreferences from '../components/UserPreferences';
-
-
 function UserPage() {
   const navigate = useNavigate();
 
@@ -44,13 +40,11 @@ function UserPage() {
       if (user) {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
-        // TODO get request from backend to get the user
         const uid = user.uid;
         console.log("uid", uid)
         getName(uid);
       } else {
         // User is signed out
-        // ...
         console.log("user is logged out")
       }
     });
@@ -62,7 +56,6 @@ function UserPage() {
       <h1>User</h1>
       <h2>Name: {name}</h2>
       <button onClick={handleLogout}>Logout</button>
-      <UserPreferences />
     </div>
   )
 }

@@ -39,7 +39,7 @@ const TopNavigationMenu = ({ loggedIn }) => {
             <IconButton color="inherit" onClick={() => handleNavigation('/group')}>
               <GroupIcon />
             </IconButton>
-            <IconButton color="inherit" onClick={() => handleNavigation('/player-selection')}>
+            <IconButton color="inherit" onClick={() => handleNavigation('/preferences')}>
               {/* Suitable Icon */}
               <SportsTennisIcon />
             </IconButton>

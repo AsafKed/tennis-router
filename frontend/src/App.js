@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import GroupPage from "./pages/GroupPage";
 import UserPage from "./pages/UserPage";
 import PlayerSelectionPage from "./pages/PlayerSelectionPage";
+import PreferenceSolicitationPage from "./pages/PreferenceSolicitationPage";
 import BottomNavigationMenu from "./components/BottomNavigationMenu";
 import TopNavigationMenu from "./components/TopNavigationMenu";
 
@@ -48,7 +49,7 @@ function App() {
             <>
               <Route path="/group" element={<GroupPage />} />
               <Route path="/user" element={<UserPage />} />
-              <Route path="/player-selection" element={<PlayerSelectionPage />} />
+              <Route path="/preferences" element={<PreferenceSolicitationPage />} />
             </>
           )}
           {!loggedIn && (

@@ -129,8 +129,8 @@ def like_player():
         neo4j_worker = Relation_Worker()
         neo4j_worker.create_likes_relation(user_id, player_name)
         neo4j_worker.delete_recommend_relations(user_id)
-        similar_players = neo4j_worker.get_similar_players_based_on_attributes(user_id, attribute_weights)
-        neo4j_worker.create_recommend_relations(user_id, similar_players)
+        # similar_players = neo4j_worker.get_similar_players_based_on_attributes(user_id, attribute_weights)
+        # neo4j_worker.create_recommend_relations(user_id, similar_players)
         neo4j_worker.close()
         return jsonify({'message': 'Successfully liked player and updated recommendations'}), 200
     except Exception as e:
@@ -147,8 +147,8 @@ def unlike_player():
         neo4j_worker = Relation_Worker()
         neo4j_worker.delete_likes_relation(user_id, player_name)
         neo4j_worker.delete_recommend_relations(user_id)
-        similar_players = neo4j_worker.get_similar_players_based_on_attributes(user_id, attribute_weights)
-        neo4j_worker.create_recommend_relations(user_id, similar_players)
+        # similar_players = neo4j_worker.get_similar_players_based_on_attributes(user_id, attribute_weights)
+        # neo4j_worker.create_recommend_relations(user_id, similar_players)
         neo4j_worker.close()
         return jsonify({'message': 'Successfully unliked player and updated recommendations'}), 200
     except Exception as e:

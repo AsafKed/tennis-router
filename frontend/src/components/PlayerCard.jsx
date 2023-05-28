@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Card, CardContent, Typography, Box, CircularProgress, CardMedia, Grid, LinearProgress, Chip } from '@mui/material';
+import { Modal, Card, CardContent, Typography, Box, CircularProgress, CardMedia, Chip } from '@mui/material';
 import ReactCountryFlag from "react-country-flag";
+import LinearProgress from '@mui/material/LinearProgress';
 
 const PlayerCard = ({ playerName, open, handleClose }) => {
     const [playerData, setPlayerData] = useState(null);
@@ -34,55 +35,67 @@ const PlayerCard = ({ playerName, open, handleClose }) => {
                 justifyContent: 'center',
             }}
         >
-            <Box sx={{ boxShadow: 24 }}>
+            <Box sx={{ boxShadow: 24, width: '80vw', maxWidth: '500px' }}>
                 <Card>
                     {loading ? (
                         <CircularProgress />
                     ) : (
                         playerData && (
                             <CardContent>
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12} md={6}>
+                                <Box display="flex" flexDirection="row">
+                                    <Box width="50%" paddingRight="16px">
                                         <CardMedia
                                             component="img"
-                                            height="300"
                                             image={playerData.image_url}
                                             alt={playerData.name}
-                                            sx={{ objectFit: 'contain' }}
+                                            sx={{ objectFit: 'contain', maxHeight: '300px', marginBottom: '16px' }}
                                         />
-                                        <ReactCountryFlag
-                                            countryCode={playerData.country_code}
-                                            style={{
-                                                width: '2em',
-                                                height: '2em',
-                                                position: 'absolute',
-                                                top: '10px',
-                                                left: '10px',
-                                                zIndex: 1,
-                                            }}
-                                            svg
-                                        />
+                                        <Box display="flex" alignItems="center">
+                                            <ReactCountryFlag
+                                                countryCode={playerData.country_code}
+                                                style={{
+                                                    width: '2em',
+                                                    height: '2em',
+                                                    marginRight: '10px',
+                                                }}
+                                                svg
+                                            />
+                                            <Typography variant="body2" color="text.secondary">
+                                                {playerData.country}
+                                            </Typography>
+                                        </Box>
                                         <Typography variant="body2" color="text.secondary">
-                                            From: {playerData.country} <br/>
-                                            {playerData.personality_long} <br/>
+                                            {playerData.personality_long}
                                         </Typography>
-                                    </Grid>
-                                    <Grid item xs={12} md={6}>
+                                    </Box>
+                                    <Box width="50%">
                                         <Typography variant="h5" component="div" id="player-card-title">
                                             {playerData.name}
                                         </Typography>
-                                        <Typography variant="body2" color="text.secondary">
+                                        {/* Add more player data here */}
+                                        <Typography variant="body2" color="text.secondary" id="player-card-description">
                                             Rank: {playerData.rank} <br/>
-                                            <LinearProgress variant="determinate" value={playerData.rank} /> {/* You need to normalize the rank value */}
-                                            {/* Add more player data here */}
+                                            Rank Level: {playerData.rank_level} <br/>
+                                            Status: {playerData.status} <br/>
+                                            Experience: {playerData.experience} <br/>
+                                            Play Style: {playerData.play_style} <br/>
+                                            Age: {playerData.age} <br/>
+                                            Height: {playerData.height} <br/>
+                                            Favorite Shot: {playerData.favorite_shot} <br/>
+                                            Hand: {playerData.hand} <br/>
+                                            Grass Advantage: {playerData.grass_advantage} <br/>
+                                            Career High Rank: {playerData.career_high_rank} <br/>
+                                            Years on Tour: {playerData.years_on_tour} <br/>
+                                            Coach: {playerData.coach} <br/>
+                                            Gender: {playerData.gender} <br/>
                                         </Typography>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        {playerData.personality_tags.map((tag, index) => (
-                                            <Chip label={tag} key={index} style={{marginRight: '5px', marginBottom: '5px'}}/>
-                                        ))}
-                                    </Grid>
-                                </Grid>
+                                    </Box>
+                                </Box>
+                                <Box marginTop="16px">
+                                    {playerData.personality_tags.map((tag, index) => (
+                                        <Chip label={tag} key={index} style={{ marginRight: '8px', marginBottom: '8px' }} />
+                                    ))}
+                                </Box>
                             </CardContent>
                         )
                     )}

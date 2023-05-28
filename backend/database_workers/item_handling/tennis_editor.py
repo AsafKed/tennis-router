@@ -183,7 +183,8 @@ class TennisEditor:
                 'coach': row['Coach'],
                 'image_url': row['ImageURL'], 
                 'gender': row['Gender'],
-                'country_code': row['CountryCode']
+                'country_code': row['CountryCode'],
+                'career_high_year': row['Career high year']
             }
 
             players.append(player)
@@ -220,7 +221,7 @@ class TennisEditor:
                                            career_high_rank=player['career_high_rank'], 
                                            years_on_tour=player['years_on_tour'], coach=player['coach'],
                                            image_url=player['image_url'], gender=player['gender'],
-                                           country_code=player['country_code'])
+                                           country_code=player['country_code'], career_high_year=player['career_high_year'])
 
     
         worker.close()

@@ -133,7 +133,7 @@ const PlayerSelection = () => {
     };
 
     return (
-        <div>
+        <div style={{ padding: '0 16px' }}>
             <h1>Player Selection</h1>
             <TextField
                 select
@@ -147,25 +147,27 @@ const PlayerSelection = () => {
                 <MenuItem value="rank">Rank</MenuItem>
             </TextField>
             <h2>Liked Players</h2>
-            <Grid container spacing={4} style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
+            <Grid container spacing={4}>
                 {likedPlayers.map((player) => (
-                    <Card key={player.name}>
-                        <CardMedia
-                            component="img"
-                            height="300"
-                            image={player.image_url}
-                            alt={player.name}
-                            sx={{ objectFit: 'contain' }}
-                        />
-                        <CardContent>
-                            <Typography gutterBottom variant="h5" component="div">
-                                {player.name}
-                            </Typography>
-                            <Button onClick={() => handleUnlike(player.name)}>
-                                Unlike
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
+                        <Card>
+                            <CardMedia
+                                component="img"
+                                height="300"
+                                image={player.image_url}
+                                alt={player.name}
+                                sx={{ objectFit: 'contain' }}
+                            />
+                            <CardContent>
+                                <Typography gutterBottom variant="h5" component="div">
+                                    {player.name}
+                                </Typography>
+                                <Button onClick={() => handleUnlike(player.name)}>
+                                    Unlike
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </Grid>
                 ))}
             </Grid>
             <h2>All Competitors</h2>
@@ -182,7 +184,6 @@ const PlayerSelection = () => {
                             />
                             {/* Only display the flag if the player.country_code is not empty */}
                             {player.country_code && (
-
                                 <ReactCountryFlag
                                     countryCode={player.country_code}
                                     style={{
@@ -208,7 +209,6 @@ const PlayerSelection = () => {
                                 </Button>
                             </CardContent>
                         </Card>
-
                     </Grid>
                 ))}
             </Grid>

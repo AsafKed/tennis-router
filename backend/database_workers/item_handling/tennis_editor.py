@@ -7,9 +7,11 @@ class TennisEditor:
     def __init__(self, historic_data=None, personal_data_source=None):
         """Preferably, data should come from https://github.com/JeffSackmann/tennis_atp"""
         self.historic_data = historic_data
+
         """Read data from an Excel file"""
-        self.male_data = pd.read_excel(personal_data_source, sheet_name='Competitors-Male')
-        self.female_data = pd.read_excel(personal_data_source, sheet_name='Competitors-Female')
+        if personal_data_source is not None:
+            self.male_data = pd.read_excel(personal_data_source, sheet_name='Competitors-Male', na_filter=False)
+            self.female_data = pd.read_excel(personal_data_source, sheet_name='Competitors-Female', na_filter=False)
         
         if self.historic_data is not None:
             self.prepare_historic_data()

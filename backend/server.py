@@ -113,7 +113,6 @@ def get_players():
         neo4j_worker = Player_Worker()
         players_list = neo4j_worker.get_all_players()
         neo4j_worker.close()
-        print(f'\nPlayers list:\n{players_list}\n')
         return json.dumps(players_list, ensure_ascii=False), 200
     except Exception as e:
         print(e)
@@ -167,11 +166,26 @@ def get_liked_players(user_id):
         neo4j_worker = Relation_Worker()
         liked_players = neo4j_worker.get_liked_players(user_id)
         neo4j_worker.close()
-        print(f'\nLiked players:\n{liked_players}')
         return json.dumps(liked_players, ensure_ascii=False), 200
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error while getting liked players'}), 500
+    
+# Get player data
+@app.route('/players/data/<player_name>', methods=['GET'])
+def get_player_data(player_name):
+    print(f'Getting data for player {player_name}')
+    try:
+        player_name = player_name.replace('_', ' ')
+        neo4j_worker = Player_Worker()
+        player_data = neo4j_worker.get_player_data(player_name)
+        neo4j_worker.close()
+        print(f'\nPlayer data:\n{player_data}')
+        return json.dumps(player_data, ensure_ascii=False), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Error while getting player data'}), 500
+
     
 #################
 # SocketIO events

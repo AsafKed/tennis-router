@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, Button } from '@mui/material';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
+import PlayerCard from './PlayerCard';
 
 const PlayerSelection = () => {
     const [players, setPlayers] = useState([]);
@@ -9,6 +10,9 @@ const PlayerSelection = () => {
     const [sortOption, setSortOption] = useState('alphabetical');
     const [userId, setId] = useState("");
     const [likedPlayers, setLikedPlayers] = useState([]);
+    // Player clicking
+    const [selectedPlayer, setSelectedPlayer] = useState(null);
+    const [isPlayerCardOpen, setIsPlayerCardOpen] = useState(false);
 
     // Get all players
     useEffect(() => {
@@ -26,7 +30,6 @@ const PlayerSelection = () => {
     const fetchLikedPlayers = useCallback(async () => {
         const response = await fetch(`/players/liked/${userId}`);
         const text = await response.text();
-        console.log("Liked players\n", text);
         const data = JSON.parse(text);
         setLikedPlayers(data);
     }, [userId]);
@@ -117,6 +120,16 @@ const PlayerSelection = () => {
         return likedPlayers.some(likedPlayer => likedPlayer.name === playerName);
     };
 
+    // Player clicking
+    const handlePlayerClick = (playerName) => {
+        setSelectedPlayer(playerName);
+        setIsPlayerCardOpen(true);
+    };
+
+    const handlePlayerCardClose = () => {
+        setIsPlayerCardOpen(false);
+    };
+
     return (
         <div>
             <h1>Player Selection</h1>
@@ -157,7 +170,7 @@ const PlayerSelection = () => {
             <Grid container spacing={4}>
                 {filteredPlayers.map((player) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
-                        <Card>
+                        <Card onClick={() => handlePlayerClick(player.name)}>
                             <CardMedia
                                 component="img"
                                 height="300"
@@ -177,6 +190,7 @@ const PlayerSelection = () => {
                     </Grid>
                 ))}
             </Grid>
+            <PlayerCard playerName={selectedPlayer} open={isPlayerCardOpen} handleClose={handlePlayerCardClose} />
         </div>
     );
 };

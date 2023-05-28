@@ -24,7 +24,7 @@ const TopNavigationMenu = ({ loggedIn }) => {
   }
 
   return (
-    <AppBar position="static">
+    <AppBar position="sticky">
       <Toolbar>
         <IconButton edge="start" color="inherit" onClick={() => handleNavigation('/')}>
           <HomeIcon />

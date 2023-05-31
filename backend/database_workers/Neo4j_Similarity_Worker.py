@@ -137,8 +137,15 @@ class Similarity_Worker:
         # One-hot encode the categorical features
         one_hot_hand = pd.get_dummies(players_df['hand'], prefix='hand')
         one_hot_play_style = pd.get_dummies(players_df['play_style'], prefix='play_style')
-        one_hot_country = pd.get_dummies(players_df['country'], prefix='country')
-        one_hot_libema = pd.get_dummies(players_df['libema'], prefix='libema')
+        one_hot_country_zone = pd.get_dummies(players_df['country_zone'], prefix='country_zone')
+        one_hot_libema = pd.get_dummies(players_df['previous_libema_winner'], prefix='previous_libema_winner')
+        one_hot_status = pd.get_dummies(players_df['status'], prefix='status')
+        one_hot_grass_advantage = pd.get_dummies(players_df['grass_advantage'], prefix='grass_advantage')
+        one_hot_favorite_shot = pd.get_dummies(players_df['favorite_shot'], prefix='favorite_shot')
+        
+
+        # Concatenate the one-hot encoded features to the players_df
+        players_df = pd.concat([players_df, one_hot_hand, one_hot_play_style, one_hot_country_zone, one_hot_libema, one_hot_status, one_hot_grass_advantage, one_hot_favorite_shot], axis=1)
 
 
     # Create BOW vectors for the personality_tags of each player

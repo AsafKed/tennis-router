@@ -26,7 +26,7 @@ class Similarity_Based_Recommender:
     def compute_euclidian_similarity(self):
         """Computes numeric similarity (1-distance) for all pairwise combinations of players"""
         
-        
+
 
     def recommend(self, player_id):
         pass

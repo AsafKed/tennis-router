@@ -165,6 +165,7 @@ class TennisEditor:
             player = {
                 'name': row['Player'],
                 'country': row['Country'],
+                'country_zone': row['CountryZone'],
                 'rank': row['Rank'],
                 'rank_level': rank_level,
                 'style': row['Style'],
@@ -210,19 +211,20 @@ class TennisEditor:
 
         # Add details to the database
         for player in tqdm(all_players):
-            worker.add_personal_data_to_player(name=player['name'], country=player['country'], rank=player['rank'], 
-                                           rank_level=player['rank_level'], status=player['status'], 
-                                           experience=player['experience'], play_style=player['style'], 
-                                           previous_win_year=player['winning_year'], previous_libema_winner=player['previous_libema_winner'],
-                                           age=player['age'], height=player['height'], 
-                                           favorite_shot=player['favorite_shot'], hand=player['hand'], 
-                                           personality_tags=player['personality_tags'], 
-                                           personality_long=player['personality_long'], 
-                                           grass_advantage=player['grass_advantage'], 
-                                           career_high_rank=player['career_high_rank'], 
-                                           years_on_tour=player['years_on_tour'], coach=player['coach'],
-                                           image_url=player['image_url'], gender=player['gender'],
-                                           country_code=player['country_code'], career_high_year=player['career_high_year'])
+            worker.add_personal_data_to_player(name=player['name'], country=player['country'], 
+                                                country_zone=player['country_zone'], rank=player['rank'], 
+                                                rank_level=player['rank_level'], status=player['status'], 
+                                                experience=player['experience'], play_style=player['style'], 
+                                                previous_win_year=player['winning_year'], previous_libema_winner=player['previous_libema_winner'],
+                                                age=player['age'], height=player['height'], 
+                                                favorite_shot=player['favorite_shot'], hand=player['hand'], 
+                                                personality_tags=player['personality_tags'], 
+                                                personality_long=player['personality_long'], 
+                                                grass_advantage=player['grass_advantage'], 
+                                                career_high_rank=player['career_high_rank'], 
+                                                years_on_tour=player['years_on_tour'], coach=player['coach'],
+                                                image_url=player['image_url'], gender=player['gender'],
+                                                country_code=player['country_code'], career_high_year=player['career_high_year'])
 
     
         worker.close()

@@ -1,3 +1,4 @@
+import pandas as pd
 from neo4j import GraphDatabase
 
 # To use the .env file
@@ -109,7 +110,7 @@ class Similarity_Worker:
     @staticmethod
     def _create_euclidian_similarities(tx):
         query = """ MATCH (p1:Player), (p2:Player)
-                    WHERE id(p1) < id(p2)
+                    WHERE id(p1) <> id(p2)
                     WITH p1, p2, gds.similarity.euclidean(p1.scaled_properties, p2.scaled_properties) AS similarity
                     MERGE (p1)-[r:SIMILAR_EUCLIDIAN]->(p2)
                     SET r.score = similarity
@@ -117,20 +118,7 @@ class Similarity_Worker:
         
         tx.run(query)
 
-
-
-
-    @staticmethod
-    def _rank_euclidian_similarities(tx):
-        query = """ MATCH (p:Player)-[s:SIMILAR_EUCLIDIAN]->()
-                    WITH p, s ORDER BY s.similarity DESC
-                    WITH p, COLLECT(s) as similarities, range(0, 2) AS ranks
-                    UNWIND ranks AS rank
-                    WITH rank, p, similarities[rank] AS rel
-                    SET rel.rank = rank + 1
-                """
-        
-        tx.run(query)
+    # This had a ranking, but I'm leaving it out because ranking is a directed property, but the relations are undirected
 
     #############################
     # Create cosine similarity relations with scores (0–1) based on categorical features
@@ -142,3 +130,21 @@ class Similarity_Worker:
         player_worker.close()
 
         # Create similarity relations between all players based on the categorical features
+
+
+    #############################
+    # Get similarities between all players
+    #############################
+    def get_all_similarities(self):
+        with self.driver.session() as session:
+            result = session.read_transaction(self._get_all_similarities)
+            return pd.DataFrame(result)
+
+    @staticmethod
+    def _get_all_similarities(tx):
+        query = """ MATCH (p1:Player)-[s:SIMILAR_EUCLIDIAN]->(p2:Player)
+                    RETURN p1.name AS player1, s.score AS similarity, s.rank as rank, p2.name AS player2
+                """
+        
+        result = tx.run(query)
+        return result.data()

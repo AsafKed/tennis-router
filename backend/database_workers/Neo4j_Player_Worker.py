@@ -14,10 +14,10 @@ load_dotenv()
 class Player_Worker:
     def __init__(self):
         uri = os.getenv("NEO4J_URI")
-        player = os.getenv("NEO4J_USERNAME")
+        user = os.getenv("NEO4J_USERNAME")
         password = os.getenv("NEO4J_PASSWORD")
 
-        self.driver = GraphDatabase.driver(uri, auth=(player, password))
+        self.driver = GraphDatabase.driver(uri, auth=(user, password))
 
     def close(self):
         # Don't forget to close the driver connection when you are finished with it
@@ -170,7 +170,31 @@ class Player_Worker:
         person['personality_tags'] = person['personality_tags'].lower().split(', ')
 
         return person
+    
+    # Get player data for all players
+    def get_all_players_with_personal_data(self):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(
+                self._get_all_players_with_personal_data)
+            return result
+        
+    @staticmethod
+    def _get_all_players_with_personal_data(tx):
+        query = """ MATCH (p:Player)
+                    RETURN p.name AS name, p.country AS country, p.rank AS rank, p.rank_level AS rank_level, p.status AS status, p.experience AS experience, p.play_style AS play_style, p.style AS style, p.age AS age, p.height AS height, p.favorite_shot AS favorite_shot, p.hand AS hand, p.personality_tags AS personality_tags, p.personality_long AS personality_long,
+                    p.grass_advantage AS grass_advantage, p.career_high_rank AS career_high_rank, p.years_on_tour AS years_on_tour, p.coach AS coach, p.image_url AS image_url, p.gender AS gender, p.country_code AS country_code, p.career_high_year AS career_high_year
+                """
 
+        result = tx.run(query)
+
+        # Turn the result into a list of dictionaries
+        result = result.data()
+
+        # Split the personality_tags string into a list
+        for person in result:
+            person['personality_tags'] = person['personality_tags'].lower().split(', ')
+
+        return result
     
     ############################
     # Create match

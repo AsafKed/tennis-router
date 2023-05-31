@@ -35,8 +35,6 @@ class Similarity_Worker:
             session.execute_write(self._scale_properties)
             session.execute_write(self._write_scaled_properties)
             session.execute_write(self._create_euclidian_similarities)
-            session.execute_write(self._rank_euclidian_similarities)
-
 
     @staticmethod
     def _create_log_values(tx):
@@ -112,8 +110,8 @@ class Similarity_Worker:
         query = """ MATCH (p1:Player), (p2:Player)
                     WHERE id(p1) <> id(p2)
                     WITH p1, p2, gds.similarity.euclidean(p1.scaled_properties, p2.scaled_properties) AS similarity
-                    MERGE (p1)-[r:SIMILAR_EUCLIDIAN]->(p2)
-                    SET r.score = similarity
+                    MERGE (p1)-[r:SIMILARITY]->(p2)
+                    SET r.euclidean = similarity
                 """
         
         tx.run(query)
@@ -130,6 +128,20 @@ class Similarity_Worker:
         player_worker.close()
 
         # Create similarity relations between all players based on the categorical features
+
+    # Do one-hot encoding for the handedness of each player, the playing_style, the country (turn this into regions!), won libema or not, status, the grass_advantage
+    def create_one_hot_encoding(self):
+        # Turn self.players into a dataframe
+        players_df = pd.DataFrame(self.players)
+
+        # One-hot encode the categorical features
+        one_hot_hand = pd.get_dummies(players_df['hand'], prefix='hand')
+        one_hot_play_style = pd.get_dummies(players_df['play_style'], prefix='play_style')
+        one_hot_country = pd.get_dummies(players_df['country'], prefix='country')
+        one_hot_libema = pd.get_dummies(players_df['libema'], prefix='libema')
+
+
+    # Create BOW vectors for the personality_tags of each player
 
 
     #############################

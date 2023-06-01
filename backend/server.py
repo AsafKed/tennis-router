@@ -6,6 +6,7 @@ import os
 from database_workers.Neo4j_User_Worker import User_Worker
 from database_workers.Neo4j_Player_Worker import Player_Worker
 from database_workers.Neo4j_Relation_Worker import Relation_Worker
+from database_workers.Neo4j_Similarity_Worker import Similarity_Worker
 import uuid
 import json
 
@@ -85,13 +86,20 @@ def get_user_groups(user_id):
 def update_similarity_weights(user_id):
     similarity_weights = request.json
     similarity_weights = similarity_weights["similarity_weights"]
-    print(f"\nSimilarity weights {similarity_weights}\n")
     # Update this in neo4j
     neo4j_worker = User_Worker()
     neo4j_worker.update_similarity_weights(user_id, similarity_weights)
     neo4j_worker.close()
 
     return jsonify(similarity_weights), 201
+
+@app.route("/users/<user_id>/get_similarity_weights", methods=["GET"])
+def get_similarity_weights(user_id):
+    neo4j_worker = User_Worker()
+    similarity_weights = neo4j_worker.get_similarity_weights(user_id)
+    neo4j_worker.close()
+
+    return jsonify(similarity_weights), 200
 
 @app.route("/users/<user_id>/preferences", methods=["PUT"])
 def update_user_preferences(user_id):
@@ -129,6 +137,29 @@ def get_players():
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error while getting players'}), 500
+
+# Get similar players
+@app.route('/players/similar/<player_name>/', methods=['GET'])
+def get_similar_players(player_name):
+    # Convert underscores to spaces in player name
+    player_name = player_name.replace("_", " ")
+    query = request.args.to_dict(flat=False)
+    user_id = query['user_id'][0]
+
+    try:
+        user_worker = User_Worker()
+        weight = user_worker.get_similarity_weights(user_id)
+        user_worker.close()
+
+        sim_worker = Similarity_Worker()
+        similar_players = sim_worker.get_top_similarities(player_name, weight)
+        sim_worker.close()
+
+        return json.dumps(similar_players, ensure_ascii=False), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Error while getting similar players'}), 500
+
 
 # User likes player
 @app.route('/players/like', methods=['POST'])
@@ -186,13 +217,11 @@ def get_liked_players(user_id):
 # Get player data
 @app.route('/players/data/<player_name>', methods=['GET'])
 def get_player_data(player_name):
-    print(f'Getting data for player {player_name}')
     try:
         player_name = player_name.replace('_', ' ')
         neo4j_worker = Player_Worker()
         player_data = neo4j_worker.get_player_data(player_name)
         neo4j_worker.close()
-        print(f'\nPlayer data:\n{player_data}')
         return json.dumps(player_data, ensure_ascii=False), 200
     except Exception as e:
         print(e)

@@ -265,3 +265,33 @@ class Similarity_Worker:
         
         result = tx.run(query)
         return result.data()
+
+    #############################
+    # Get top 3 most similar players for specified player
+    #############################
+    def get_top_similarities(self, player_name, weighted_similarity_type, top_n=3, same_gender=True):
+        with self.driver.session() as session:
+            result = session.execute_read(self._get_top_similarities, player_name=player_name, weighted_similarity_type=weighted_similarity_type, top_n=top_n, same_gender=same_gender)
+            return result
+        
+    @staticmethod
+    def _get_top_similarities(tx, player_name, weighted_similarity_type, top_n, same_gender):
+        query = """
+                    MATCH (p1:Player {name: $player_name})-[s:SIMILARITY]->(p2:Player)
+                    """ + ("WHERE p1.gender = p2.gender " if same_gender else "") + """
+                    RETURN p1.name AS player1, p2.name AS player2,
+                    CASE $weighted_similarity_type
+                        WHEN 'numeric' THEN s.numeric
+                        WHEN 'tag_similarity' THEN s.tag_similarity
+                        WHEN 'categorical' THEN s.categorical
+                        WHEN 'tag_numeric' THEN s.tag_numeric
+                        WHEN 'tag_categorical' THEN s.tag_categorical
+                        WHEN 'numeric_categorical' THEN s.numeric_categorical
+                        WHEN 'all' THEN s.all
+                    END AS similarity
+                    ORDER BY similarity DESC
+                    LIMIT $top_n
+                """
+        
+        result = tx.run(query, player_name=player_name, weighted_similarity_type=weighted_similarity_type, top_n=top_n)
+        return result.data()

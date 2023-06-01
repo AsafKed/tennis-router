@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, Button } from '@mui/material';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
-import PlayerCard from './PlayerCard';
-// Country flags
+import PlayerSimilarity from './PlayerSimilarity';
 import ReactCountryFlag from "react-country-flag";
 
 const PlayerSelection = () => {
@@ -212,7 +211,7 @@ const PlayerSelection = () => {
                     </Grid>
                 ))}
             </Grid>
-            <PlayerCard playerName={selectedPlayer} open={isPlayerCardOpen} handleClose={handlePlayerCardClose} />
+            {selectedPlayer && <PlayerSimilarity playerName={selectedPlayer} userId={userId} />}
         </div>
     );
 };

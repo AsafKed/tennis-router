@@ -29,17 +29,17 @@ const PlayerCard = ({ playerName, open, handleClose }) => {
     }, [playerName]);
 
     return (
-        <Modal
-            open={open}
-            onClose={handleClose}
-            aria-labelledby="player-card-title"
-            aria-describedby="player-card-description"
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-            }}
-        >
+        // <Modal
+        //     open={open}
+        //     onClose={handleClose}
+        //     aria-labelledby="player-card-title"
+        //     aria-describedby="player-card-description"
+        //     style={{
+        //         display: 'flex',
+        //         alignItems: 'center',
+        //         justifyContent: 'center',
+        //     }}
+        // >
             <Box sx={{ boxShadow: 24 }}>
                 <Card>
                     {loading ? (
@@ -139,7 +139,7 @@ const PlayerCard = ({ playerName, open, handleClose }) => {
                     )}
                 </Card>
             </Box>
-        </Modal>
+        // </Modal>
     );
 };
 

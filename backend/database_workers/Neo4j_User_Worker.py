@@ -281,6 +281,23 @@ class User_Worker:
         return person
 
     ############################
+    # Get similarity weights
+    ############################
+    def get_similarity_weights(self, user_id):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(self._get_similarity_weights, user_id)
+
+            return result['similarity_weights']
+        
+    @staticmethod
+    def _get_similarity_weights(tx, user_id):
+        query = """ MATCH (u:User { user_id: $user_id })
+                    RETURN u.similarity_weights AS similarity_weights
+                """ 
+        result = tx.run(query, user_id=user_id).data()
+        return result[0]
+    
+    ############################
     # Update user preferences
     ############################
     def update_user_preferences(self, user_id, preference1, preference2, preference3):

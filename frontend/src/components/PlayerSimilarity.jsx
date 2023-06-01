@@ -53,11 +53,11 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
                     color="primary"
                     style={{
                         position: 'absolute',
-                        bottom: isMobile ? 'initial' : '20px',
-                        right: isMobile ? 'initial' : '0px',
+                        bottom: showSimilarPlayers ? 'initial' : '20px',
+                        right: showSimilarPlayers ? 'initial' : '0px',
                         height: '50px',
-                        alignSelf: isMobile ? 'center' : 'initial',
-                        marginTop: isMobile ? '20px' : 'initial'
+                        alignSelf: showSimilarPlayers ? 'center' : 'initial',
+                        marginTop: showSimilarPlayers ? '20px' : 'initial'
                     }}
                 >
                     {showSimilarPlayers ? 'Hide Similar Players' : 'Show Similar Players'}

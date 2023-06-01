@@ -211,8 +211,7 @@ const PlayerSelection = () => {
                     </Grid>
                 ))}
             </Grid>
-            {selectedPlayer && <PlayerSimilarity playerName={selectedPlayer} userId={userId} />}
-        </div>
+            {selectedPlayer && <PlayerSimilarity playerName={selectedPlayer} userId={userId} open={isPlayerCardOpen} handleClose={handlePlayerCardClose} />}        </div>
     );
 };
 

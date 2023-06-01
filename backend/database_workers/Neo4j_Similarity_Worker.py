@@ -119,59 +119,10 @@ class Similarity_Worker:
         
         tx.run(query)
 
-    # This had a ranking, but I'm leaving it out because ranking is a directed property, but the relations are undirected
-
-    #############################
-    # Create cosine similarity relations with scores (0–1) based on categorical features
-    #############################
-    def create_cosine_similarities(self):
-        # Get the players
-        player_worker = Player_Worker()
-        players = player_worker.get_all_players_with_personal_data()
-        player_worker.close()
-
-        # Create similarity relations between all players based on the categorical features
-
-    # TODO edit this, I do not like the output (see the jupter notebook, as long as you keep it like this, it's not working well enough to be uploaded to the db)
-    # Do one-hot encoding for the handedness of each player, the playing_style, the country (turn this into regions!), won libema or not, status, the grass_advantage
-    def create_one_hot_encoding(self):
-        # Turn self.players into a dataframe
-        players_df = pd.DataFrame(self.players)
-
-        # One-hot encode the categorical features
-        one_hot_hand = pd.get_dummies(players_df['hand'], prefix='hand')
-        one_hot_play_style = pd.get_dummies(players_df['play_style'], prefix='play_style')
-        one_hot_country_zone = pd.get_dummies(players_df['country_zone'], prefix='country_zone')
-        one_hot_libema = pd.get_dummies(players_df['previous_libema_winner'], prefix='previous_libema_winner')
-        one_hot_status = pd.get_dummies(players_df['status'], prefix='status')
-        one_hot_grass_advantage = pd.get_dummies(players_df['grass_advantage'], prefix='grass_advantage')
-        one_hot_favorite_shot = pd.get_dummies(players_df['favorite_shot'], prefix='favorite_shot')
-        
-
-        # Concatenate the one-hot encoded features to the players_df
-        players_df = pd.concat([players_df, one_hot_hand, one_hot_play_style, one_hot_country_zone, one_hot_libema, one_hot_status, one_hot_grass_advantage, one_hot_favorite_shot], axis=1)
-
-        # Drop the categorical features
-        players_df = players_df.drop(['hand', 'play_style', 'country_zone', 'previous_libema_winner', 'status', 'grass_advantage', 'favorite_shot'], axis=1)
-
-        # Turn the dataframe into a list of dictionaries
-        players = players_df.to_dict('records')
-
-        # Update the players in the database (gotta do this per player)
-        for player in players:
-            print(player)
-            player_worker = Player_Worker()
-            player_worker.upload_player_data(player)
-            player_worker.close()
-            break
-        
-
-
-
-    
+    # This had a ranking, but I'm leaving it out because ranking is a directed property, but the relations are undirected    
     
     #############################
-    # Create overlap similarity relations with scores (0–1) based on personality tags (takes into account differing set size)
+    # Create personality tag similarity with scores (0–1) based on personality tags
     #############################
     # Create BOW vectors for the personality_tags of each player
     def create_bow_vectors(self):
@@ -202,14 +153,15 @@ class Similarity_Worker:
                 """
         tx.run(query, name=player['name'], bow=player['personality_tags_bow'])
 
-    # Create overlap similarity relations between all players based on the BOW representations
+
+    # Create tag similarity relations between all players based on the BOW representations
     def create_tag_similarities(self):
         with self.driver.session() as session:
-            result = session.execute_write(self._create_cosine_similarities)
+            result = session.execute_write(self._create_tag_similarities)
             return result
         
     @staticmethod
-    def _create_cosine_similarities(tx):
+    def _create_tag_similarities(tx):
         query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
                     WHERE p1 <> p2
                     WITH p1, p2, s, p1.personality_tags_bow AS p1_tags, p2.personality_tags_bow AS p2_tags
@@ -222,24 +174,57 @@ class Similarity_Worker:
 
 
     #############################
-    # Create jaccard similarity relations with scores (0–1) based on categorical properties (works well with same set size)
+    # Create similarity rating for categorical properties
     #############################
-    def create_jaccard_similarities(self):
-        with self.driver.session() as session:
-            result = session.execute_write(self._create_jaccard_similarities)
-            return result
+    def create_categorical_vectors(self):
+        # Create a string for each player that concatenates all the categorical properties
+        for player in self.players:
+            categorical_string = ' '.join([str(player[prop]) for prop in ['play_style', 'status', 'grass_advantage', 'hand', 'previous_libema_winner', 'country_zone', 'favorite_shot']])
+            player['categorical_string'] = categorical_string
+
+        # Create a CountVectorizer with the unique tags as the vocabulary
+        vectorizer = CountVectorizer()
+
+        # Fit the CountVectorizer to all the categorical_string of all players
+        all_categorical_strings = [player['categorical_string'] for player in self.players]
+        vectorizer.fit(all_categorical_strings)
         
+        # Create a BOW representation for each player
+        for player in self.players:
+            bow = vectorizer.transform([player['categorical_string']]).toarray()[0]
+            player['categorical_bow'] = bow.tolist()
+
+        # Upload the BOW representations to Neo4j
+        with self.driver.session() as session:
+            for player in self.players:
+                session.execute_write(self._upload_categorical_bow, player)
+
     @staticmethod
-    def _create_jaccard_similarities(tx):
+    def _upload_categorical_bow(tx, player):
+        query = """ MATCH (p:Player {name: $name})
+                    SET p.categorical_bow = $bow
+                """
+        tx.run(query, name=player['name'], bow=player['categorical_bow'])
+
+    # Create cosine similarity relations between all players based on the BOW representations
+    def create_categorical_similarities(self):
+        with self.driver.session() as session:
+            result = session.execute_write(self._create_cosine_similarities)
+            return result
+
+    @staticmethod
+    def _create_cosine_similarities(tx):
         query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
                     WHERE p1 <> p2
-                    WITH p1, p2, s, [p1.play_style, p1.status, p1.grass_advantage, p1.hand, p1.previous_libema_winner, p1.country_zone, p1.favorite_shot, p1.coach] AS p1_properties, [p2.play_style, p2.status, p2.grass_advantage, p2.hand, p2.previous_libema_winner, p2.country_zone, p2.favorite_shot, p2.coach] AS p2_properties
-                    SET s.jaccard = gds.similarity.jaccard(p1_properties, p2_properties)
-                    RETURN p1.name, p2.name, s.jaccard AS jaccardSimilarity
+                    WITH p1, p2, s, p1.categorical_bow AS p1_bow, p2.categorical_bow AS p2_bow
+                    SET s.categorical = gds.similarity.cosine(p1_bow, p2_bow)
+                    RETURN p1.name, p2.name, s.categorical AS cosineSimilarity
                 """
-        
         result = tx.run(query)
         return result
+
+
+
 
 
     #############################
@@ -253,7 +238,7 @@ class Similarity_Worker:
     @staticmethod
     def _get_all_similarities(tx):
         query = """ MATCH (p1:Player)-[s:SIMILARITY]->(p2:Player)
-                    RETURN p1.name AS player1, s.numeric AS numeric, s.tag_similarity as tag_similarity, p2.name AS player2
+                    RETURN p1.name AS player1, s.numeric AS numeric, s.tag_similarity as tag_similarity, s.categorical AS categorical, p2.name AS player2
                 """
         
         result = tx.run(query)

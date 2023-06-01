@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
+import { Alert } from '@mui/material';
 
 function Register() {
     const navigate = useNavigate();
@@ -102,11 +103,9 @@ function Register() {
                             >
                                 Sign up
                             </button>
+                            {error && <Alert severity="error">{error}</Alert>}
 
                         </form>
-                        {/* TODO: print this nicely */}
-                        {/* stylize this in red */}
-                        <p style={{ color: 'red' }}>{error}</p>
                         <p>
                             Already have an account?{' '}
                             <NavLink to="/login" >

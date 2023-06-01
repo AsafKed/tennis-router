@@ -260,6 +260,27 @@ class User_Worker:
         return [row["name"] for row in result]
 
     ############################
+    # Update similarity weights
+    ############################
+    def update_similarity_weights(self, user_id, similarity_weights):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self._update_similarity_weights, user_id, similarity_weights
+            )
+
+            return result
+        
+    @staticmethod
+    def _update_similarity_weights(tx, user_id, similarity_weights):
+        query = """ MATCH (u:User { user_id: $user_id })
+                SET u.similarity_weights = $similarity_weights
+                RETURN u.name AS name, u.user_id AS user_id, u.similarity_weights AS similarity_weights
+            """
+        result = tx.run(query, user_id=user_id, similarity_weights=similarity_weights).data()
+        person = result[0]
+        return person
+
+    ############################
     # Update user preferences
     ############################
     def update_user_preferences(self, user_id, preference1, preference2, preference3):

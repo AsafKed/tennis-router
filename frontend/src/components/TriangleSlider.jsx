@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 import { Button, Card } from '@mui/material';
+import { auth } from '../firebase';
 
 const TriangleSlider = () => {
   const points = [
@@ -28,10 +29,30 @@ const TriangleSlider = () => {
       id === 4 ? 'tag_categorical' : id === 5 ? 'all' : id === 6 ? 'numeric_categorical' : 'categorical')
   };
 
-  const handleWeightChange = (event) => {
+  const handleWeightChange = async () => {
     // Send the new weightDistribution to the backend
     console.log(weightDistribution)
-  }
+
+    // Get User ID from Firebase
+    const user = auth.currentUser;
+    const uid = user.uid;
+
+    const response = await fetch(`/users/${uid}/similarity_weights`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ similarity_weights: weightDistribution }),
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(data);
+}
+
 
   return (
     <div>

@@ -2,11 +2,13 @@ import React, {useState} from 'react';
 import {  signInWithEmailAndPassword   } from 'firebase/auth';
 import { auth } from '../firebase';
 import { NavLink, useNavigate } from 'react-router-dom'
+import { Alert } from '@mui/material';
  
 const Login = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState(null)
        
     const onLogin = (e) => {
         e.preventDefault();
@@ -20,6 +22,7 @@ const Login = () => {
         .catch((error) => {
             const errorCode = error.code;
             const errorMessage = error.message;
+            setError(errorMessage)
             console.log(errorCode, errorMessage)
         });
        
@@ -67,12 +70,13 @@ const Login = () => {
                                 >      
                                     Login                                                                  
                                 </button>
+                                {error && <Alert severity="error">{error}</Alert>}
                             </div>                               
                         </form>
                        
                         <p className="text-sm text-white text-center">
                             No account yet? {' '}
-                            <NavLink to="/signup">
+                            <NavLink to="/register">
                                 Sign up
                             </NavLink>
                         </p>

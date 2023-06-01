@@ -81,6 +81,18 @@ def get_user_groups(user_id):
 
     return jsonify(groups), 200
 
+@app.route("/users/<user_id>/similarity_weights", methods=["PUT"])
+def update_similarity_weights(user_id):
+    similarity_weights = request.json
+    similarity_weights = similarity_weights["similarity_weights"]
+    print(f"\nSimilarity weights {similarity_weights}\n")
+    # Update this in neo4j
+    neo4j_worker = User_Worker()
+    neo4j_worker.update_similarity_weights(user_id, similarity_weights)
+    neo4j_worker.close()
+
+    return jsonify(similarity_weights), 201
+
 @app.route("/users/<user_id>/preferences", methods=["PUT"])
 def update_user_preferences(user_id):
     preferences_data = request.json

@@ -13,15 +13,28 @@ const TriangleSlider = () => {
   ];
 
   const [selectedPoint, setSelectedPoint] = useState(5);
+  const [personalityWeight, setPersonalityWeight] = useState(0.33);
+  const [numericWeight, setNumericWeight] = useState(0.33);
+  const [categoricalWeight, setCategoricalWeight] = useState(0.33);
 
   const handleClick = (id) => {
     setSelectedPoint(id);
-    console.log(id);
+    setPersonalityWeight(id === 1 ? 1 : id === 2 ? 0.5 : id === 4 ? 0.5 : id === 5 ? 0.33 : 0);
+    setNumericWeight(id === 2 ? 0.5 : id === 3 ? 1 : id === 5 ? 0.33 : id === 6 ? 0.5 : 0);
+    setCategoricalWeight(id === 4 ? 0.5 : id === 5 ? 0.33 : id === 6 ? 0.5 : id === 7 ? 1 : 0);
   };
 
   return (
     <div>
-      
+      <p>Use these dots to select how much each type of data point affects the similarity. Hover over each dot to see how it weighs the different types. The following are descriptions for each of the types.</p>
+      <ul>
+        <li>Personality Tags: These are tags that describe a person's personality. For example, "funny", "outgoing", "shy", etc. See them at the bottom of each player once clicked.</li>
+        <li>Numeric: These are numbers that describe a person. For example, "height", "weight", "age", etc. See them by clicking a player.</li>
+        <li>Categorical: These are other notable attributes, such as a person's "handedness", "favorite shot", etc. See them by clicking a player.</li>
+      </ul>
+      <p>Similarity function:</p>
+      <p>similarity = {personalityWeight} * personalitySimilarity + {numericWeight} * numericSimilarity + {categoricalWeight} * categoricalSimilarity</p>
+
       <svg width="200" height="140">
         <g transform="translate(10, 10)">
           {points.map((point) => (

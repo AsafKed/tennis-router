@@ -30,14 +30,14 @@ class Similarity_Worker:
         player_worker.close()
 
     #############################
-    # Create euclidian similarity relations with scores (0–1) based on numeric features
+    # Create euclidean similarity relations with scores (0–1) based on numeric features
     #############################
-    def create_euclidian_similarities(self):
+    def create_numeric_similarities(self):
         with self.driver.session() as session:
             session.execute_write(self._create_log_values)
             session.execute_write(self._scale_properties)
             session.execute_write(self._write_scaled_properties)
-            session.execute_write(self._create_euclidian_similarities)
+            session.execute_write(self._create_euclidean_similarities)
 
     @staticmethod
     def _create_log_values(tx):
@@ -53,20 +53,20 @@ class Similarity_Worker:
     @staticmethod
     def _scale_properties(tx):
         # Check if the in-memory graph exists
-        check_query = """ CALL gds.graph.exists('euclidian_similarity_graph') YIELD exists """
+        check_query = """ CALL gds.graph.exists('euclidean_similarity_graph') YIELD exists """
         result = tx.run(check_query)
         graph_exists = result.single()[0]
 
         # If the in-memory graph exists, drop it
         if graph_exists:
-            drop_query = """ CALL gds.graph.drop('euclidian_similarity_graph') """
+            drop_query = """ CALL gds.graph.drop('euclidean_similarity_graph') """
             tx.run(drop_query)
         else:
             print("No graph to drop")
 
         # Create a new in-memory graph
         create_query = """ CALL gds.graph.project(
-                            'euclidian_similarity_graph',
+                            'euclidean_similarity_graph',
                             'Player',
                             '*',
                             {nodeProperties: ['log_rank', 'age', 'height', 'log_career_high_rank', 'years_on_tour', 'career_high_year']
@@ -77,7 +77,7 @@ class Similarity_Worker:
 
         # Scale the properties
         query = """ CALL gds.alpha.scaleProperties.mutate(
-                        'euclidian_similarity_graph',
+                        'euclidean_similarity_graph',
                         {nodeProperties: ['log_rank', 'age', 'height', 'log_career_high_rank', 'years_on_tour', 'career_high_year'],
                         scaler: 'minMax',
                         mutateProperty: 'scaled_properties'})
@@ -100,7 +100,7 @@ class Similarity_Worker:
         # Take the in_memory graph and write the scaled properties to the database
         if not exists:
             query = """ CALL gds.graph.nodeProperties.write(
-                            'euclidian_similarity_graph',
+                            'euclidean_similarity_graph',
                             ['scaled_properties']
                         )
                         YIELD propertiesWritten
@@ -109,12 +109,12 @@ class Similarity_Worker:
             tx.run(query)
 
     @staticmethod
-    def _create_euclidian_similarities(tx):
+    def _create_euclidean_similarities(tx):
         query = """ MATCH (p1:Player), (p2:Player)
                     WHERE id(p1) <> id(p2)
                     WITH p1, p2, gds.similarity.euclidean(p1.scaled_properties, p2.scaled_properties) AS similarity
                     MERGE (p1)-[r:SIMILARITY]->(p2)
-                    SET r.euclidean = similarity
+                    SET r.numeric = similarity
                 """
         
         tx.run(query)
@@ -203,22 +203,23 @@ class Similarity_Worker:
         tx.run(query, name=player['name'], bow=player['personality_tags_bow'])
 
     # Create overlap similarity relations between all players based on the BOW representations
-    def create_overlap_similarities(self):
+    def create_tag_similarities(self):
         with self.driver.session() as session:
-            result = session.execute_write(self._create_overlap_similarities)
+            result = session.execute_write(self._create_cosine_similarities)
             return result
         
     @staticmethod
-    def _create_overlap_similarities(tx):
+    def _create_cosine_similarities(tx):
         query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
                     WHERE p1 <> p2
-                    WITH p1, p2, s, coalesce(split(p1.personality_tags, ', '), []) AS p1_tags, coalesce(split(p2.personality_tags, ', '), []) AS p2_tags
-                    SET s.overlap = gds.similarity.overlap(p1_tags, p2_tags)
-                    RETURN p1.name, p2.name, s.overlap AS overlapSimilarity
+                    WITH p1, p2, s, p1.personality_tags_bow AS p1_tags, p2.personality_tags_bow AS p2_tags
+                    SET s.tag_similarity = gds.similarity.cosine(p1_tags, p2_tags)
+                    RETURN p1.name, p2.name, s.tag_similarity AS cosineSimilarity
                 """
         
         result = tx.run(query)
         return result
+
 
     #############################
     # Create jaccard similarity relations with scores (0–1) based on categorical properties (works well with same set size)
@@ -251,8 +252,8 @@ class Similarity_Worker:
 
     @staticmethod
     def _get_all_similarities(tx):
-        query = """ MATCH (p1:Player)-[s:SIMILAR_EUCLIDIAN]->(p2:Player)
-                    RETURN p1.name AS player1, s.score AS similarity, s.rank as rank, p2.name AS player2
+        query = """ MATCH (p1:Player)-[s:SIMILARITY]->(p2:Player)
+                    RETURN p1.name AS player1, s.numeric AS numeric, s.tag_similarity as tag_similarity, p2.name AS player2
                 """
         
         result = tx.run(query)

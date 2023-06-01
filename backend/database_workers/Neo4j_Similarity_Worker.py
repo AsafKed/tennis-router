@@ -1,4 +1,3 @@
-import pandas as pd
 from neo4j import GraphDatabase
 
 # To use the .env file
@@ -7,6 +6,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from .Neo4j_Player_Worker import Player_Worker
+
+# Other imports
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
 
 class Similarity_Worker:
     def __init__(self):
@@ -129,6 +132,7 @@ class Similarity_Worker:
 
         # Create similarity relations between all players based on the categorical features
 
+    # TODO edit this, I do not like the output (see the jupter notebook, as long as you keep it like this, it's not working well enough to be uploaded to the db)
     # Do one-hot encoding for the handedness of each player, the playing_style, the country (turn this into regions!), won libema or not, status, the grass_advantage
     def create_one_hot_encoding(self):
         # Turn self.players into a dataframe
@@ -147,8 +151,94 @@ class Similarity_Worker:
         # Concatenate the one-hot encoded features to the players_df
         players_df = pd.concat([players_df, one_hot_hand, one_hot_play_style, one_hot_country_zone, one_hot_libema, one_hot_status, one_hot_grass_advantage, one_hot_favorite_shot], axis=1)
 
+        # Drop the categorical features
+        players_df = players_df.drop(['hand', 'play_style', 'country_zone', 'previous_libema_winner', 'status', 'grass_advantage', 'favorite_shot'], axis=1)
 
+        # Turn the dataframe into a list of dictionaries
+        players = players_df.to_dict('records')
+
+        # Update the players in the database (gotta do this per player)
+        for player in players:
+            print(player)
+            player_worker = Player_Worker()
+            player_worker.upload_player_data(player)
+            player_worker.close()
+            break
+        
+
+
+
+    
+    
+    #############################
+    # Create overlap similarity relations with scores (0–1) based on personality tags (takes into account differing set size)
+    #############################
     # Create BOW vectors for the personality_tags of each player
+    def create_bow_vectors(self):
+        all_tags = set()
+        for player in self.players:
+            tags = set(player['personality_tags'])
+            all_tags.update(tags)
+
+        all_tags = sorted(all_tags)
+
+        # Create a CountVectorizer with the unique tags as the vocabulary
+        vectorizer = CountVectorizer(vocabulary=list(all_tags))
+
+        # Create a BOW representation for each player
+        for player in self.players:
+            bow = vectorizer.transform([' '.join(player['personality_tags'])]).toarray()[0]
+            player['personality_tags_bow'] = bow.tolist()
+
+        # Upload the BOW representations to Neo4j
+        with self.driver.session() as session:
+            for player in self.players:
+                session.execute_write(self._upload_bow, player)
+
+    @staticmethod
+    def _upload_bow(tx, player):
+        query = """ MATCH (p:Player {name: $name})
+                    SET p.personality_tags_bow = $bow
+                """
+        tx.run(query, name=player['name'], bow=player['personality_tags_bow'])
+
+    # Create overlap similarity relations between all players based on the BOW representations
+    def create_overlap_similarities(self):
+        with self.driver.session() as session:
+            result = session.execute_write(self._create_overlap_similarities)
+            return result
+        
+    @staticmethod
+    def _create_overlap_similarities(tx):
+        query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
+                    WHERE p1 <> p2
+                    WITH p1, p2, s, coalesce(split(p1.personality_tags, ', '), []) AS p1_tags, coalesce(split(p2.personality_tags, ', '), []) AS p2_tags
+                    SET s.overlap = gds.similarity.overlap(p1_tags, p2_tags)
+                    RETURN p1.name, p2.name, s.overlap AS overlapSimilarity
+                """
+        
+        result = tx.run(query)
+        return result
+
+    #############################
+    # Create jaccard similarity relations with scores (0–1) based on categorical properties (works well with same set size)
+    #############################
+    def create_jaccard_similarities(self):
+        with self.driver.session() as session:
+            result = session.execute_write(self._create_jaccard_similarities)
+            return result
+        
+    @staticmethod
+    def _create_jaccard_similarities(tx):
+        query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
+                    WHERE p1 <> p2
+                    WITH p1, p2, s, [p1.play_style, p1.status, p1.grass_advantage, p1.hand, p1.previous_libema_winner, p1.country_zone, p1.favorite_shot, p1.coach] AS p1_properties, [p2.play_style, p2.status, p2.grass_advantage, p2.hand, p2.previous_libema_winner, p2.country_zone, p2.favorite_shot, p2.coach] AS p2_properties
+                    SET s.jaccard = gds.similarity.jaccard(p1_properties, p2_properties)
+                    RETURN p1.name, p2.name, s.jaccard AS jaccardSimilarity
+                """
+        
+        result = tx.run(query)
+        return result
 
 
     #############################
@@ -156,7 +246,7 @@ class Similarity_Worker:
     #############################
     def get_all_similarities(self):
         with self.driver.session() as session:
-            result = session.read_transaction(self._get_all_similarities)
+            result = session.execute_read(self._get_all_similarities)
             return pd.DataFrame(result)
 
     @staticmethod

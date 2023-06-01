@@ -197,6 +197,23 @@ class Player_Worker:
 
         return result
     
+    # Upload any data for a player to the database (new properties or update properties)
+    def upload_player_data(self, name, **kwargs):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self._upload_player_data, name, **kwargs)
+            return result
+        
+    @staticmethod
+    def _upload_player_data(tx, name, kwargs):
+        query = """ MATCH (p:Player { name: $name })
+                    SET p += $kwargs
+                """
+
+        result = tx.run(query, name=name, kwargs=kwargs)
+
+        return result
+    
     ############################
     # Create match
     ############################

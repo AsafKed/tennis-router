@@ -21,6 +21,7 @@ const BottomNavigationMenu = ({ loggedIn }) => {
     '/': 0,
     '/group': 1,
     '/user': 2,
+    '/preferences': 3,
     '/login': loggedIn ? -1 : 1,
     '/register': loggedIn ? -1 : 2,
   };

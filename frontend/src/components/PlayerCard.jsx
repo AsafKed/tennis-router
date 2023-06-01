@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Card, CardContent, Typography, Box, CircularProgress, CardMedia, Grid, Divider, Chip, Button, Collapse } from '@mui/material';
+import { Card, CardContent, Typography, Box, CircularProgress, CardMedia, Grid, Divider, Chip, Button, Collapse } from '@mui/material';
 import ReactCountryFlag from "react-country-flag";
-import { Star, SportsTennis, CalendarToday, ExpandMore } from '@mui/icons-material';
+import { ExpandMore } from '@mui/icons-material';
 
 const PlayerCard = ({ playerName }) => {
     const [playerData, setPlayerData] = useState(null);

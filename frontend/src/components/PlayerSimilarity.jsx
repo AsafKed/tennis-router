@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal } from '@mui/material';
+import { Button, Modal, useMediaQuery, useTheme } from '@mui/material';
 import PlayerCard from './PlayerCard';
 import PlayerCardMini from './PlayerCardMini';
 
@@ -7,6 +7,9 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
     const [similarityWeight, setSimilarityWeight] = useState("all");
     const [similarPlayers, setSimilarPlayers] = useState([]);
     const [showSimilarPlayers, setShowSimilarPlayers] = useState(false);
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     // Fetch similarity weight from the user
     useEffect(() => {
@@ -37,6 +40,7 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
         <Modal open={open} onClose={handleClose}>
             <div style={{
                 display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
                 justifyContent: 'center',
                 alignItems: 'center',
                 padding: '20px',
@@ -47,17 +51,22 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
                     onClick={() => setShowSimilarPlayers(!showSimilarPlayers)}
                     variant="contained"
                     color="primary"
-                    style={{ 
+                    style={{
                         position: 'absolute',
-                        bottom: '20px',
-                        right: '0px',
+                        bottom: isMobile ? 'initial' : '20px',
+                        right: isMobile ? 'initial' : '0px',
                         height: '50px',
-                    }}                >
+                        alignSelf: isMobile ? 'center' : 'initial',
+                        marginTop: isMobile ? '20px' : 'initial'
+                    }}
+                >
                     {showSimilarPlayers ? 'Hide Similar Players' : 'Show Similar Players'}
                 </Button>
-                <div style={{paddingLeft: "20px"}}>
-                    {showSimilarPlayers && similarPlayers.map(player => <PlayerCardMini key={player.player2} player={player} />)}
-                </div>
+                {showSimilarPlayers && (
+                    <div style={{ paddingLeft: isMobile ? "0px" : "20px" }}>
+                        {similarPlayers.map(player => <PlayerCardMini key={player.player2} player={player} />)}
+                    </div>
+                )}
             </div>
         </Modal>
     )

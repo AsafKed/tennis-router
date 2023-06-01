@@ -224,8 +224,30 @@ class Similarity_Worker:
         return result
 
 
-
-
+    #############################
+    # Create weighted similarity types, to avoid overloading the memory of the server by computing this anew every time
+    #############################
+    def create_weighted_similarities(self):
+        with self.driver.session() as session:
+            result = session.execute_write(self._create_weighted_similarities)
+            return result
+        
+    @staticmethod
+    def _create_weighted_similarities(tx):
+        # This should take all combinations of weights of the three similarity types.
+        # That means that for a relationship, similarity_100=1*tag_similarity + 0*numeric + 0*categorical, similarity_010=0*tag_similarity + 1*numeric + 0*categorical, etc.
+        # This is a bit of a hack, but it works
+        query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
+                    WHERE p1 <> p2
+                    WITH p1, p2, s, s.tag_similarity AS tag_similarity, s.numeric AS numeric, s.categorical AS categorical
+                    SET s.tag_numeric = 0.5*tag_similarity + 0.5*numeric, 
+                    s.tag_categorical = 0.5*tag_similarity + 0.5*categorical, 
+                    s.numeric_categorical = 0.5*numeric + 0.5*categorical, 
+                    s.all = 0.3333*tag_similarity + 0.3333*numeric + 0.3333*categorical
+                """
+        
+        result = tx.run(query)
+        return result
 
     #############################
     # Get similarities between all players
@@ -238,7 +260,7 @@ class Similarity_Worker:
     @staticmethod
     def _get_all_similarities(tx):
         query = """ MATCH (p1:Player)-[s:SIMILARITY]->(p2:Player)
-                    RETURN p1.name AS player1, s.numeric AS numeric, s.tag_similarity as tag_similarity, s.categorical AS categorical, p2.name AS player2
+                    RETURN p1.name AS player1, s.numeric AS numeric, s.tag_similarity as tag_similarity, s.categorical AS categorical, s.tag_numeric AS tag_numeric, s.tag_categorical AS tag_categorical, s.numeric_categorical AS numeric_categorical, s.all AS all, p2.name AS player2
                 """
         
         result = tx.run(query)

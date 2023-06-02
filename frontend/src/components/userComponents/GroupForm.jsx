@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Button, TextField } from '@mui/material';
 import { v4 as uuid } from 'uuid';
 
@@ -7,6 +7,7 @@ function GroupForm({ socketInstance, userId }) {
     const [groupName, setGroupName] = useState("");
     const [formType, setFormType] = useState(null);
     const [attemptingCreate, setAttemptingCreate] = useState(false);
+    const [errorMessage, setErrorMessage] = useState(null);
 
     const handleCreateGroup = () => {
         setAttemptingCreate(true);
@@ -27,6 +28,21 @@ function GroupForm({ socketInstance, userId }) {
         socketInstance.emit('join_group', { group_id: groupId, user_id: userId });
         setFormType(null);
     };
+
+    const handleCancelJoinGroup = () => {
+        setFormType(null);
+    };
+
+    // Error handling from server
+    useEffect(() => {
+        socketInstance.on('join_group_error', (data) => {
+            setErrorMessage(data.error);
+        });
+
+        return () => {
+            socketInstance.off('join_group_error');
+        };
+    }, [socketInstance]);
 
     return (
         <div>
@@ -58,7 +74,11 @@ function GroupForm({ socketInstance, userId }) {
                         onChange={(e) => setGroupId(e.target.value.trim())}
                     />
                     <Button onClick={handleJoinGroup}>Join Group</Button>
+                    <Button onClick={handleCancelJoinGroup}>Cancel Join Group</Button>
                 </div>
+            )}
+            {errorMessage && (
+                <Alert severity="error">{errorMessage}</Alert>
             )}
         </div>
     );

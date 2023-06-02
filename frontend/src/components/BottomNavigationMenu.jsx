@@ -3,7 +3,6 @@ import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
 import SportsTennisIcon from '@mui/icons-material/SportsTennis';
 import HomeIcon from '@mui/icons-material/Home';
@@ -19,9 +18,8 @@ const BottomNavigationMenu = ({ loggedIn }) => {
 
   const routeToValueMap = {
     '/': 0,
-    '/group': 1,
+    '/preferences': 1,
     '/user': 2,
-    '/preferences': 3,
     '/login': loggedIn ? -1 : 1,
     '/register': loggedIn ? -1 : 2,
   };
@@ -50,12 +48,6 @@ const BottomNavigationMenu = ({ loggedIn }) => {
         />
         {loggedIn ? (
           [
-            <BottomNavigationAction
-              key="groups"
-              label="Groups"
-              icon={<GroupIcon />}
-              onClick={() => handleNavigation('/group')}
-            />,
             <BottomNavigationAction
               key="preferences"
               label="Preferences solicitation"

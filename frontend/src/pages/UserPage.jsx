@@ -16,11 +16,11 @@ function UserPage() {
   const [userId, setUserId] = useState("");
   const [name, setName] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [groupNum, setGroupNum] = useState(0);
 
   const handleListItemClick = (event, index) => {
     setSelectedIndex(index);
   };
-
 
   const handleLogout = () => {
     signOut(auth).then(() => {
@@ -32,6 +32,21 @@ function UserPage() {
       console.log("Error signing out.");
     });
   }
+
+  const getGroupNum = (uid) => {
+    fetch(`http://localhost:5001/user-groups/${uid}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        setGroupNum(data.length);
+      });
+  };
 
   const getName = async (userId) => {
     const response = await fetch(`http://localhost:5001/users/${userId}`, {
@@ -52,6 +67,7 @@ function UserPage() {
         // https://firebase.google.com/docs/reference/js/firebase.User
         const uid = user.uid;
         getName(uid);
+        getGroupNum(uid);
       } else {
         // User is signed out
         console.log("user is logged out")
@@ -84,7 +100,7 @@ function UserPage() {
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <StyledBadge badgeContent={0} color="primary" showZero>
+          <StyledBadge badgeContent={groupNum} color="primary" showZero>
             <ListItemButton
               selected={selectedIndex === 1}
               onClick={(event) => handleListItemClick(event, 1)}

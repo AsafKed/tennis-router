@@ -2,7 +2,6 @@ import React from 'react';
 import { AppBar, Toolbar, IconButton, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
 import SportsTennisIcon from '@mui/icons-material/SportsTennis';
 import HomeIcon from '@mui/icons-material/Home';
@@ -36,9 +35,6 @@ const TopNavigationMenu = ({ loggedIn }) => {
         {/* Only show these pages if the user is logged in */}
         {loggedIn && (
           <>
-            <IconButton color="inherit" onClick={() => handleNavigation('/group')}>
-              <GroupIcon />
-            </IconButton>
             <IconButton color="inherit" onClick={() => handleNavigation('/preferences')}>
               {/* Suitable Icon */}
               <SportsTennisIcon />

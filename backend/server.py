@@ -76,9 +76,11 @@ def get_user(user_id):
 
 @app.route("/user-groups/<user_id>", methods=["GET"])
 def get_user_groups(user_id):
+    print(f'\nGetting groups for user {user_id}\n')
     neo4j_worker = User_Worker()
     groups = neo4j_worker.get_groups_by_user(user_id)
     neo4j_worker.close()
+    print(f'Groups found: {groups}\n')
 
     return jsonify(groups), 200
 
@@ -292,16 +294,19 @@ def handle_join_room(data):
     user_id = data['user_id']
 
     # Neo4j create group
-    neo4j_worker = User_Worker()
-    neo4j_worker.add_user_to_group(user_id=user_id, group_id=group_id, creator=False)
+    try:
+        neo4j_worker = User_Worker()
+        neo4j_worker.add_user_to_group(user_id=user_id, group_id=group_id, creator=False)
 
-    # Add the user to the socket IO room (for sending messages to the group)
-    print("Joining room:", group_id)
-    join_room(group_id)
+        # Add the user to the socket IO room (for sending messages to the group)
+        print("Joining room:", group_id)
+        join_room(group_id)
 
-    users = neo4j_worker.get_users_by_group(group_id)
-    print(f"\nUsers in the group are: {users}\n")
-    neo4j_worker.close()
+        users = neo4j_worker.get_users_by_group(group_id)
+        print(f"\nUsers in the group are: {users}\n")
+        neo4j_worker.close()
+    except:
+        emit('join_group_error', {'error': "Error: invalid group ID. Make sure it's the correct ID."}, room=request.sid)
 
 @socketio.on("leave_group")
 def handle_leave_room(data):

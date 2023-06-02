@@ -19,17 +19,17 @@ function GroupView({ userId }) {
         setExpandedGroupUsers([]);
     };
 
-    const handleGroupSelected = (groupName) => {
-        setGroup(groupName);
-        getGroups(userId);
-    };
+    // const handleGroupSelected = (groupName) => {
+    //     setGroup(groupName);
+    //     getGroups(userId);
+    // };
 
-    // TODO fix this functionality (currently not working)
-    const handleGroupLeave = () => {
-        setGroup("");
-        setLeavingGroup(true);
-        getGroups(userId);
-    };
+    // // TODO fix this functionality (currently not working)
+    // const handleGroupLeave = () => {
+    //     setGroup("");
+    //     setLeavingGroup(true);
+    //     getGroups(userId);
+    // };
 
     useEffect(() => {
         if (leavingGroup && socketInstance) {
@@ -41,17 +41,21 @@ function GroupView({ userId }) {
         }
     }, [leavingGroup, socketInstance]);
 
-    const getGroups = async (userId) => {
-        const response = await fetch(`http://localhost:5001/user-groups/${userId}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-        const data = await response.json();
-        console.log("Server response:", data);
-        setGroups(data);
-    };
+    useEffect(() => {
+        const getGroups = async (userId) => {
+            const response = await fetch(`http://localhost:5001/user-groups/${userId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            const data = await response.json();
+            console.log("Server response:", data);
+            setGroups(data);
+        };
+        getGroups(userId);
+    }, [userId]);
+        
 
     // To expand the group and show the users in the group
     const handleGroupClicked = async (groupId) => {

@@ -12,10 +12,9 @@ const GroupCard = ({ group, onGroupClicked, users, expandedGroup }) => {
     return (
         <Card onClick={handleClick} style={{ marginBottom: 10 }}>
             <CardContent>
-                <Typography>{group.group_name}</Typography>
+                <Typography variant="h6">{group.group_name}</Typography>
                 {expanded && (
                     <>
-                        <Typography>Name: {group.group_name}</Typography>
                         <Typography>Id: {group.group_id}</Typography>
                         <Typography>
                             Users: {users && users.map((user) => user.name).join(", ")}

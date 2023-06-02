@@ -245,9 +245,26 @@ class Player_Worker:
         result = tx.run(query, {'match_num': kwargs['match_num'], 'match_name': kwargs['match_name'], 'tourney_id': kwargs['tourney_id'], 'props': non_null_properties})
         return result.single()[0]
 
+    def create_match_simple(self, match_date, match_time, match_location, match_name):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self._create_and_return_match_simple, match_date=match_date, match_time=match_time, match_location=match_location, match_name=match_name)
+
+        return result
+    
+    @staticmethod
+    def _create_and_return_match_simple(tx, **kwargs):
+        query = """ MERGE (m:Match {match_name: $match_name})
+                    ON CREATE SET m += $props
+                    ON MATCH SET m += $props
+                    RETURN m
+                """
+
+        non_null_properties = {k: v for k, v in kwargs.items() if v is not None}
+        result = tx.run(query, {'match_name': kwargs['match_name'], 'props': non_null_properties})
+        return result.single()[0]
     
     ############################
-    # Add player to match
+    # Add player to match (historical)
     ############################
     # Check if player is already in match
     def player_in_match(self, player_id: str, match_name: str):
@@ -288,6 +305,46 @@ class Player_Worker:
         tx.run(query, {'player_id': player_id, 'match_num': match_num, 
                         'tourney_id': tourney_id,
                         'relationship_type': relationship_type})
+        
+    ############################
+    # Add player to match (simple)
+    ############################
+    # Check if player is already in match
+    def player_in_match_simple(self, player_name: str, match_name: str):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(
+                self._player_in_match_simple, player_name, match_name
+            )
+            # If player_id in list of returned players, return true, otherwise, false
+            if len(result) > 0:
+                for player in result:
+                    if player["name"] == player_name:
+                        return True
+            return False
+        
+    @staticmethod
+    def _player_in_match_simple(tx, player_name: str, match_name: str):
+        query = """ MATCH (p:Player { name: $player_name })
+                MATCH (m:Match { match_name: $match_name })
+                MATCH (p)-[r:PLAYS]->(m)
+                RETURN p.name AS name, m.match_name AS match_name, m.date AS date, m.time as time
+            """
+        result = tx.run(
+            query, player_name=player_name, match_name=match_name
+        ).data()
+        return result
+    
+    def create_player_match_relationship_simple(self, player_name, match_name):
+        with self.driver.session(database="neo4j") as session:
+            session.execute_write(self._create_player_match_relationship_simple, player_name, match_name)
+
+    @staticmethod
+    def _create_player_match_relationship_simple(tx, player_name, match_name):
+        query = """ MATCH (p:Player {name: $player_name})
+                    MATCH (m:Match {match_name: $match_name})
+                    MERGE (p)-[r:PLAYS]->(m)
+                """
+        tx.run(query, {'player_name': player_name, 'match_name': match_name})
 
     ############################
     # Get all players

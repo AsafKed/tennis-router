@@ -3,7 +3,7 @@ import numpy as np
 from ..Neo4j_Player_Worker import Player_Worker as Worker
 from tqdm import tqdm
 
-class TennisEditor:
+class PlayerEditor:
     def __init__(self, historic_data=None, personal_data_source=None):
         """Preferably, data should come from https://github.com/JeffSackmann/tennis_atp"""
         self.historic_data = historic_data

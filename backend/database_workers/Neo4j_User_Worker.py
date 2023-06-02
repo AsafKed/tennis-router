@@ -404,10 +404,3 @@ class User_Worker:
             """
         result = tx.run(query, group_name=group_name).data()
         return result
-
-
-# if __name__ == "__main__":
-# Aura queries use an encrypted connection using the "neo4j+s" URI scheme
-# app = User_Worker()
-# app.create_user("Asaf Kedem", "123", "https://www.google.com", 0, "18:07")
-# app.close()

@@ -6,7 +6,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 // Post-login pages
-import GroupPage from "./pages/GroupPage";
 import UserPage from "./pages/UserPage";
 import PlayerSelectionPage from "./components/PlayerSelection";
 import PreferenceSolicitationPage from "./pages/PreferenceSolicitationPage";
@@ -47,7 +46,6 @@ function App() {
           <Route path="/" element={<WelcomePage />} />
           {loggedIn && (
             <>
-              <Route path="/group" element={<GroupPage />} />
               <Route path="/user" element={<UserPage />} />
               <Route path="/preferences" element={<PreferenceSolicitationPage />} />
             </>

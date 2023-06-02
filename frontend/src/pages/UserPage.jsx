@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, Badge } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import GroupView from "../components/userComponents/GroupView";
 
 // Firebase
 import { onAuthStateChanged } from "firebase/auth";
@@ -10,8 +11,9 @@ import { auth } from '../firebase';
 import { signOut } from "firebase/auth";
 
 function UserPage() {
-  const subPages = ["recommendations", "groups", "saved settings"];
+  const subPages = ["recommendations", "groups", "settings"];
   const navigate = useNavigate();
+  const [userId, setUserId] = useState("");
   const [name, setName] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -39,7 +41,7 @@ function UserPage() {
       },
     });
     const data = await response.json();
-    console.log("Server response:", data);
+    setUserId(data.user_id);
     setName(data.name);
   };
 
@@ -101,10 +103,12 @@ function UserPage() {
             selected={selectedIndex === 2}
             onClick={(event) => handleListItemClick(event, 2)}
           >
-            <ListItemText primary="Saved Settings" />
+            <ListItemText primary="Settings" />
           </ListItemButton>
         </ListItem>
       </List>
+
+      {selectedIndex === 1 && <GroupView userId={userId} />}
 
       <Button onClick={handleLogout}>Logout</Button>
     </div>

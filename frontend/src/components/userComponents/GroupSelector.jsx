@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 
-export default function Group({ onGroupSelected, onGroupLeft, user }) {
+export default function Group({ onGroupSelected, onGroupLeft, userId }) {
   const [chatName, setChatName] = useState("");
   const chatNameInput = useRef();
 

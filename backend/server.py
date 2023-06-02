@@ -253,25 +253,27 @@ def disconnected():
     print("user disconnected")
     emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
 
-@socketio.on("join_group")
+@socketio.on("create_group")
 def handle_join_room(data):
     print(f"\n{data}\n")
-    group_name = data['group']
-    user_id = data['user']['user_id']
+    group_id = data['group_id']
+    group_name = data['group_name']
+    user_id = data['user_id']
 
-    # Neo4j join group
+    # Neo4j create group
     neo4j_worker = User_Worker()
-    # TODO current logic is to create a new group FOR EACH USER, that's DUMB DUDE, ez fixy
     # Check if the user is already in the group
-    if neo4j_worker.group_exists(group_name):
-        print("Group exists")
-        neo4j_worker.add_user_to_group(user_id=user_id, group_name=group_name)
-        group_id = neo4j_worker.get_group_id(group_name)
-    else:
-        print("Group does not exist")
-        group_id = str(uuid.uuid4())
-        neo4j_worker.create_group(group_name, group_id)
-        neo4j_worker.add_user_to_group(user_id=user_id, group_name=group_name)
+    # if neo4j_worker.group_exists(group_name):
+    #     print("Group exists")
+    neo4j_worker.create_group(group_id=group_id, group_name=group_name)
+    neo4j_worker.add_user_to_group(user_id=user_id, group_id=group_id)
+    #     group_id = neo4j_worker.get_group_id(group_name)
+    # else:
+        # TODO emit that this group does not exist
+        # print("Group does not exist")
+        # group_id = str(uuid.uuid4())
+        # neo4j_worker.create_group(group_name, group_id)
+        # neo4j_worker.add_user_to_group(user_id=user_id, group_name=group_name)
 
     # Add the user to the socket IO room (for sending messages to the group)
     print("Joining room:", group_name, group_id)

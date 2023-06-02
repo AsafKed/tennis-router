@@ -38,20 +38,20 @@ const TriangleSlider = () => {
     const uid = user.uid;
 
     const response = await fetch(`/users/${uid}/similarity_weights`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ similarity_weights: weightDistribution }),
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ similarity_weights: weightDistribution }),
     });
 
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
     console.log(data);
-}
+  }
 
 
   return (

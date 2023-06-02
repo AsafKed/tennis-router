@@ -9,7 +9,7 @@ import LikeButton from './LikeButton';
 const PlayerSelection = () => {
     const [players, setPlayers] = useState([]);
     const [filteredPlayers, setFilteredPlayers] = useState([]);
-    const [sortOption, setSortOption] = useState('alphabetical');
+    const [sortOption, setSortOption] = useState('rank');
     const [userId, setId] = useState("");
     const [likedPlayers, setLikedPlayers] = useState([]);
     // Player clicking
@@ -143,8 +143,8 @@ const PlayerSelection = () => {
                 variant="outlined"
                 style={{ marginBottom: '16px' }}
             >
-                <MenuItem value="alphabetical">Alphabetical</MenuItem>
                 <MenuItem value="rank">Rank</MenuItem>
+                <MenuItem value="alphabetical">Alphabetical</MenuItem>
             </TextField>
             <h2>Liked Players</h2>
             <Grid container spacing={4}>

@@ -1,7 +1,8 @@
 import "../App.css";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import { Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, Badge } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
 // Firebase
 import { onAuthStateChanged } from "firebase/auth";
@@ -57,6 +58,15 @@ function UserPage() {
 
   }, [])
 
+  const StyledBadge = styled(Badge)(({ theme }) => ({
+    '& .MuiBadge-badge': {
+      right: 175,
+      top: 25,
+      border: `2px solid ${theme.palette.background.paper}`,
+      padding: '0 4px',
+    },
+  }));
+
   return (
     <div>
       <h1>Settings</h1>
@@ -72,16 +82,19 @@ function UserPage() {
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton
-            selected={selectedIndex === 1}
-            onClick={(event) => handleListItemClick(event, 1)}
-          >
-            <ListItemText primary="Groups" secondary={
-              <React.Fragment>
-                {" Click here to view/edit your groups."}
-              </React.Fragment>
-            } />
-          </ListItemButton>
+          <StyledBadge badgeContent={0} color="primary" showZero>
+            <ListItemButton
+              selected={selectedIndex === 1}
+              onClick={(event) => handleListItemClick(event, 1)}
+            >
+              <ListItemText primary="Groups" secondary={
+                <React.Fragment>
+                  {" Click here to view/edit your groups."}
+                </React.Fragment>
+              }
+              />
+            </ListItemButton>
+          </StyledBadge>
         </ListItem>
         <ListItem disablePadding>
           <ListItemButton

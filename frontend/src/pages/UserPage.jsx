@@ -11,7 +11,6 @@ import { auth } from '../firebase';
 import { signOut } from "firebase/auth";
 
 function UserPage() {
-  const subPages = ["recommendations", "groups", "settings"];
   const navigate = useNavigate();
   const [userId, setUserId] = useState("");
   const [name, setName] = useState("");

@@ -305,8 +305,10 @@ def handle_join_room(data):
         users = neo4j_worker.get_users_by_group(group_id)
         print(f"\nUsers in the group are: {users}\n")
         neo4j_worker.close()
+        emit('join_group_status', {'success': 'Success'}, room=request.sid)
     except:
-        emit('join_group_error', {'error': "Error: invalid group ID. Make sure it's the correct ID."}, room=request.sid)
+        print('Error: invalid group ID. Make sure it\'s the correct ID.')
+        emit('join_group_status', {'error': "Error: invalid group ID. Make sure it's the correct ID."}, room=request.sid)
 
 @socketio.on("leave_group")
 def handle_leave_room(data):

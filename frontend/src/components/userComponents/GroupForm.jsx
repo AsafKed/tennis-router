@@ -7,6 +7,7 @@ function GroupForm({ socketInstance, userId }) {
     const [groupName, setGroupName] = useState("");
     const [formType, setFormType] = useState(null);
     const [attemptingCreate, setAttemptingCreate] = useState(false);
+    const [attemptingJoin, setAttemptingJoin] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
 
     const handleCreateGroup = () => {
@@ -25,23 +26,34 @@ function GroupForm({ socketInstance, userId }) {
     };
 
     const handleJoinGroup = () => {
+        setAttemptingJoin(true);
         socketInstance.emit('join_group', { group_id: groupId, user_id: userId });
-        setFormType(null);
     };
 
     const handleCancelJoinGroup = () => {
         setFormType(null);
+        setAttemptingJoin(false);
+        setErrorMessage(null);
     };
 
     // Error handling from server
     useEffect(() => {
-        socketInstance.on('join_group_error', (data) => {
-            setErrorMessage(data.error);
-        });
+        if (attemptingJoin && socketInstance) {
+            socketInstance.on('join_group_status', (data) => {
+                if (data.error) {
+                    setErrorMessage(data.error);
+                }
+                else if (data.success) {
+                    setErrorMessage(null);
+                    setAttemptingJoin(false);
+                    setFormType(null);
+                }
+            });
 
-        return () => {
-            socketInstance.off('join_group_error');
-        };
+            return () => {
+                socketInstance.off('join_group_error');
+            };
+        }
     }, [socketInstance]);
 
     return (

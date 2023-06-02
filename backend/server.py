@@ -266,7 +266,7 @@ def handle_join_room(data):
     # if neo4j_worker.group_exists(group_name):
     #     print("Group exists")
     neo4j_worker.create_group(group_id=group_id, group_name=group_name)
-    neo4j_worker.add_user_to_group(user_id=user_id, group_id=group_id)
+    neo4j_worker.add_user_to_group(user_id=user_id, group_id=group_id, creator=True)
     #     group_id = neo4j_worker.get_group_id(group_name)
     # else:
         # TODO emit that this group does not exist

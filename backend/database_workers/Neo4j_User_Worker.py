@@ -129,54 +129,29 @@ class User_Worker:
             query, user_id=user_id, group_id=group_id
         ).data()
         return result
-
-    # # Create group
-    # def create_group(self, user_id: str, group_name: str, group_id: str):
-    #     user_in_group = self.user_in_group(user_id, group_id)
-    #     if not user_in_group:
-    #         with self.driver.session(database="neo4j") as session:
-    #             result = session.execute_write(
-    #                 self._create_group, user_id, group_name, group_id
-    #             )
-
-    #             return result
-
-    # @staticmethod
-    # def _create_group(tx, user_id: str, group_name: str):
-    #     # Get today's date in the format YYYY-MM-DD
-    #     today = datetime.today().strftime("%Y-%m-%d")
-
-    #     query = """ MATCH (u:User { user_id: $user_id })
-    #             MATCH (g:Group { group_id: $group_id, group_name: $group_name})
-    #             MERGE (u)-[r:WITH { date: $today }]->(g)
-    #             RETURN u.name AS name, u.user_id AS user_id, g.group_name AS group_name, r.date AS date
-    #         """
-    #     result = tx.run(
-    #         query, user_id=user_id, group_name=group_name, today=today
-    #     ).data()
-    #     Uniqueness_Check(result)
-    #     person = result[0]
-    #     return person
-
+    
     # Add user to group
-    def add_user_to_group(self, user_id: str, group_id: str):
+    def add_user_to_group(self, user_id: str, group_id: str, creator=False):
         user_in_group = self.user_in_group(user_id, group_id)
         if not user_in_group:
             with self.driver.session(database="neo4j") as session:
                 result = session.execute_write(
-                    self._add_user_to_group, user_id, group_id
+                    self._add_user_to_group, user_id, group_id, creator
                 )
 
                 return result
 
     @staticmethod
-    def _add_user_to_group(tx, user_id: str, group_id: str):
+    def _add_user_to_group(tx, user_id: str, group_id: str, creator: bool):
         # Get today's date in the format YYYY-MM-DD
         today = datetime.today().strftime("%Y-%m-%d")
 
         query = """ MATCH (u:User { user_id: $user_id })
                 MATCH (g:Group { group_id: $group_id })
-                MERGE (u)-[r:WITH { date: $today }]->(g)
+                """ + (
+                        "MERGE (u)-[r:WITH { created: $today }]->(g)" if creator 
+                        else "MERGE (u)-[r:WITH { joined: $today }]->(g)"
+                ) + """
                 RETURN u.name AS name, u.user_id AS user_id, g.group_name AS group_name, r.date AS date
             """
         result = tx.run(

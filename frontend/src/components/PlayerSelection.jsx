@@ -4,6 +4,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
 import PlayerSimilarity from './PlayerSimilarity';
 import ReactCountryFlag from "react-country-flag";
+import LikeButton from './LikeButton';
 
 const PlayerSelection = () => {
     const [players, setPlayers] = useState([]);
@@ -203,9 +204,10 @@ const PlayerSelection = () => {
                                 <Typography variant="body1" color="text.secondary">
                                     Rank: {player.rank}
                                 </Typography>
-                                <Button variant="contained" color="primary" onClick={() => handleLike(player.name)}>
-                                    Like
-                                </Button>
+                                <LikeButton isLiked={isLiked(player.name)}
+                                    onLike={() => handleLike(player.name)}
+                                    onUnlike={() => handleUnlike(player.name)}
+                                />
                             </CardContent>
                         </Card>
                     </Grid>

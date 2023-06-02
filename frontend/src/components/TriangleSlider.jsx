@@ -56,7 +56,14 @@ const TriangleSlider = () => {
 
   return (
     <div>
-      <Card>
+      <Card style={
+        {
+          width: '50%',
+          height: '400px',
+          margin: 'auto',
+          padding: '20px'
+        }
+      }>
         <p>Use these dots to select how much each type of data point affects the similarity. Hover over each dot to see how it weighs the different types. The following are descriptions for each of the types.</p>
         <ul>
           <li>Personality Tags: These are tags that describe a person's personality. For example, "funny", "outgoing", "shy", etc. See them at the bottom of each player once clicked.</li>

@@ -24,7 +24,7 @@ function GroupForm({ socketInstance, userId }) {
     };
 
     const handleJoinGroup = () => {
-        socketInstance.emit('join_group', { group: groupId, user_id: userId });
+        socketInstance.emit('join_group', { group_id: groupId, user_id: userId });
         setFormType(null);
     };
 
@@ -55,7 +55,7 @@ function GroupForm({ socketInstance, userId }) {
                     <TextField
                         label="Group ID"
                         value={groupId}
-                        onChange={(e) => setGroupId(e.target.value)}
+                        onChange={(e) => setGroupId(e.target.value.trim())}
                     />
                     <Button onClick={handleJoinGroup}>Join Group</Button>
                 </div>

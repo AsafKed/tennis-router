@@ -254,7 +254,7 @@ def disconnected():
     emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
 
 @socketio.on("create_group")
-def handle_join_room(data):
+def handle_create_room(data):
     print(f"\n{data}\n")
     group_id = data['group_id']
     group_name = data['group_name']
@@ -284,6 +284,24 @@ def handle_join_room(data):
     neo4j_worker.close()
 
     emit("update_group_users", users, room=group_id, broadcast=True)
+
+@socketio.on("join_group")
+def handle_join_room(data):
+    print(f"\n{data}\n")
+    group_id = data['group_id']
+    user_id = data['user_id']
+
+    # Neo4j create group
+    neo4j_worker = User_Worker()
+    neo4j_worker.add_user_to_group(user_id=user_id, group_id=group_id, creator=False)
+
+    # Add the user to the socket IO room (for sending messages to the group)
+    print("Joining room:", group_id)
+    join_room(group_id)
+
+    users = neo4j_worker.get_users_by_group(group_id)
+    print(f"\nUsers in the group are: {users}\n")
+    neo4j_worker.close()
 
 @socketio.on("leave_group")
 def handle_leave_room(data):

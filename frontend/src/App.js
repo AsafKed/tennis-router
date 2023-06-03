@@ -7,7 +7,6 @@ import Register from "./pages/Register";
 
 // Post-login pages
 import UserPage from "./pages/UserPage";
-import PlayerSelectionPage from "./components/PlayerSelection";
 import PreferenceSolicitationPage from "./pages/PreferenceSolicitationPage";
 import BottomNavigationMenu from "./components/BottomNavigationMenu";
 import TopNavigationMenu from "./components/TopNavigationMenu";

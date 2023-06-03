@@ -3,6 +3,7 @@ from neo4j import GraphDatabase
 # To use the .env file
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from .Neo4j_Player_Worker import Player_Worker
@@ -11,11 +12,12 @@ from .Neo4j_Player_Worker import Player_Worker
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 
+
 class Similarity_Worker:
     def __init__(self):
-        uri = os.getenv('NEO4J_URI')
-        user = os.getenv('NEO4J_USERNAME')
-        password = os.getenv('NEO4J_PASSWORD')
+        uri = os.getenv("NEO4J_URI")
+        user = os.getenv("NEO4J_USERNAME")
+        password = os.getenv("NEO4J_PASSWORD")
 
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
 
@@ -47,11 +49,11 @@ class Similarity_Worker:
                     SET p.log_career_high_rank = log(p.career_high_rank)
                     RETURN p
                 """
-        
+
         result = tx.run(query)
+        print(f"Log values created for {result.consume().counters.nodes_created} players.")
         return result
 
-  
     @staticmethod
     def _scale_properties(tx):
         # Check if any of the properties have null or missing values
@@ -67,11 +69,20 @@ class Similarity_Worker:
                 CASE WHEN p.career_high_year IS NULL THEN 'career_high_year' END AS career_high_year
         """
         result = tx.run(check_values_query)
-        null_properties = [record for record in result if any(value for key, value in record.items() if key != 'name')]
+        null_properties = [
+            record
+            for record in result
+            if any(value for key, value in record.items() if key != "name")
+        ]
         if null_properties:
-            print("Some players have null or missing values for the following properties:")
+            print(
+                "Some players have null or missing values for the following properties:"
+            )
             for record in null_properties:
-                print(record['name'], [key for key, value in record.items() if value and key != 'name'])
+                print(
+                    record["name"],
+                    [key for key, value in record.items() if value and key != "name"],
+                )
 
         # Check if any of the properties have null or missing values
         check_values_query = """
@@ -81,10 +92,14 @@ class Similarity_Worker:
         """
         result = tx.run(check_values_query)
         if result.peek():
-            print("Some players have null or missing values for the required properties.")
+            print(
+                "Some players have null or missing values for the required properties."
+            )
             return
         # Check if the in-memory graph exists
-        check_query = """ CALL gds.graph.exists('euclidean_similarity_graph') YIELD exists """
+        check_query = (
+            """ CALL gds.graph.exists('euclidean_similarity_graph') YIELD exists """
+        )
         result = tx.run(check_query)
         graph_exists = result.single()[0]
 
@@ -108,15 +123,16 @@ class Similarity_Worker:
 
         # Scale the properties
         query = """ CALL gds.alpha.scaleProperties.mutate(
-                        'euclidean_similarity_graph',
-                        {nodeProperties: ['log_rank', 'age', 'height', 'log_career_high_rank', 'years_on_tour', 'career_high_year'],
-                        scaler: 'minMax',
-                        mutateProperty: 'scaled_properties'})
-                        YIELD nodePropertiesWritten
-                """
-        
-        tx.run(query)
-
+                    'euclidean_similarity_graph',
+                    {nodeProperties: ['log_rank', 'age', 'height', 'log_career_high_rank', 'years_on_tour', 'career_high_year'],
+                    scaler: 'minMax',
+                    mutateProperty: 'scaled_properties'})
+                    YIELD nodePropertiesWritten
+            """
+    
+        result = tx.run(query)
+        print(f"Scaled properties created for {result.single()[0]} players.")
+        return result
 
     @staticmethod
     def _write_scaled_properties(tx):
@@ -131,29 +147,37 @@ class Similarity_Worker:
         # Take the in_memory graph and write the scaled properties to the database
         if not exists:
             query = """ CALL gds.graph.nodeProperties.write(
-                            'euclidean_similarity_graph',
-                            ['scaled_properties']
-                        )
-                        YIELD propertiesWritten
-                    """
+                        'euclidean_similarity_graph',
+                        ['scaled_properties']
+                    )
+                    YIELD propertiesWritten
+                """
             
-            tx.run(query)
+            result = tx.run(query)
+            print(f"Scaled properties written for {result.single()[0]} players.")
+            return result
 
     @staticmethod
     def _create_euclidean_similarities(tx):
         query = """ MATCH (p1:Player), (p2:Player)
-                    WHERE id(p1) <> id(p2) AND p1.scaled_properties IS NOT NULL AND p2.scaled_properties IS NOT NULL
+                    WHERE id(p1) <> id(p2) 
+                    AND p1.scaled_properties IS NOT NULL 
+                    AND p2.scaled_properties IS NOT NULL
+                    AND all(prop in ['log_rank', 'age', 'height', 'log_career_high_rank', 'years_on_tour', 'career_high_year'] WHERE p1[prop] IS NOT NULL AND p2[prop] IS NOT NULL)
                     WITH p1, p2, gds.similarity.euclidean(p1.scaled_properties, p2.scaled_properties) AS similarity
                     MERGE (p1)-[r:SIMILARITY]->(p2)
                     ON CREATE SET r.numeric = similarity
                     ON MATCH SET r.numeric = similarity
+                    RETURN p1, p2, r.numeric
                 """
         
-        tx.run(query)
+        result = tx.run(query)
+        print(f"Euclidean similarities created for {result.consume().counters.relationships_created} player pairs.")
+        return result
 
-
-    # This had a ranking, but I'm leaving it out because ranking is a directed property, but the relations are undirected    
     
+    # This had a ranking, but I'm leaving it out because ranking is a directed property, but the relations are undirected
+
     #############################
     # Create personality tag similarity with scores (0–1) based on personality tags
     #############################
@@ -161,7 +185,7 @@ class Similarity_Worker:
     def create_bow_vectors(self):
         all_tags = set()
         for player in self.players:
-            tags = set(player['personality_tags'])
+            tags = set(player["personality_tags"])
             all_tags.update(tags)
 
         all_tags = sorted(all_tags)
@@ -171,8 +195,10 @@ class Similarity_Worker:
 
         # Create a BOW representation for each player
         for player in self.players:
-            bow = vectorizer.transform([' '.join(player['personality_tags'])]).toarray()[0]
-            player['personality_tags_bow'] = bow.tolist()
+            bow = vectorizer.transform(
+                [" ".join(player["personality_tags"])]
+            ).toarray()[0]
+            player["personality_tags_bow"] = bow.tolist()
 
         # Upload the BOW representations to Neo4j
         with self.driver.session() as session:
@@ -184,15 +210,14 @@ class Similarity_Worker:
         query = """ MATCH (p:Player {name: $name})
                     SET p.personality_tags_bow = $bow
                 """
-        tx.run(query, name=player['name'], bow=player['personality_tags_bow'])
-
+        tx.run(query, name=player["name"], bow=player["personality_tags_bow"])
 
     # Create tag similarity relations between all players based on the BOW representations
     def create_tag_similarities(self):
         with self.driver.session() as session:
             result = session.execute_write(self._create_tag_similarities)
             return result
-            
+
     @staticmethod
     def _create_tag_similarities(tx):
         query = """ MATCH (p1:Player), (p2:Player)
@@ -206,10 +231,8 @@ class Similarity_Worker:
                     SET s.tag_similarity = tag_similarity
                     RETURN p1.name, p2.name, s.tag_similarity AS cosineSimilarity
                 """
-        
+
         tx.run(query)
-
-
 
     #############################
     # Create similarity rating for categorical properties
@@ -217,20 +240,35 @@ class Similarity_Worker:
     def create_categorical_vectors(self):
         # Create a string for each player that concatenates all the categorical properties
         for player in self.players:
-            categorical_string = ' '.join([str(player[prop]) for prop in ['play_style', 'status', 'grass_advantage', 'hand', 'previous_libema_winner', 'country_zone', 'favorite_shot']])
-            player['categorical_string'] = categorical_string
+            categorical_string = " ".join(
+                [
+                    str(player[prop])
+                    for prop in [
+                        "play_style",
+                        "status",
+                        "grass_advantage",
+                        "hand",
+                        "previous_libema_winner",
+                        "country_zone",
+                        "favorite_shot",
+                    ]
+                ]
+            )
+            player["categorical_string"] = categorical_string
 
         # Create a CountVectorizer with the unique tags as the vocabulary
         vectorizer = CountVectorizer()
 
         # Fit the CountVectorizer to all the categorical_string of all players
-        all_categorical_strings = [player['categorical_string'] for player in self.players]
+        all_categorical_strings = [
+            player["categorical_string"] for player in self.players
+        ]
         vectorizer.fit(all_categorical_strings)
-        
+
         # Create a BOW representation for each player
         for player in self.players:
-            bow = vectorizer.transform([player['categorical_string']]).toarray()[0]
-            player['categorical_bow'] = bow.tolist()
+            bow = vectorizer.transform([player["categorical_string"]]).toarray()[0]
+            player["categorical_bow"] = bow.tolist()
 
         # Upload the BOW representations to Neo4j
         with self.driver.session() as session:
@@ -242,7 +280,7 @@ class Similarity_Worker:
         query = """ MATCH (p:Player {name: $name})
                     SET p.categorical_bow = $bow
                 """
-        tx.run(query, name=player['name'], bow=player['categorical_bow'])
+        tx.run(query, name=player["name"], bow=player["categorical_bow"])
 
     # Create cosine similarity relations between all players based on the BOW representations
     def create_categorical_similarities(self):
@@ -260,7 +298,6 @@ class Similarity_Worker:
                 """
         tx.run(query)
 
-
     #############################
     # Create weighted similarity types, to avoid overloading the memory of the server by computing this anew every time
     #############################
@@ -268,7 +305,7 @@ class Similarity_Worker:
         with self.driver.session() as session:
             result = session.execute_write(self._create_weighted_similarities)
             return result
-        
+
     @staticmethod
     def _create_weighted_similarities(tx):
         # This should take all combinations of weights of the three similarity types.
@@ -282,7 +319,7 @@ class Similarity_Worker:
                     s.numeric_categorical = 0.5*numeric + 0.5*categorical, 
                     s.all = 0.3333*tag_similarity + 0.3333*numeric + 0.3333*categorical
                 """
-        
+
         result = tx.run(query)
         return result
 
@@ -299,23 +336,36 @@ class Similarity_Worker:
         query = """ MATCH (p1:Player)-[s:SIMILARITY]->(p2:Player)
                     RETURN p1.name AS player1, s.numeric AS numeric, s.tag_similarity as tag_similarity, s.categorical AS categorical, s.tag_numeric AS tag_numeric, s.tag_categorical AS tag_categorical, s.numeric_categorical AS numeric_categorical, s.all AS all, p2.name AS player2
                 """
-        
+
         result = tx.run(query)
         return result.data()
 
     #############################
     # Get top 3 most similar players for specified player
     #############################
-    def get_top_similarities(self, player_name, weighted_similarity_type, top_n=3, same_gender=True):
+    def get_top_similarities(
+        self, player_name, weighted_similarity_type, top_n=3, same_gender=True
+    ):
         with self.driver.session() as session:
-            result = session.execute_read(self._get_top_similarities, player_name=player_name, weighted_similarity_type=weighted_similarity_type, top_n=top_n, same_gender=same_gender)
+            result = session.execute_read(
+                self._get_top_similarities,
+                player_name=player_name,
+                weighted_similarity_type=weighted_similarity_type,
+                top_n=top_n,
+                same_gender=same_gender,
+            )
             return result
-        
+
     @staticmethod
-    def _get_top_similarities(tx, player_name, weighted_similarity_type, top_n, same_gender):
-        query = """
+    def _get_top_similarities(
+        tx, player_name, weighted_similarity_type, top_n, same_gender
+    ):
+        query = (
+            """
                     MATCH (p1:Player {name: $player_name})-[s:SIMILARITY]->(p2:Player)
-                    """ + ("WHERE p1.gender = p2.gender " if same_gender else "") + """
+                    """
+            + ("WHERE p1.gender = p2.gender " if same_gender else "")
+            + """
                     RETURN p1.name AS player1, p2.name AS player2,
                     CASE $weighted_similarity_type
                         WHEN 'numeric' THEN s.numeric
@@ -329,6 +379,12 @@ class Similarity_Worker:
                     ORDER BY similarity DESC
                     LIMIT $top_n
                 """
-        
-        result = tx.run(query, player_name=player_name, weighted_similarity_type=weighted_similarity_type, top_n=top_n)
+        )
+
+        result = tx.run(
+            query,
+            player_name=player_name,
+            weighted_similarity_type=weighted_similarity_type,
+            top_n=top_n,
+        )
         return result.data()

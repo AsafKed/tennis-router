@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, Badge } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import RecommendationsView from "../components/userComponents/RecommendationsView";
 import GroupView from "../components/userComponents/GroupView";
 
 // Firebase
@@ -90,7 +91,7 @@ function UserPage() {
       <h3>Welcome back, {name}.</h3>
       <Divider />
       <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-        <ListItem disablePadding>
+        <ListItem disablePadding style={{ paddingBlockEnd: '0.5em' }}>
           <ListItemButton
             selected={selectedIndex === 0}
             onClick={(event) => handleListItemClick(event, 0)}
@@ -98,8 +99,8 @@ function UserPage() {
             <ListItemText primary="Recommendations" />
           </ListItemButton>
         </ListItem>
-        <ListItem disablePadding>
-          <StyledBadge badgeContent={groupNum} color="primary" showZero>
+        <ListItem disablePadding style={{ paddingBlockEnd: '0.5em' }}>
+          <Badge badgeContent={groupNum} color="primary" style={{ width: '100%' }} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
             <ListItemButton
               selected={selectedIndex === 1}
               onClick={(event) => handleListItemClick(event, 1)}
@@ -111,18 +112,23 @@ function UserPage() {
               }
               />
             </ListItemButton>
-          </StyledBadge>
+          </Badge>
         </ListItem>
         <ListItem disablePadding>
           <ListItemButton
             selected={selectedIndex === 2}
             onClick={(event) => handleListItemClick(event, 2)}
           >
-            <ListItemText primary="Settings" />
+            <ListItemText primary="Settings" secondary={
+                <React.Fragment>
+                  {"Fill these in to get recommendations."}
+                </React.Fragment>
+              }/>
           </ListItemButton>
         </ListItem>
       </List>
 
+      {selectedIndex === 0 && <RecommendationsView userId={userId} />}
       {selectedIndex === 1 && <GroupView userId={userId} />}
 
       <Button onClick={handleLogout}>Logout</Button>

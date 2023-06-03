@@ -130,6 +130,14 @@ def update_user_settings(user_id):
 
     return jsonify(settings_data), 201
 
+@app.route("/users/<user_id>/settings", methods=["GET"])
+def get_user_settings(user_id):
+    neo4j_worker = User_Worker()
+    settings = neo4j_worker.get_user_settings(user_id)
+    neo4j_worker.close()
+
+    return jsonify(settings), 200
+
 @app.route("/group-users/<group_id>", methods=["GET"])
 def get_group_users(group_id):
     neo4j_worker = User_Worker()

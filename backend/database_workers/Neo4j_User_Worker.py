@@ -42,6 +42,7 @@ class User_Worker:
         # MERGE will try to match the entire pattern and if it does not exist, it creates it.
         query = """ MERGE (u:User { name: $name, user_id: $user_id })
                 SET u.email = $email
+                SET u.days = []
                 RETURN u.name AS name, u.user_id AS user_id, u.email AS email
             """
         result = tx.run(query, name=name, user_id=user_id, email=email)
@@ -345,6 +346,23 @@ class User_Worker:
         result = tx.run(query, user_id=user_id, days=days).data()
         person = result[0]
         return person
+    
+    ############################
+    # Get user settings
+    ############################
+    def get_user_settings(self, user_id):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(self._get_user_settings, user_id)
+
+            return result
+        
+    @staticmethod
+    def _get_user_settings(tx, user_id):
+        query = """ MATCH (u:User { user_id: $user_id })
+                    RETURN u.days AS days
+                """ 
+        result = tx.run(query, user_id=user_id).data()
+        return result[0]
         
 
     ############################

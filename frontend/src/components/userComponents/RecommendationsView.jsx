@@ -29,11 +29,11 @@ function RecommendationsView({ userId }) {
 
             <Typography variant="body1" gutterBottom>
                 <b>Click the Groups tab.</b> There you can
-                <ol>
-                    <li><b>Create a group</b> and invite your friends</li>
-                    <li><b>Join a group</b> using the group ID</li>
-                </ol>
             </Typography>
+            <ol>
+                <li><b>Create a group</b> and invite your friends</li>
+                <li><b>Join a group</b> using the group ID</li>
+            </ol>
         </div>
     )
 }

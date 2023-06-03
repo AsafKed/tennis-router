@@ -324,6 +324,28 @@ class User_Worker:
         result = tx.run(query, user_id=user_id, preference1=preference1, preference2=preference2, preference3=preference3).data()
         person = result[0]
         return person
+    
+    ############################
+    # Update user settings
+    ############################
+    def update_user_settings(self, user_id, days):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self._update_user_settings, user_id, days
+            )
+
+            return result
+        
+    @staticmethod
+    def _update_user_settings(tx, user_id, days):
+        query = """ MATCH (u:User { user_id: $user_id })
+                SET u.days = $days
+                RETURN u.name AS name, u.user_id AS user_id, u.days AS days
+            """
+        result = tx.run(query, user_id=user_id, days=days).data()
+        person = result[0]
+        return person
+        
 
     ############################
     # Get users by group_id

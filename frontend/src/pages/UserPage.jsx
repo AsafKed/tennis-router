@@ -5,6 +5,7 @@ import { Button, Divider, Typography, List, ListItem, ListItemButton, ListItemTe
 import { styled } from '@mui/material/styles';
 import RecommendationsView from "../components/userComponents/RecommendationsView";
 import GroupView from "../components/userComponents/GroupView";
+import SettingsView from "../components/userComponents/SettingsView";
 
 // Firebase
 import { onAuthStateChanged } from "firebase/auth";
@@ -130,6 +131,7 @@ function UserPage() {
 
       {selectedIndex === 0 && <RecommendationsView userId={userId} />}
       {selectedIndex === 1 && <GroupView userId={userId} />}
+      {selectedIndex === 2 && <SettingsView userId={userId} />}
 
       <Button onClick={handleLogout}>Logout</Button>
     </div>

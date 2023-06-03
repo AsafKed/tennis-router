@@ -9,6 +9,8 @@ function WelcomePage() {
       <p>Browse the players and put in your preferences by clicking the tennis racket in the navigation bar.</p>
       <p>On that page, you can browse and like players. Head over there to experiment with it.</p>
 
+      <p>We'll make recommendations for singles matches.</p>
+
       <p>We need to know which day you'll come and some more details to make a suitable recommendation. Head over to the settings page (rightmost in the navigation) to fill that in! Or click below.</p>
       <Link to="/user">Go to Profile</Link>
     </div>

@@ -118,6 +118,17 @@ def update_user_preferences(user_id):
 
     return jsonify(preferences_data), 201
 
+@app.route("/users/<user_id>/settings", methods=["PUT"])
+def update_user_settings(user_id):
+    settings_data = request.json
+    print(f"\nSettings data {settings_data}\n")
+    # Update this in neo4j
+    neo4j_worker = User_Worker()
+    days = settings_data["days"]
+    neo4j_worker.update_user_settings(user_id, days)
+    neo4j_worker.close()
+
+    return jsonify(settings_data), 201
 
 @app.route("/group-users/<group_id>", methods=["GET"])
 def get_group_users(group_id):

@@ -1,6 +1,7 @@
+import React from "react";
 import { Typography } from "@mui/material";
 
-function RecommendationsView() {
+function RecommendationsView({ userId }) {
     return (
         <div>
             <Typography variant="h1" gutterBottom>

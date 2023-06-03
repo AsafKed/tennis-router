@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useState, useEffect } from "react";
+
 // Pre-login pages
 import WelcomePage from "./pages/WelcomePage";
 import Login from "./pages/Login";
@@ -17,6 +18,7 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
+// Firebase
 import { auth } from './firebase';
 
 function App() {

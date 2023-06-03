@@ -132,6 +132,8 @@ class PlayerEditor:
                 status = 'Former Top 10'
             elif row['CurrentAllTimeHigh'] == True:
                 status = 'All Time High'
+            elif row['Status']:
+                status = row['Status']
 
             # Set winning year
             if row['Previous Libema Winner']:

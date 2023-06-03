@@ -42,6 +42,7 @@ class Similarity_Worker:
     @staticmethod
     def _create_log_values(tx):
         query = """ MATCH (p:Player)
+                    WHERE p.rank > 0 AND p.career_high_rank > 0
                     SET p.log_rank = log(p.rank)
                     SET p.log_career_high_rank = log(p.career_high_rank)
                     RETURN p
@@ -49,9 +50,39 @@ class Similarity_Worker:
         
         result = tx.run(query)
         return result
-    
+
+  
     @staticmethod
     def _scale_properties(tx):
+        # Check if any of the properties have null or missing values
+        check_values_query = """
+            MATCH (p:Player)
+            RETURN 
+                p.name AS name,
+                CASE WHEN p.log_rank IS NULL THEN 'log_rank' END AS log_rank,
+                CASE WHEN p.age IS NULL THEN 'age' END AS age,
+                CASE WHEN p.height IS NULL THEN 'height' END AS height,
+                CASE WHEN p.log_career_high_rank IS NULL THEN 'log_career_high_rank' END AS log_career_high_rank,
+                CASE WHEN p.years_on_tour IS NULL THEN 'years_on_tour' END AS years_on_tour,
+                CASE WHEN p.career_high_year IS NULL THEN 'career_high_year' END AS career_high_year
+        """
+        result = tx.run(check_values_query)
+        null_properties = [record for record in result if any(value for key, value in record.items() if key != 'name')]
+        if null_properties:
+            print("Some players have null or missing values for the following properties:")
+            for record in null_properties:
+                print(record['name'], [key for key, value in record.items() if value and key != 'name'])
+
+        # Check if any of the properties have null or missing values
+        check_values_query = """
+            MATCH (p:Player)
+            WHERE p.log_rank IS NULL OR p.age IS NULL OR p.height IS NULL OR p.log_career_high_rank IS NULL OR p.years_on_tour IS NULL OR p.career_high_year IS NULL
+            RETURN p
+        """
+        result = tx.run(check_values_query)
+        if result.peek():
+            print("Some players have null or missing values for the required properties.")
+            return
         # Check if the in-memory graph exists
         check_query = """ CALL gds.graph.exists('euclidean_similarity_graph') YIELD exists """
         result = tx.run(check_query)
@@ -111,13 +142,15 @@ class Similarity_Worker:
     @staticmethod
     def _create_euclidean_similarities(tx):
         query = """ MATCH (p1:Player), (p2:Player)
-                    WHERE id(p1) <> id(p2)
+                    WHERE id(p1) <> id(p2) AND p1.scaled_properties IS NOT NULL AND p2.scaled_properties IS NOT NULL
                     WITH p1, p2, gds.similarity.euclidean(p1.scaled_properties, p2.scaled_properties) AS similarity
                     MERGE (p1)-[r:SIMILARITY]->(p2)
-                    SET r.numeric = similarity
+                    ON CREATE SET r.numeric = similarity
+                    ON MATCH SET r.numeric = similarity
                 """
         
         tx.run(query)
+
 
     # This had a ranking, but I'm leaving it out because ranking is a directed property, but the relations are undirected    
     
@@ -159,18 +192,23 @@ class Similarity_Worker:
         with self.driver.session() as session:
             result = session.execute_write(self._create_tag_similarities)
             return result
-        
+            
     @staticmethod
     def _create_tag_similarities(tx):
-        query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
+        query = """ MATCH (p1:Player), (p2:Player)
                     WHERE p1 <> p2
-                    WITH p1, p2, s, p1.personality_tags_bow AS p1_tags, p2.personality_tags_bow AS p2_tags
-                    SET s.tag_similarity = gds.similarity.cosine(p1_tags, p2_tags)
+                    MERGE (p1)-[s:SIMILARITY]-(p2)
+                    WITH p1, p2, s, 
+                        CASE WHEN none(x IN p1.personality_tags_bow WHERE x <> 0) OR none(x IN p2.personality_tags_bow WHERE x <> 0) 
+                            THEN 0 
+                            ELSE gds.similarity.cosine(p1.personality_tags_bow, p2.personality_tags_bow) 
+                        END AS tag_similarity
+                    SET s.tag_similarity = tag_similarity
                     RETURN p1.name, p2.name, s.tag_similarity AS cosineSimilarity
                 """
         
-        result = tx.run(query)
-        return result
+        tx.run(query)
+
 
 
     #############################
@@ -214,14 +252,13 @@ class Similarity_Worker:
 
     @staticmethod
     def _create_cosine_similarities(tx):
-        query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
+        query = """ MATCH (p1:Player), (p2:Player)
                     WHERE p1 <> p2
-                    WITH p1, p2, s, p1.categorical_bow AS p1_bow, p2.categorical_bow AS p2_bow
-                    SET s.categorical = gds.similarity.cosine(p1_bow, p2_bow)
+                    MERGE (p1)-[s:SIMILARITY]-(p2)
+                    SET s.categorical = gds.similarity.cosine(p1.categorical_bow, p2.categorical_bow)
                     RETURN p1.name, p2.name, s.categorical AS cosineSimilarity
                 """
-        result = tx.run(query)
-        return result
+        tx.run(query)
 
 
     #############################

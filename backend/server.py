@@ -331,15 +331,13 @@ def handle_join_room(data):
 
 @socketio.on("leave_group")
 def handle_leave_room(data):
-    group_name = data['group']
+    group_id = data['group_id']
     user_id = data['user']['user_id']
     
-    print(f"\nTriggered leave group for {user_id} from {group_name}\n")
+    print(f"\nTriggered leave group for {user_id} from {group_id}\n")
     
     neo4j_worker = User_Worker()
-    neo4j_worker.remove_user_from_group(user_id, group_name)
-    group_id = neo4j_worker.get_group_id(group_name)
-    users = neo4j_worker.get_users_by_group(group_id)
+    neo4j_worker.remove_user_from_group(user_id, group_id)
     neo4j_worker.close()
 
     emit("update_group_users", users, room=group_id, broadcast=True)

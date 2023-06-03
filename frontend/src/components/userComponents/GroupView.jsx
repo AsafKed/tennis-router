@@ -55,7 +55,7 @@ function GroupView({ userId }) {
         };
         getGroups(userId);
     }, [userId]);
-        
+
 
     // To expand the group and show the users in the group
     const handleGroupClicked = async (groupId) => {
@@ -75,6 +75,13 @@ function GroupView({ userId }) {
             setExpandedGroupUsers([]);
         }
     };
+
+    const handleGroupLeave = (groupId) => {
+        if (socketInstance) {
+            socketInstance.emit("leave_group", { group_id: groupId, user: { user_id: userId } });
+        }
+    };
+
 
     // Connection to socket
     useEffect(() => {
@@ -114,6 +121,7 @@ function GroupView({ userId }) {
                             key={ind}
                             group={group}
                             onGroupClicked={handleGroupClicked}
+                            onGroupLeave={handleGroupLeave}
                             users={expandedGroupUsers}
                             expandedGroup={expandedGroup}
                         />

@@ -175,39 +175,39 @@ class User_Worker:
             return result
         
     @staticmethod
-    def _get_join_date(tx, user_id: str, group_name: str):
-        query = """ MATCH (u:User { user_id: $user_id })-[r:WITH]->(g:Group { group_name: $group_name })
-                RETURN r.date AS date
+    def _get_join_date(tx, user_id: str, group_id: str):
+        query = """ MATCH (u:User { user_id: $user_id })-[r:WITH]->(g:Group { group_id: $group_id })
+                RETURN r.joined AS joined
             """
-        result = tx.run(query, user_id=user_id, group_name=group_name).data()
+        result = tx.run(query, user_id=user_id, group_id=group_id).data()
         if not result:
-            raise ValueError(f"No join date found for user {user_id} and group {group_name}")
+            raise ValueError(f"No join date found for user {user_id} and group {group_id}")
 
-        date = result[0]['date']
+        date = result[0]['joined']
         return date
 
     # Create left group relationship
-    def remove_user_from_group(self, user_id: str, group_name: str):
-        join_date = self.get_join_date(user_id, group_name)
+    def remove_user_from_group(self, user_id: str, group_id: str):
+        join_date = self.get_join_date(user_id, group_id)
 
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self._remove_user_from_group, user_id, group_name, join_date
+                self._remove_user_from_group, user_id, group_id, join_date
             )
 
             return result
         
     @staticmethod
-    def _remove_user_from_group(tx, user_id: str, group_name: str, join_date):
+    def _remove_user_from_group(tx, user_id: str, group_id: str, join_date):
         # Get today's date in the format YYYY-MM-DD
         today = datetime.today().strftime("%Y-%m-%d")
 
-        query = """ MATCH (u:User { user_id: $user_id })-[r:WITH]->(g:Group { group_name: $group_name })
+        query = """ MATCH (u:User { user_id: $user_id })-[r:WITH]->(g:Group { group_id: $group_id })
                 CREATE (u)-[l:LEFT { date: $today, join_date: $join_date }]->(g)
                 DELETE r
                 RETURN u.name AS name, u.user_id AS user_id, g.group_name AS group_name, l.date AS date, l.join_date AS join_date
             """
-        result = tx.run(query, user_id=user_id, group_name=group_name, today=today, join_date=join_date).data()
+        result = tx.run(query, user_id=user_id, group_id=group_id, today=today, join_date=join_date).data()
         person = result[0]
         return person
 

@@ -82,6 +82,21 @@ function GroupView({ userId }) {
         }
     };
 
+    const handleDeleteGroup = async (groupId) => {
+        try {
+            const response = await fetch(`http://localhost:5001/groups/${groupId}/delete?user_id=${userId}`, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+        } catch (error) {
+            console.error("Error deleting group: ", error);
+        }
+    };
+
 
     // Connection to socket
     useEffect(() => {
@@ -122,6 +137,7 @@ function GroupView({ userId }) {
                             group={group}
                             onGroupClicked={handleGroupClicked}
                             onGroupLeave={handleGroupLeave}
+                            onDeleteGroup={handleDeleteGroup}
                             users={expandedGroupUsers}
                             expandedGroup={expandedGroup}
                         />

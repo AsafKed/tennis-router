@@ -394,15 +394,17 @@ class User_Worker:
             result = session.execute_read(self._get_groups_by_user, user_id)
             for row in result:
                 print("Found person: {row}".format(row=row))
+                if row['created']:
+                    row['created_by_user'] = True
 
             return result
         
     @staticmethod
     def _get_groups_by_user(tx, user_id):
         query = """
-            MATCH (u:User)-[:WITH]->(g:Group)
+            MATCH (u:User)-[r:WITH]->(g:Group)
             WHERE u.user_id = $user_id
-            RETURN g.group_name AS group_name, g.group_id AS group_id
+            RETURN g.group_name AS group_name, g.group_id AS group_id, (r.created) IS NOT NULL AS created
             """
         result = tx.run(query, user_id=user_id).data()
         return result
@@ -427,6 +429,28 @@ class User_Worker:
         result = tx.run(query, group_name=group_name).data()
         return result
     
+    ############################
+    # Delete group
+    ############################
+    def delete_group(self, group_id, user_id):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self._delete_group, group_id, user_id
+            )
+
+            return result
+        
+    @staticmethod
+    def _delete_group(tx, group_id, user_id):
+        query = """
+            MATCH (g:Group {group_id: $group_id})<-[r]-(o:User)
+            MATCH (u:User {user_id: $user_id})-[r2:WITH]->(g)
+            WHERE (r2.created) IS NOT NULL
+            DETACH DELETE g
+            """
+        result = tx.run(query, group_id=group_id, user_id=user_id).data()
+        return result
+
     ############################
     # Get group id
     ############################

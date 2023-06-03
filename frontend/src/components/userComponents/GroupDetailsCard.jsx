@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Card, CardContent, Divider, Typography } from "@material-ui/core";
 
-const GroupCard = ({ group, onGroupClicked, onGroupLeave, users, expandedGroup }) => {
+const GroupCard = ({ group, onGroupClicked, onGroupLeave, onDeleteGroup, users, expandedGroup }) => {
     const expanded = group.group_id === expandedGroup;
 
     const handleOpen = (event) => {
@@ -12,18 +12,23 @@ const GroupCard = ({ group, onGroupClicked, onGroupLeave, users, expandedGroup }
     const handleLeaveGroup = (event) => {
         event.stopPropagation();
         onGroupLeave(group.group_id);
-    };    
+    };
+
+    const handleDeleteGroup = (event) => {
+        event.stopPropagation();
+        onDeleteGroup(group.group_id);
+    };
 
     return (
-        <Card onClick={handleOpen} style={{ marginBottom: '2em' }}>
+        <Card style={{ marginBottom: '2em' }}>
             <CardContent>
-                <Typography variant="h6">{group.group_name}</Typography>
+                <Typography onClick={handleOpen} variant="h6">{group.group_name}</Typography>
                 {expanded && (
                     <>
                         <Divider />
                         <br />
                         <Typography><i>Use the following ID to invite others.</i></Typography>
-                        <Typography>Id: {group.group_id}</Typography>
+                        <Typography>{group.group_id}</Typography>
                         <Typography>
                             {/* created by */}
                             <br />
@@ -31,9 +36,15 @@ const GroupCard = ({ group, onGroupClicked, onGroupLeave, users, expandedGroup }
                             {/* Group days  */}
                         </Typography>
                         <br />
-                        <Button variant="contained" color="secondary" onClick={handleLeaveGroup}>
-                            Leave group
-                        </Button>
+                        {group.created_by_user ? (
+                            <Button variant="contained" color="secondary" onClick={handleDeleteGroup}>
+                                Delete group
+                            </Button>
+                        ) : (
+                            <Button variant="contained" color="secondary" onClick={handleLeaveGroup}>
+                                Leave group
+                            </Button>
+                        )}
                     </>
                 )}
             </CardContent>

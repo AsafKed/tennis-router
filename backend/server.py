@@ -84,6 +84,17 @@ def get_user_groups(user_id):
 
     return jsonify(groups), 200
 
+@app.route("/groups/<group_id>/delete", methods=["DELETE"])
+def delete_group(group_id):
+    query = request.args.to_dict(flat=False)
+    user_id = query['user_id'][0]
+
+    neo4j_worker = User_Worker()
+    neo4j_worker.delete_group(group_id, user_id)
+    neo4j_worker.close()
+
+    return jsonify({"message": "Group deleted"}), 200
+
 @app.route("/users/<user_id>/similarity_weights", methods=["PUT"])
 def update_similarity_weights(user_id):
     similarity_weights = request.json

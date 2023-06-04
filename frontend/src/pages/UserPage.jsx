@@ -23,6 +23,10 @@ function UserPage() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [groupNum, setGroupNum] = useState(0);
 
+  const listItems = [{ view: 'Recommendations', component: <RecommendationsView userId={userId} /> },
+  { view: 'Groups', component: <GroupView userId={userId} /> },
+  { view: 'Settings', component: <SettingsView userId={userId} /> }]
+
   // Tracking
   const { trackEvent } = useTracking();
 
@@ -33,6 +37,7 @@ function UserPage() {
 
   const handleListItemClick = (event, index) => {
     setSelectedIndex(index);
+    trackEvent({ action: 'tab_open', tab: listItems[index].view })
   };
 
   const handleLogout = () => {
@@ -109,16 +114,16 @@ function UserPage() {
             selected={selectedIndex === 0}
             onClick={(event) => handleListItemClick(event, 0)}
           >
-            <ListItemText primary="Recommendations" />
+            <ListItemText primary={listItems[0].view} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding style={{ paddingBlockEnd: '0.5em' }}>
-          <Badge badgeContent={groupNum} color="primary" style={{ width: '100%' }} anchorOrigin={{ vertical: 'top', horizontal: 'left' }}>
+          <Badge badgeContent={groupNum} color="primary" style={{ width: '100%' }} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} showZero>
             <ListItemButton
               selected={selectedIndex === 1}
               onClick={(event) => handleListItemClick(event, 1)}
             >
-              <ListItemText primary="Groups" secondary={
+              <ListItemText primary={listItems[1].view} secondary={
                 <React.Fragment>
                   {" Click here to view/edit your groups."}
                 </React.Fragment>
@@ -132,7 +137,7 @@ function UserPage() {
             selected={selectedIndex === 2}
             onClick={(event) => handleListItemClick(event, 2)}
           >
-            <ListItemText primary="Settings" secondary={
+            <ListItemText primary={listItems[2].view} secondary={
               <React.Fragment>
                 {"Fill these in to get recommendations."}
               </React.Fragment>
@@ -141,9 +146,8 @@ function UserPage() {
         </ListItem>
       </List>
 
-      {selectedIndex === 0 && <RecommendationsView userId={userId} />}
-      {selectedIndex === 1 && <GroupView userId={userId} />}
-      {selectedIndex === 2 && <SettingsView userId={userId} />}
+      {/* Render the selected component */}
+      {listItems[selectedIndex].component}
 
       <Button onClick={handleLogout}>Logout</Button>
     </div>

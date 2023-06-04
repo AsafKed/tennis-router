@@ -39,12 +39,15 @@ function App() {
         localStorage.removeItem('userPreLoginId');
       } else {
         setLoggedIn(false);
-        localStorage.setItem('userPreLoginId', uuidv4());
-        localStorage.removeItem('userId');
+        if (!localStorage.getItem('userPreLoginId')) {
+          localStorage.setItem('userPreLoginId', uuidv4());
+          localStorage.removeItem('userId');
+        }
       }
     });
 
-    trackEvent({ action: 'mounted', 'user_id': localStorage.getItem('userId'), 'user_pre_login_id': localStorage.getItem('userPreLoginId') })
+    // Track user if logged in, otherwise use unique ID
+    trackEvent({ action: 'mounted' })
 
     return () => {
       unsubscribe();

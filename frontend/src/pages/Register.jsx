@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { Alert } from '@mui/material';
 
+// Tracking
+import { dispatchTrackingData } from '../TrackingDispatcher';
+import { track, useTracking } from 'react-tracking';
+
 function Register() {
     const navigate = useNavigate();
+    const { trackEvent } = useTracking();
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('');
     const [displayName, setDisplayName] = useState('');
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        trackEvent({ action: 'page_open' })
+    }, []);
+
 
     const sendUserDataToServer = async (userId, userEmail, userName) => {
         const response = await fetch("http://localhost:5001/register", {
@@ -37,6 +47,8 @@ function Register() {
                 const user = userCredential.user;
                 console.log(user);
                 await sendUserDataToServer(user.uid, user.email, displayName);
+
+                trackEvent({ action: 'register' });
                 navigate("/user")
             })
             .catch((error) => {
@@ -44,6 +56,8 @@ function Register() {
                 const errorMessage = error.message;
                 console.log(errorCode);
                 console.log(errorMessage);
+
+                trackEvent({ action: 'register_error', 'error': errorCode })
                 setError(errorMessage);
             });
 
@@ -119,4 +133,4 @@ function Register() {
     )
 }
 
-export default Register;
+export default track({ page: 'Register' }, { dispatch: dispatchTrackingData })(Register);

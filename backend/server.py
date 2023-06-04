@@ -7,6 +7,7 @@ from database_workers.Neo4j_User_Worker import User_Worker
 from database_workers.Neo4j_Player_Worker import Player_Worker
 from database_workers.Neo4j_Relation_Worker import Relation_Worker
 from database_workers.Neo4j_Similarity_Worker import Similarity_Worker
+from database_workers.Neo4j_Event_Worker import Event_Worker
 import uuid
 import json
 
@@ -262,8 +263,10 @@ def get_player_data(player_name):
 # Track user
 @app.route('/users/track', methods=['POST'])
 def track_user():
-    print('Tracking user')
-    print(request.json)
+    event = request.json
+
+    event_worker = Event_Worker()
+    event_worker.create_event(event)
 
     return jsonify({'message': 'Successfully tracked user'}), 200
 

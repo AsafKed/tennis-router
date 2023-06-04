@@ -37,8 +37,10 @@ function App() {
         setLoggedIn(true);
         localStorage.setItem('userId', JSON.stringify(user.uid));
         localStorage.removeItem('userPreLoginId');
+        localStorage.removeItem('loggingOut');
       } else {
         setLoggedIn(false);
+        localStorage.setItem('loggingOut', 'true');
         if (!localStorage.getItem('userPreLoginId')) {
           localStorage.setItem('userPreLoginId', uuidv4());
           localStorage.removeItem('userId');
@@ -53,6 +55,7 @@ function App() {
       unsubscribe();
     };
   }, []);
+
 
   return (
     <div className="App" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

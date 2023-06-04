@@ -133,7 +133,7 @@ const PlayerSelection = () => {
     const handlePlayerClick = (playerName) => {
         setSelectedPlayer(playerName);
         setIsPlayerCardOpen(true);
-        trackEvent({ action: 'view_player', data: { playerName } });
+        trackEvent({ action: 'view_player', player_name: playerName });
     };
 
     const handlePlayerCardClose = () => {

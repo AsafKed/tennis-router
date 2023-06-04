@@ -1,12 +1,20 @@
 import React from "react";
 import { Button, Card, CardContent, Divider, Typography } from "@material-ui/core";
 
+// Tracking
+import { dispatchTrackingData } from "../../TrackingDispatcher";
+import { track, useTracking } from 'react-tracking';
+
 const GroupCard = ({ group, onGroupClicked, onGroupLeave, onDeleteGroup, users, expandedGroup }) => {
     const expanded = group.group_id === expandedGroup;
+
+    const { trackEvent } = useTracking();
 
     const handleOpen = (event) => {
         event.stopPropagation();
         onGroupClicked(expanded ? null : group.group_id);
+
+        trackEvent({ action: expanded ? 'group_closed' : 'group_opened', 'group_id': group.group_id })
     };
 
     const handleLeaveGroup = (event) => {
@@ -52,4 +60,4 @@ const GroupCard = ({ group, onGroupClicked, onGroupLeave, onDeleteGroup, users, 
     );
 };
 
-export default GroupCard;
+export default track({dispatch: dispatchTrackingData})(GroupCard);

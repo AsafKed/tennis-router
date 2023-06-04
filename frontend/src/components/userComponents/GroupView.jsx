@@ -4,6 +4,10 @@ import GroupDetailsCard from "./GroupDetailsCard";
 import UserList from "../UserList";
 import { io } from "socket.io-client";
 
+// Tracking
+import { dispatchTrackingData } from '../../TrackingDispatcher';
+import { track, useTracking } from 'react-tracking';
+
 function GroupView({ userId }) {
     const [socketInstance, setSocketInstance] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -13,23 +17,13 @@ function GroupView({ userId }) {
     const [expandedGroup, setExpandedGroup] = useState(null);
     const [expandedGroupUsers, setExpandedGroupUsers] = useState([]);
 
+    const { trackEvent } = useTracking();
+
     // When the page is clicked, collapse the card
     const handlePageClick = () => {
         setExpandedGroup(null);
         setExpandedGroupUsers([]);
     };
-
-    // const handleGroupSelected = (groupName) => {
-    //     setGroup(groupName);
-    //     getGroups(userId);
-    // };
-
-    // // TODO fix this functionality (currently not working)
-    // const handleGroupLeave = () => {
-    //     setGroup("");
-    //     setLeavingGroup(true);
-    //     getGroups(userId);
-    // };
 
     useEffect(() => {
         if (leavingGroup && socketInstance) {
@@ -52,6 +46,7 @@ function GroupView({ userId }) {
             const data = await response.json();
             console.log("Server response:", data);
             setGroups(data);
+            trackEvent({ action: 'get_groups' })
         };
         getGroups(userId);
     }, [userId]);
@@ -91,7 +86,7 @@ function GroupView({ userId }) {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
         } catch (error) {
             console.error("Error deleting group: ", error);
         }
@@ -162,4 +157,4 @@ function GroupView({ userId }) {
     );
 }
 
-export default GroupView;
+export default track({ dispatch: dispatchTrackingData })(GroupView);

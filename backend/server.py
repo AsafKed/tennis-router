@@ -259,7 +259,14 @@ def get_player_data(player_name):
         print(e)
         return jsonify({'error': 'Error while getting player data'}), 500
 
-    
+# Track user
+@app.route('/users/track', methods=['POST'])
+def track_user():
+    print('Tracking user')
+    print(request.json)
+
+    return jsonify({'message': 'Successfully tracked user'}), 200
+
 #################
 # SocketIO events
 #################

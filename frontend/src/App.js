@@ -21,18 +21,30 @@ import '@fontsource/roboto/700.css';
 // Firebase
 import { auth } from './firebase';
 
+// Tracking
+import { dispatchTrackingData } from "./TrackingDispatcher";
+import { track, useTracking } from 'react-tracking';
+import { v4 as uuidv4 } from 'uuid';
+
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
+  const { trackEvent } = useTracking();
 
   useEffect(() => {
     // Check if user is logged in, used for available navigation pages
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setLoggedIn(true);
+        localStorage.setItem('userId', JSON.stringify(user.uid));
+        localStorage.removeItem('userPreLoginId');
       } else {
         setLoggedIn(false);
+        localStorage.setItem('userPreLoginId', uuidv4());
+        localStorage.removeItem('userId');
       }
     });
+
+    trackEvent({ action: 'mounted', 'user_id': localStorage.getItem('userId'), 'user_pre_login_id': localStorage.getItem('userPreLoginId') })
 
     return () => {
       unsubscribe();
@@ -65,4 +77,4 @@ function App() {
   );
 }
 
-export default App;
+export default track({ page: 'App' }, { dispatch: dispatchTrackingData })(App);

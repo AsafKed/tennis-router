@@ -1,7 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
+// Tracking
+import { dispatchTrackingData } from '../TrackingDispatcher';
+import { track, useTracking } from 'react-tracking';
+
 function WelcomePage() {
+  const { trackEvent } = useTracking();
+
+  // Upon opening the page
+  useEffect(() => {
+    trackEvent({ action: 'page_open' })
+  }, []);
+
   return (
     // Add styling to the div. Make it look nice.
     <div style={{ width: "50%", textAlign: "left" }}>
@@ -17,4 +28,4 @@ function WelcomePage() {
   );
 }
 
-export default WelcomePage;
+export default track({ page: 'Home' }, { dispatch: dispatchTrackingData })(WelcomePage);

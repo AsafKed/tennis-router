@@ -12,12 +12,24 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
 import { signOut } from "firebase/auth";
 
+// Tracking
+import { dispatchTrackingData } from '../TrackingDispatcher';
+import { track, useTracking } from 'react-tracking';
+
 function UserPage() {
   const navigate = useNavigate();
   const [userId, setUserId] = useState("");
   const [name, setName] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [groupNum, setGroupNum] = useState(0);
+
+  // Tracking
+  const { trackEvent } = useTracking();
+
+  // Upon opening the page
+  useEffect(() => {
+    trackEvent({ action: 'page_open' })
+  }, []);
 
   const handleListItemClick = (event, index) => {
     setSelectedIndex(index);
@@ -121,10 +133,10 @@ function UserPage() {
             onClick={(event) => handleListItemClick(event, 2)}
           >
             <ListItemText primary="Settings" secondary={
-                <React.Fragment>
-                  {"Fill these in to get recommendations."}
-                </React.Fragment>
-              }/>
+              <React.Fragment>
+                {"Fill these in to get recommendations."}
+              </React.Fragment>
+            } />
           </ListItemButton>
         </ListItem>
       </List>
@@ -138,4 +150,4 @@ function UserPage() {
   )
 }
 
-export default UserPage
+export default track({ page: 'User' }, { dispatch: dispatchTrackingData })(UserPage);

@@ -17,6 +17,7 @@ function Register() {
     const [displayName, setDisplayName] = useState('');
     const [error, setError] = useState('');
 
+    // Upon opening the page
     useEffect(() => {
         trackEvent({ action: 'page_open' })
     }, []);

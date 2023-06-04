@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Checkbox, FormGroup, FormControlLabel, Typography, Button } from '@mui/material';
 
+// Tracking
+import { track, useTracking } from 'react-tracking';
+import { dispatchTrackingData } from '../../TrackingDispatcher';
+
 function SettingsView({ userId }) {
     const [days, setDays] = useState({
         '10/06/2023: Saturday': false,
@@ -13,6 +17,8 @@ function SettingsView({ userId }) {
         '17/06/2023: Saturday': false,
         '18/06/2023: Sunday': false,
     });
+
+    const { trackEvent } = useTracking();
 
     useEffect(() => {
         fetch(`http://localhost:5001/users/${userId}/settings`, {
@@ -29,6 +35,7 @@ function SettingsView({ userId }) {
                     newDays[`${day}: ${dayOfWeek}`] = true;
                 });
                 setDays(newDays);
+                trackEvent({ action: 'get_settings' })
             });
     }, [userId]);
 
@@ -51,11 +58,18 @@ function SettingsView({ userId }) {
             .then((response) => {
                 return response.json();
             })
+
+        trackEvent({ action: 'update_settings', days: selectedDays })
     }
 
     return (
         <div>
-            {/* ... */}
+            <Typography variant="h1" gutterBottom>
+                Settings
+            </Typography>
+            <Typography variant="h5" gutterBottom>
+                Which days are you attending?
+            </Typography>
             <FormGroup>
                 {Object.keys(days).map((day, index) => (
                     <FormControlLabel
@@ -76,11 +90,4 @@ function SettingsView({ userId }) {
     )
 }
 
-export default SettingsView;
-
-            // <Typography variant="h1" gutterBottom>
-            //     Settings
-            // </Typography>
-            // <Typography variant="h5" gutterBottom>
-            //     Which days are you attending?
-            // </Typography>
+export default track({ dispatch: dispatchTrackingData })(SettingsView);

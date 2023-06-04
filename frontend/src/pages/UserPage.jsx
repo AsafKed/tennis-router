@@ -105,7 +105,7 @@ function UserPage() {
 
   return (
     <div>
-      <h1>Settings</h1>
+      <h1>User Page</h1>
       <h3>Welcome back, {name}.</h3>
       <Divider />
       <List sx={{ width: '100%', bgcolor: 'background.paper' }}>

@@ -6,6 +6,9 @@ import PlayerSimilarity from './PlayerSimilarity';
 import ReactCountryFlag from "react-country-flag";
 import LikeButton from './LikeButton';
 
+// Tracking
+import { useTracking } from 'react-tracking';
+
 const PlayerSelection = () => {
     const [players, setPlayers] = useState([]);
     const [filteredPlayers, setFilteredPlayers] = useState([]);
@@ -15,6 +18,8 @@ const PlayerSelection = () => {
     // Player clicking
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [isPlayerCardOpen, setIsPlayerCardOpen] = useState(false);
+    // Tracking
+    const { trackEvent } = useTracking();
 
     // Get all players
     useEffect(() => {
@@ -46,6 +51,8 @@ const PlayerSelection = () => {
 
     useEffect(() => {
         let sortedPlayers = [...players];
+
+        trackEvent({ action: 'sort_players', sort_option: sortOption });
 
         if (sortOption === 'alphabetical') {
             sortedPlayers.sort((a, b) => a.name.localeCompare(b.name));
@@ -88,7 +95,7 @@ const PlayerSelection = () => {
             if (!response.ok) {
                 throw new Error('Failed to like player');
             }
-
+            trackEvent({ action: 'like_player', player_name: playerName });
             fetchLikedPlayers();
         } catch (error) {
             console.error(error);
@@ -108,7 +115,7 @@ const PlayerSelection = () => {
             if (!response.ok) {
                 throw new Error('Failed to unlike player');
             }
-
+            trackEvent({ action: 'unlike_player', player_name: playerName  });
             fetchLikedPlayers();
 
             // Update the likedPlayers state
@@ -126,10 +133,12 @@ const PlayerSelection = () => {
     const handlePlayerClick = (playerName) => {
         setSelectedPlayer(playerName);
         setIsPlayerCardOpen(true);
+        trackEvent({ action: 'view_player', data: { playerName } });
     };
 
     const handlePlayerCardClose = () => {
         setIsPlayerCardOpen(false);
+        trackEvent({ action: 'close_player' });
     };
 
     return (

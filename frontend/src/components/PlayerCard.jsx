@@ -3,13 +3,20 @@ import { Card, CardContent, Typography, Box, CircularProgress, CardMedia, Grid, 
 import ReactCountryFlag from "react-country-flag";
 import { ExpandMore } from '@mui/icons-material';
 
+// Tracking
+import { useTracking } from 'react-tracking';
+
 const PlayerCard = ({ playerName }) => {
     const [playerData, setPlayerData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
 
+    // Tracking
+    const { trackEvent } = useTracking();
+
     const handleExpandClick = () => {
         setExpanded(!expanded);
+        trackEvent({ action: expanded ? 'player_card_hide_more_info' : 'player_card_show_more_info', player_name: playerName });
     };
 
     useEffect(() => {

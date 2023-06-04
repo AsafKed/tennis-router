@@ -16,10 +16,12 @@ const PreferenceSolicitationPage = () => {
     // Upon opening the page
     useEffect(() => {
         trackEvent({ action: 'page_open' })
+        trackEvent({ action: setShowPlayerSelectionPage ? 'player_view_open' : 'preference_view_open' })
     }, []);
 
     const handleToggle = () => {
         setShowPlayerSelectionPage(!showPlayerSelectionPage);
+        trackEvent({ action: setShowPlayerSelectionPage ? 'player_view_open' : 'preference_view_open' })
     }
 
     return (

@@ -3,6 +3,9 @@ import { Button, Modal, useMediaQuery, useTheme } from '@mui/material';
 import PlayerCard from './PlayerCard';
 import PlayerCardMini from './PlayerCardMini';
 
+// Tracking
+import track, { useTracking } from 'react-tracking';
+
 const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
     const [similarityWeight, setSimilarityWeight] = useState("all");
     const [similarPlayers, setSimilarPlayers] = useState([]);
@@ -10,6 +13,9 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+    // Tracking
+    const { trackEvent } = useTracking();
 
     // Fetch similarity weight from the user
     useEffect(() => {
@@ -32,7 +38,7 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
             const data = await response.json(); // Use response.json() instead of response.text()
             setSimilarPlayers(data);
         };
-
+        trackEvent({ action: 'fetch_similar_players', player_name: playerName, similarity_weight: similarityWeight });
         fetchSimilarPlayers();
     }, [playerName, userId, similarityWeight]);
 

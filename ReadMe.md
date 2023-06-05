@@ -9,21 +9,11 @@ For this to work, the backend must run before the frontend.
 3. Navigate to the frontend directory
 4. Run `npm run start`
 
-## Running the services using Docker
-Locally, in the main directory, run this command:
-> docker compose -f docker-compose.dev.yml up -d
+## Running on Heroku
+Use the following code to upload
+> git subtree push --prefix frontend heroku-frontend main
+> git subtree push --prefix backend heroku-backend main
 
-In production (on an online server, such as Ubuntu 22.04), run this command:
-> docker compose -f docker-compose.prod.yml up -d
-
-This is recommended especially for use in the server. Before pushing changes, however, ensure that running them with Docker works locally.
-
-## Running on a server
-It's set up using Nginx on an Ubuntu 22 server. The docker-compose.yml file should have 2 changes when on the server: instead of having
-> build: ./backend
-That line should say:
-> image: musashishi/backend:latest
-This pulls it from the Docker Hub, which means the server doesn't need to spend resources to build the docker image. The same thing should be done for the frontend.
 
 ## Tech Stack
 
@@ -41,10 +31,10 @@ After installation please follow the instructions below to download the repo.
 - Run the following command:
 
 ```bash
-  git clone https://github.com/adrianhuber17/webSocket-App.git
+  git clone https://github.com/AsafKed/tennis-router.git
 ```
 
-- Navigate into the new sub-folder created called **WebSocket-App**.
+- Navigate into the new sub-folder created called **backend**.
 - Run the following commands to create an environment and install the dependencies:
 
 ```bash
@@ -68,7 +58,7 @@ Make sure the server is initialized before the client to avoid any issues.
 Terminal **window 1** - start the server:
 
 ```bash
-  cd webSocket-App
+  cd backend
   source env/bin/activate
   python3 server.py
 ```
@@ -76,7 +66,7 @@ Terminal **window 1** - start the server:
 Terminal **window 2** - start the client:
 
 ```bash
-  cd webSocket-App/front-end
+  cd webSocket-App/frontend
   npm start
 ```
 

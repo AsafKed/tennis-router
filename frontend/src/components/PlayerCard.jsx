@@ -23,7 +23,7 @@ const PlayerCard = ({ playerName }) => {
         const fetchPlayerData = async () => {
             setLoading(true);
             const playerNameForURL = playerName.replace(/ /g, '_');
-            const response = await fetch(`/players/data/${playerNameForURL}`);
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/data/${playerNameForURL}`);
             const text = await response.text();
             const data = JSON.parse(text);
             setPlayerData(data);

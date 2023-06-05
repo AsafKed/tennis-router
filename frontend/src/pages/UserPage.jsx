@@ -44,10 +44,10 @@ function UserPage() {
     signOut(auth).then(() => {
       // Sign-out successful.
       navigate("/");
-      console.log("Signed out successfully.");
+      // console.log("Signed out successfully.");
     }).catch((error) => {
       // An error happened.
-      console.log("Error signing out.");
+      // console.log("Error signing out.");
     });
   }
 
@@ -88,7 +88,7 @@ function UserPage() {
         getGroupNum(uid);
       } else {
         // User is signed out
-        console.log("user is logged out")
+        // console.log("user is logged out")
       }
     });
 

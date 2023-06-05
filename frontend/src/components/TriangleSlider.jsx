@@ -31,13 +31,13 @@ const TriangleSlider = () => {
 
   const handleWeightChange = async () => {
     // Send the new weightDistribution to the backend
-    console.log(weightDistribution)
+    // console.log(weightDistribution)
 
     // Get User ID from Firebase
     const user = auth.currentUser;
     const uid = user.uid;
 
-    const response = await fetch(`/users/${uid}/similarity_weights`, {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${uid}/similarity_weights`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ const TriangleSlider = () => {
     }
 
     const data = await response.json();
-    console.log(data);
+    // console.log(data);
   }
 
 

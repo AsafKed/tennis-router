@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 // Pre-login pages
@@ -63,18 +63,10 @@ function App() {
         <TopNavigationMenu loggedIn={loggedIn} />
         <Routes>
           <Route path="/" element={<WelcomePage />} />
-          {loggedIn && (
-            <>
-              <Route path="/user" element={<UserPage />} />
-              <Route path="/preferences" element={<PreferenceSolicitationPage />} />
-            </>
-          )}
-          {!loggedIn && (
-            <>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </>
-          )}
+          <Route path="/user" element={loggedIn ? <UserPage /> : <Navigate to="/" />} />
+          <Route path="/preferences" element={loggedIn ? <PreferenceSolicitationPage /> : <Navigate to="/" />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
         <div style={{ flexGrow: 1 }}></div>
         <BottomNavigationMenu loggedIn={loggedIn} />

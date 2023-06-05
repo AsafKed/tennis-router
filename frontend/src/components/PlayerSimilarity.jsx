@@ -20,7 +20,7 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
     // Fetch similarity weight from the user
     useEffect(() => {
         const fetchSimilarityWeight = async () => {
-            const response = await fetch(`/users/${userId}/get_similarity_weights`);
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/get_similarity_weights`);
             const text = await response.text();
             const data = JSON.parse(text);
             setSimilarityWeight(data);
@@ -34,7 +34,7 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
         const fetchSimilarPlayers = async () => {
             // Turn spaces into underscores
             const playerNameForURL = playerName.replace(/ /g, '_');
-            const response = await fetch(`/players/similar/${playerNameForURL}/?user_id=${userId}`);
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/similar/${playerNameForURL}/?user_id=${userId}`);
             const data = await response.json(); // Use response.json() instead of response.text()
             setSimilarPlayers(data);
         };

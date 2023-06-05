@@ -163,6 +163,7 @@ def get_group_users(group_id):
 @app.route('/players', methods=['GET'])
 def get_players():
     try:
+        print("Getting all players")
         neo4j_worker = Player_Worker()
         players_list = neo4j_worker.get_all_players()
         neo4j_worker.close()
@@ -263,6 +264,8 @@ def get_player_data(player_name):
 # Track user
 @app.route('/users/track', methods=['POST'])
 def track_user():
+    print('Tracking user')
+    print('Request: ', request.json)
     event = request.json
 
     event_worker = Event_Worker()

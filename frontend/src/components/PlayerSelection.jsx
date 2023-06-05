@@ -24,7 +24,7 @@ const PlayerSelection = () => {
     // Get all players
     useEffect(() => {
         const fetchPlayers = async () => {
-            const response = await fetch('/players');
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players`);
             const text = await response.text(); // if this doesn't work, try response.json()
             const data = JSON.parse(text)
             setPlayers(data);
@@ -35,7 +35,7 @@ const PlayerSelection = () => {
 
     // Update liked players (only after UID is known though)
     const fetchLikedPlayers = useCallback(async () => {
-        const response = await fetch(`/players/liked/${userId}`);
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/liked/${userId}`);
         const text = await response.text();
         const data = JSON.parse(text);
         setLikedPlayers(data);
@@ -71,11 +71,10 @@ const PlayerSelection = () => {
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const uid = user.uid;
-                console.log("uid", uid)
                 setId(uid);
             } else {
                 // User is signed out
-                console.log("user is logged out")
+                // console.log("user is logged out")
             }
         });
 
@@ -84,7 +83,7 @@ const PlayerSelection = () => {
     // Liking -> create user-player relationship
     const handleLike = async (playerName) => {
         try {
-            const response = await fetch(`/players/like`, {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/like`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -104,7 +103,7 @@ const PlayerSelection = () => {
 
     const handleUnlike = async (playerName) => {
         try {
-            const response = await fetch(`/players/unlike`, {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/unlike`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

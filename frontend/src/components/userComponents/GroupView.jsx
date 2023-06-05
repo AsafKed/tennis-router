@@ -28,7 +28,7 @@ function GroupView({ userId }) {
     useEffect(() => {
         if (leavingGroup && socketInstance) {
             socketInstance.on("update_group_users", (users) => {
-                console.log("users", users);
+                // console.log("users", users);
                 setLeavingGroup(false);
                 window.location.reload(false);
             });
@@ -44,7 +44,7 @@ function GroupView({ userId }) {
                 },
             });
             const data = await response.json();
-            console.log("Server response:", data);
+            // console.log("Server response:", data);
             setGroups(data);
             trackEvent({ action: 'get_groups' })
         };
@@ -63,7 +63,7 @@ function GroupView({ userId }) {
                 },
             });
             const data = await response.json();
-            console.log("Server response:", data);
+            // console.log("Server response:", data);
             setExpandedGroupUsers(data);
         } else {
             setExpandedGroup(null);
@@ -107,11 +107,11 @@ function GroupView({ userId }) {
             setSocketInstance(socket);
 
             socket.on("connect", (data) => {
-                console.log(data);
+                // console.log(data);
             });
 
             socket.on("disconnect", (data) => {
-                console.log(data);
+                // console.log(data);
             });
         }
     }, [socketInstance]);

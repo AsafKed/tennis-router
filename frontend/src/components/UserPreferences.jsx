@@ -28,7 +28,7 @@ function UserPreferences() {
         });
 
         if (response.ok) {
-            console.log('Preferences saved successfully');
+            // console.log('Preferences saved successfully');
         } else {
             console.error('Error saving preferences');
         }

@@ -9,12 +9,10 @@ export async function dispatchTrackingData(data) {
         data['guest_id'] = localStorage.getItem('userPreLoginId');
     }
 
-    console.log(data);
-
     // Introduce a delay before making the fetch call to prevent guest node duplicates
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    fetch('/users/track', {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/users/track`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -22,6 +20,5 @@ export async function dispatchTrackingData(data) {
             body: JSON.stringify(data)
             })
             .then(response => response.json())
-            .then(data => console.log(data))
             .catch(error => console.log(error))
 }

@@ -10,10 +10,9 @@ const PlayerCardMini = ({ player }) => {
 
     useEffect(() => {
         const fetchPlayerInfo = async () => {
-            const response = await fetch(`/players/data/${player.player2}`);
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/data/${player.player2}`);
             const text = await response.text();
             const data = JSON.parse(text);
-            console.log(data);
             setPlayerInfo(data);
         };
 

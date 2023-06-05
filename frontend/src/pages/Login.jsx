@@ -29,14 +29,14 @@ const Login = () => {
                 const user = userCredential.user;
                 trackEvent({ action: 'login' });
                 navigate("/user")
-                console.log(user);
+                // console.log(user);
             })
             .catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
                 setError(errorMessage)
                 trackEvent({ action: 'login_error', 'error': errorCode })
-                console.log(errorCode, errorMessage)
+                // console.log(errorCode, errorMessage)
             });
 
     }

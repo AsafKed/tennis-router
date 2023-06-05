@@ -36,7 +36,7 @@ function Register() {
             }),
         });
         const data = await response.json();
-        console.log("Server response:", data);
+        // console.log("Server response:", data);
     };
 
     const onSubmit = async (e) => {
@@ -46,7 +46,7 @@ function Register() {
             .then(async (userCredential) => {
                 // Signed in
                 const user = userCredential.user;
-                console.log(user);
+                // console.log(user);
                 await sendUserDataToServer(user.uid, user.email, displayName);
 
                 trackEvent({ action: 'register' });
@@ -55,8 +55,8 @@ function Register() {
             .catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
-                console.log(errorCode);
-                console.log(errorMessage);
+                // console.log(errorCode);
+                // console.log(errorMessage);
 
                 trackEvent({ action: 'register_error', 'error': errorCode })
                 setError(errorMessage);

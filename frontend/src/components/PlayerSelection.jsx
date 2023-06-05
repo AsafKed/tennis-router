@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, Button, Box } from '@mui/material';
+import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, Button } from '@mui/material';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
 import PlayerSimilarity from './PlayerSimilarity';
@@ -157,7 +157,7 @@ const PlayerSelection = () => {
             <h2>Liked Players</h2>
 
             {/* To do turn this into like a carousel thing */}
-            {/* <Grid container spacing={4}>
+            <Grid container spacing={4}>
                 {likedPlayers.map((player) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
                         <Card>
@@ -179,43 +179,7 @@ const PlayerSelection = () => {
                         </Card>
                     </Grid>
                 ))}
-            </Grid> */}
-            <Box
-                sx={{
-                    display: 'flex',
-                    overflowX: 'auto',
-                    width: '100%', // Set a fixed width
-                    padding: '16px', // Add padding as needed
-                    '&::-webkit-scrollbar': {
-                        display: 'none',
-                    },
-                    msOverflowStyle: 'none',
-                    scrollbarWidth: 'none',
-                    overscrollBehaviorX: 'contain', // Prevent page from scrolling when end of Box is reached
-                }}
-            >
-                {likedPlayers.map((player) => (
-                    <Box key={player.name} sx={{ minWidth: 200, marginRight: 2 }}>
-                        <Card>
-                            <CardMedia
-                                component="img"
-                                height="300"
-                                image={player.image_url}
-                                alt={player.name}
-                                sx={{ objectFit: 'contain' }}
-                            />
-                            <CardContent>
-                                <Typography gutterBottom variant="h5" component="div">
-                                    {player.name}
-                                </Typography>
-                                <Button onClick={() => handleUnlike(player.name)}>
-                                    Unlike
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    </Box>
-                ))}
-            </Box>
+            </Grid>
 
             <h2>All Competitors</h2>
             <Grid container spacing={4}>

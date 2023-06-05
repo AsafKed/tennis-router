@@ -10,10 +10,13 @@ For this to work, the backend must run before the frontend.
 4. Run `npm run start`
 
 ## Running on Heroku
-Use the following code to upload
-> git subtree push --prefix frontend heroku-frontend main
-> git subtree push --prefix backend heroku-backend main
-
+Use the following code to upload to the frontend and backend respectively. Make sure you're in the root directory when running this from a terminal (e.g. tennis-router/, not tennis-router/frontend for example.)
+```bash
+  git subtree push --prefix frontend heroku-frontend main
+```
+```bash
+  git subtree push --prefix backend heroku-backend main
+```
 
 ## Tech Stack
 

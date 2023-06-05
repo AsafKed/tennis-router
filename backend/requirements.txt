@@ -14,6 +14,7 @@ Flask==2.2.3
 Flask-Cors==3.0.10
 Flask-SocketIO==5.3.3
 fonttools==4.39.4
+gunicorn==20.1.0
 h11==0.14.0
 ipykernel==6.22.0
 ipython==8.12.0

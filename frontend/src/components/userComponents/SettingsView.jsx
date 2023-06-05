@@ -21,7 +21,7 @@ function SettingsView({ userId }) {
     const { trackEvent } = useTracking();
 
     useEffect(() => {
-        fetch(`http://localhost:5001/users/${userId}/settings`, {
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/settings`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -46,7 +46,7 @@ function SettingsView({ userId }) {
     const handleSubmit = () => {
         const selectedDays = Object.keys(days).filter(day => days[day]).map(day => day.split(":")[0].trim());
 
-        fetch(`http://localhost:5001/users/${userId}/settings`, {
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/settings`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

@@ -15,7 +15,7 @@ function UserPreferences() {
 
     const handleSavePreferences = async () => {
         const userId = auth.currentUser.uid;
-        const response = await fetch(`http://localhost:5001/users/${userId}/preferences`, {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/preferences`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

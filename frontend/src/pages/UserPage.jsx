@@ -52,7 +52,7 @@ function UserPage() {
   }
 
   const getGroupNum = (uid) => {
-    fetch(`http://localhost:5001/user-groups/${uid}`, {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/user-groups/${uid}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -67,7 +67,7 @@ function UserPage() {
   };
 
   const getName = async (userId) => {
-    const response = await fetch(`http://localhost:5001/users/${userId}`, {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

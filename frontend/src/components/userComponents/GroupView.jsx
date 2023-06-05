@@ -37,7 +37,7 @@ function GroupView({ userId }) {
 
     useEffect(() => {
         const getGroups = async (userId) => {
-            const response = await fetch(`http://localhost:5001/user-groups/${userId}`, {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user-groups/${userId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -56,7 +56,7 @@ function GroupView({ userId }) {
     const handleGroupClicked = async (groupId) => {
         if (expandedGroup !== groupId) {
             setExpandedGroup(groupId);
-            const response = await fetch(`http://localhost:5001/group-users/${groupId}`, {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/group-users/${groupId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -79,7 +79,7 @@ function GroupView({ userId }) {
 
     const handleDeleteGroup = async (groupId) => {
         try {
-            const response = await fetch(`http://localhost:5001/groups/${groupId}/delete?user_id=${userId}`, {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/groups/${groupId}/delete?user_id=${userId}`, {
                 method: "DELETE",
             });
 
@@ -96,7 +96,7 @@ function GroupView({ userId }) {
     // Connection to socket
     useEffect(() => {
         if (!socketInstance) {
-            const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:5001";
+            const backendUrl = process.env.REACT_APP_BACKEND_URL;
             const socket = io(backendUrl, {
                 transports: ["websocket"],
                 cors: {

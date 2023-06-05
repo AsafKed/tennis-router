@@ -28,7 +28,7 @@ const PreferenceSolicitationPage = () => {
         <div>
             <h1>Preference Solicitation</h1>
             <button onClick={handleToggle}>Toggle</button>
-            <TriangleSlider />
+            {/* <TriangleSlider /> */}
             {showPlayerSelectionPage ? <PlayerSelectionPage /> : <UserPreferences />}
         </div>
     )

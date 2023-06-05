@@ -18,6 +18,9 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
+// Theme for Material UI (JADS colors)
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
 // Firebase
 import { auth } from './firebase';
 
@@ -26,7 +29,31 @@ import { dispatchTrackingData } from "./TrackingDispatcher";
 import { track, useTracking } from 'react-tracking';
 import { v4 as uuidv4 } from 'uuid';
 
+
+// Main app component
 function App() {
+  // Set the theme
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: "#2D2F7F",
+      },
+      secondary: {
+        main: "#CA4F55",
+      },
+    },
+  });
+
+
+  // theme.typography.h1 = {
+  //   fontSize: '2.5rem',
+  //   fontWeight: 500,
+  //   lineHeight: 1.2,
+  //   letterSpacing: '-0.01562em',
+  //   color: '#2D2F7F',
+  // };
+
+  // And other variables
   const [loggedIn, setLoggedIn] = useState(false);
   const { trackEvent } = useTracking();
 
@@ -59,19 +86,21 @@ function App() {
 
   return (
     <div className="App" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <BrowserRouter>
-        <TopNavigationMenu loggedIn={loggedIn} />
-        <Routes>
-          <Route path="/" element={<WelcomePage />} />
-          <Route path="/user" element={loggedIn ? <UserPage /> : <Navigate to="/" />} />
-          <Route path="/preferences" element={loggedIn ? <PreferenceSolicitationPage /> : <Navigate to="/" />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </Routes>
-        <div style={{ flexGrow: 1 }}></div>
-        <BottomNavigationMenu loggedIn={loggedIn} />
-      </BrowserRouter>
-    </div>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <TopNavigationMenu loggedIn={loggedIn} />
+          <Routes>
+            <Route path="/" element={<WelcomePage />} />
+            <Route path="/user" element={loggedIn ? <UserPage /> : <Navigate to="/" />} />
+            <Route path="/preferences" element={loggedIn ? <PreferenceSolicitationPage /> : <Navigate to="/" />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Routes>
+          <div style={{ flexGrow: 1 }}></div>
+          <BottomNavigationMenu loggedIn={loggedIn} />
+        </BrowserRouter>
+      </ThemeProvider>
+    </div >
   );
 }
 

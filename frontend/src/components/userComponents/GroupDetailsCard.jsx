@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Card, CardContent, Divider, Typography } from "@material-ui/core";
+import { Button, Card, CardContent, Divider, Typography } from '@mui/material';
 
 // Tracking
 import { dispatchTrackingData } from "../../TrackingDispatcher";

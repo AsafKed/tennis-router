@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, Button } from '@mui/material';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
-import PlayerSimilarity from './PlayerSimilarity';
+import PlayerSimilarity from './PlayerBrowser/PlayerSimilarity';
 import ReactCountryFlag from "react-country-flag";
 import LikeButton from './LikeButton';
 
@@ -15,6 +15,7 @@ const PlayerSelection = () => {
     const [sortOption, setSortOption] = useState('rank');
     const [userId, setId] = useState("");
     const [likedPlayers, setLikedPlayers] = useState([]);
+    const [sortedLikedPlayers, setSortedLikedPlayers] = useState([]);
     // Player clicking
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [isPlayerCardOpen, setIsPlayerCardOpen] = useState(false);
@@ -51,19 +52,29 @@ const PlayerSelection = () => {
         }
     }, [userId, fetchLikedPlayers]);
 
+    // Sort players, remove liked players
     useEffect(() => {
         let sortedPlayers = [...players];
+        setSortedLikedPlayers(likedPlayers.sort((a, b) => a.rank - b.rank));
 
         trackEvent({ action: 'sort_players', sort_option: sortOption });
 
         if (sortOption === 'alphabetical') {
             sortedPlayers.sort((a, b) => a.name.localeCompare(b.name));
+            sortedLikedPlayers.sort((a, b) => a.name.localeCompare(b.name));
         } else if (sortOption === 'rank') {
             sortedPlayers.sort((a, b) => a.rank - b.rank);
+            sortedLikedPlayers.sort((a, b) => a.rank - b.rank);
         }
 
+        // Map likedPlayers to an array of names
+        const likedPlayerNames = likedPlayers.map(player => player.name);
+
+        // Remove liked players from sortedPlayers
+        sortedPlayers = sortedPlayers.filter((player) => !likedPlayerNames.includes(player.name));
         setFilteredPlayers(sortedPlayers);
-    }, [players, sortOption]);
+    }, [players, sortOption, likedPlayers]);
+
 
     const handleSortChange = (event) => {
         setSortOption(event.target.value);
@@ -146,7 +157,6 @@ const PlayerSelection = () => {
 
     return (
         <div style={{ padding: '0 16px' }}>
-            <h1>Player Selection</h1>
             <TextField
                 select
                 label="Sort by"
@@ -164,9 +174,9 @@ const PlayerSelection = () => {
                     <h2>Liked Players</h2>
 
                     <Grid container spacing={4}>
-                        {likedPlayers.map((player) => (
+                        {sortedLikedPlayers.map((player) => (
                             <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
-                                <Card>
+                                <Card onClick={() => handlePlayerClick(player.name)} style={{ position: 'relative' }}>
                                     <CardMedia
                                         component="img"
                                         height="300"
@@ -178,9 +188,15 @@ const PlayerSelection = () => {
                                         <Typography gutterBottom variant="h5" component="div">
                                             {player.name}
                                         </Typography>
-                                        <Button onClick={() => handleUnlike(player.name)}>
-                                            Unlike
-                                        </Button>
+                                        <Typography variant="body1" color="text.secondary">
+                                            Rank: {player.rank}
+                                        </Typography>
+                                        {isLoggedIn && (
+                                            <LikeButton isLiked={isLiked(player.name)}
+                                                onLike={() => handleLike(player.name)}
+                                                onUnlike={() => handleUnlike(player.name)}
+                                            />
+                                        )}
                                     </CardContent>
                                 </Card>
                             </Grid>
@@ -189,7 +205,7 @@ const PlayerSelection = () => {
                 </div>
             )}
 
-            <h2>All Competitors</h2>
+            <h2>Other Competitors</h2>
             <Grid container spacing={4}>
                 {filteredPlayers.map((player) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
@@ -235,7 +251,7 @@ const PlayerSelection = () => {
                     </Grid>
                 ))}
             </Grid>
-            {selectedPlayer && <PlayerSimilarity playerName={selectedPlayer} userId={userId} open={isPlayerCardOpen} handleClose={handlePlayerCardClose} isLoggedIn={isLoggedIn}/>}        </div>
+            {selectedPlayer && <PlayerSimilarity playerName={selectedPlayer} userId={userId} open={isPlayerCardOpen} handleClose={handlePlayerCardClose} isLoggedIn={isLoggedIn} />}        </div>
     );
 };
 

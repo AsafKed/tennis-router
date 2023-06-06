@@ -6,6 +6,7 @@ import TriangleSlider from "../components/TriangleSlider";
 // Tracking
 import { dispatchTrackingData } from '../TrackingDispatcher';
 import { track, useTracking } from 'react-tracking';
+import { Box, Button, Typography } from '@mui/material';
 
 const PreferenceSolicitationPage = () => {
     // Have a toggle to show either the player selection page or the user preferences page
@@ -26,9 +27,12 @@ const PreferenceSolicitationPage = () => {
 
     return (
         <div>
-            <h1>Preference Solicitation</h1>
-            <button onClick={handleToggle}>Toggle</button>
-            {/* <TriangleSlider /> */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                <Typography variant="h1">Browser Page</Typography>
+                {/* <TriangleSlider /> */}
+                <Button onClick={handleToggle} variant='contained'>Toggle browse type</Button>
+            </Box>
+            {showPlayerSelectionPage ? <Typography variant="h2">Player Browsing</Typography> : <Typography variant="h2">Parameter Browsing</Typography>}
             {showPlayerSelectionPage ? <PlayerSelectionPage /> : <UserPreferences />}
         </div>
     )

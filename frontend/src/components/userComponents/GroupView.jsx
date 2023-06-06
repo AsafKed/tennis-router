@@ -35,19 +35,21 @@ function GroupView({ userId }) {
         }
     }, [leavingGroup, socketInstance]);
 
+    // To get the groups that the user is in
+    const getGroups = async (userId) => {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user-groups/${userId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        const data = await response.json();
+        // console.log("Server response:", data);
+        setGroups(data);
+        trackEvent({ action: 'get_groups' })
+    };
+
     useEffect(() => {
-        const getGroups = async (userId) => {
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user-groups/${userId}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = await response.json();
-            // console.log("Server response:", data);
-            setGroups(data);
-            trackEvent({ action: 'get_groups' })
-        };
         getGroups(userId);
     }, [userId]);
 
@@ -141,7 +143,7 @@ function GroupView({ userId }) {
             </div>
             <div>
                 <div className="line">
-                    <GroupForm socketInstance={socketInstance} userId={userId} />
+                    <GroupForm socketInstance={socketInstance} userId={userId} getGroups={getGroups} />
                 </div>
                 {!loading && (
                     <UserList

@@ -48,9 +48,9 @@ const TopNavigationMenu = ({ loggedIn }) => {
         {/* Only show these pages if the user is not logged in */}
         {!loggedIn && (
           <>
-            <IconButton color="inherit" onClick={() => handleNavigation('/login')}>
+            {/* <IconButton color="inherit" onClick={() => handleNavigation('/login')}>
               <LoginIcon />
-            </IconButton>
+            </IconButton> */}
             <IconButton color="inherit" onClick={() => handleNavigation('/register')}>
               <PersonAddIcon />
             </IconButton>

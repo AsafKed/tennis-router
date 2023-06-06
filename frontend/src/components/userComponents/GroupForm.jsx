@@ -2,13 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Button, TextField } from '@mui/material';
 import { v4 as uuid } from 'uuid';
 
-function GroupForm({ socketInstance, userId }) {
+function GroupForm({ socketInstance, userId, getGroups }) {
     const [groupId, setGroupId] = useState("");
     const [groupName, setGroupName] = useState("");
     const [formType, setFormType] = useState(null);
     const [attemptingCreate, setAttemptingCreate] = useState(false);
     const [attemptingJoin, setAttemptingJoin] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
+
+    const handleReload = () => {
+        window.location.reload(false);
+    };
 
     const handleCreateGroup = () => {
         setAttemptingCreate(true);
@@ -18,6 +22,7 @@ function GroupForm({ socketInstance, userId }) {
         const newGroupId = uuid();
         socketInstance.emit('create_group', { group_id: newGroupId, group_name: groupName, user_id: userId });
         setFormType(null);
+        handleReload();
     };
 
     const handleCancelCreateGroup = () => {
@@ -28,6 +33,7 @@ function GroupForm({ socketInstance, userId }) {
     const handleJoinGroup = () => {
         setAttemptingJoin(true);
         socketInstance.emit('join_group', { group_id: groupId, user_id: userId });
+        handleReload();
     };
 
     const handleCancelJoinGroup = () => {

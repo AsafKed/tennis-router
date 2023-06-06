@@ -41,6 +41,7 @@ function UserPage() {
   };
 
   const handleLogout = () => {
+    trackEvent({ action: 'logout' })
     signOut(auth).then(() => {
       // Sign-out successful.
       navigate("/");

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Alert } from '@mui/material';
+import { Alert, TextField, Typography, Paper, Button } from '@mui/material';
 
 // Tracking
 import { dispatchTrackingData } from '../TrackingDispatcher';
@@ -46,9 +46,43 @@ const Login = () => {
             <main >
                 <section>
                     <div>
-                        <p> FocusApp </p>
+                        <Typography variant="h1" component="h1" gutterBottom>
+                            Login
+                        </Typography>
 
-                        <form>
+                        <Paper elevation={2} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem' }}>
+                            <TextField
+                                sx={{ m: 1, width: '25ch' }}
+                                id="email-address"
+                                label="Email address"
+                                variant="outlined"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                            <TextField
+                                sx={{ m: 1, width: '25ch' }}
+                                id="password"
+                                label="Password"
+                                variant="outlined"
+                                type='password'
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+
+                            {error && <Alert severity="error">{error}</Alert>}
+
+                            <Button
+                                sx={{ m: 1, width: '25ch' }}
+                                variant="contained"
+                                onClick={onLogin}
+                            >
+                                Login
+                            </Button>
+                        </Paper>
+
+                        {/* <form>
                             <div>
                                 <label htmlFor="email-address">
                                     Email address
@@ -85,13 +119,13 @@ const Login = () => {
                                 </button>
                                 {error && <Alert severity="error">{error}</Alert>}
                             </div>
-                        </form>
+                        </form> */}
 
                         <p className="text-sm text-white text-center">
                             No account yet? {' '}
-                            <NavLink to="/register">
+                            <Button href="/register" variant='outlined'>
                                 Sign up
-                            </NavLink>
+                            </Button>
                         </p>
 
                     </div>

@@ -7,7 +7,7 @@ For this to work, the backend must run before the frontend.
 1. Navigate to the backend directory
 2. Run `python3 server.py` (on Linux)
 3. Navigate to the frontend directory
-4. Run `npm run start`
+4. Run `npm run start-dev`
 
 ## Running on Heroku
 Use the following code to upload to the frontend and backend respectively. Make sure you're in the root directory when running this from a terminal (e.g. tennis-router/, not tennis-router/frontend for example.)

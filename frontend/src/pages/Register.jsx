@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
-import { Alert } from '@mui/material';
+import { Alert, Button, Typography, Paper, TextField } from '@mui/material';
 
 // Tracking
 import { dispatchTrackingData } from '../TrackingDispatcher';
@@ -69,63 +69,61 @@ function Register() {
             <section>
                 <div>
                     <div>
-                        <h1> FocusApp </h1>
-                        <form>
-                            <div>
-                                <label htmlFor="display-name">
-                                    Display name
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Display Name"
-                                    value={displayName}
-                                    onChange={(e) => setDisplayName(e.target.value)}
-                                    required
-                                />
-                            </div>
+                        <Typography variant="h1" component="h1" gutterBottom>
+                            Register
+                        </Typography>
 
-                            <div>
-                                <label htmlFor="email-address">
-                                    Email address
-                                </label>
-                                <input
-                                    type="email"
-                                    label="Email address"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    placeholder="Email address"
-                                />
-                            </div>
+                        <Paper elevation={2} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem' }}>
+                            <TextField
+                                sx={{ m: 1, width: '25ch' }}
+                                id="display-name"
+                                label="Display name"
+                                variant="outlined"
+                                value={displayName}
+                                onChange={(e) => setDisplayName(e.target.value)}
+                                required
+                            />
+                            <TextField
+                                sx={{ m: 1, width: '25ch' }}
+                                id="email-address"
+                                label="Email address"
+                                variant="outlined"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                            <TextField
+                                sx={{ m: 1, width: '25ch' }}
+                                id="password"
+                                label="Password"
+                                variant="outlined"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                            <Typography variant="body2" gutterBottom sx={{paddingBlockStart: '1rem'}}>
+                                By clicking Sign up, you agree to our <a href="https://www.jads.nl/privacy-statement/" target='_blank'>Privacy Policy</a>.
+                            </Typography>
 
-                            <div>
-                                <label htmlFor="password">
-                                    Password
-                                </label>
-                                <input
-                                    type="password"
-                                    label="Create password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    placeholder="Password"
-                                />
-                            </div>
-
-                            <button
+                            <Button
+                                variant="contained"
                                 type="submit"
                                 onClick={onSubmit}
+                                sx={{ mt: 3, mb: 2, width: '90%' }}
                             >
                                 Sign up
-                            </button>
-                            {error && <Alert severity="error">{error}</Alert>}
+                            </Button>
+                        </Paper>
 
-                        </form>
+                        {error && <Alert severity="error">{error}</Alert>}
+
                         <p>
                             Already have an account?{' '}
-                            <NavLink to="/login" >
+                            {/* Stretch button to fill its container */}
+                            <Button href="/login" variant='outlined' >
                                 Sign in
-                            </NavLink>
+                            </Button>
                         </p>
                     </div>
                 </div>

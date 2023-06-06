@@ -109,9 +109,11 @@ def update_similarity_weights(user_id):
 
 @app.route("/users/<user_id>/get_similarity_weights", methods=["GET"])
 def get_similarity_weights(user_id):
+    print("Getting similarity weights for user", user_id)
     neo4j_worker = User_Worker()
     similarity_weights = neo4j_worker.get_similarity_weights(user_id)
     neo4j_worker.close()
+    print("Similarity weights", similarity_weights)
 
     return jsonify(similarity_weights), 200
 

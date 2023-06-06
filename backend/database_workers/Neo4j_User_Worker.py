@@ -43,6 +43,7 @@ class User_Worker:
         query = """ MERGE (u:User { name: $name, user_id: $user_id })
                 SET u.email = $email
                 SET u.days = []
+                SET u.similarity_weights = "all"
                 RETURN u.name AS name, u.user_id AS user_id, u.email AS email
             """
         result = tx.run(query, name=name, user_id=user_id, email=email)

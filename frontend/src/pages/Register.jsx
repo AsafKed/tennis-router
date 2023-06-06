@@ -81,6 +81,7 @@ function Register() {
                                 variant="outlined"
                                 value={displayName}
                                 onChange={(e) => setDisplayName(e.target.value)}
+                                onKeyPress={(e) => { if (e.key === 'Enter') onSubmit(e); }}
                                 required
                             />
                             <TextField
@@ -90,6 +91,7 @@ function Register() {
                                 variant="outlined"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                onKeyPress={(e) => { if (e.key === 'Enter') onSubmit(e); }}
                                 required
                             />
                             <TextField
@@ -100,9 +102,12 @@ function Register() {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                onKeyPress={(e) => { if (e.key === 'Enter') onSubmit(e); }}
                                 required
                             />
-                            <Typography variant="body2" gutterBottom sx={{paddingBlockStart: '1rem'}}>
+                            {error && <Alert severity="error">{error}</Alert>}
+                            
+                            <Typography variant="body2" gutterBottom sx={{ paddingBlockStart: '2rem' }}>
                                 By clicking Sign up, you agree to our <a href="https://www.jads.nl/privacy-statement/" target='_blank'>Privacy Policy</a>.
                             </Typography>
 
@@ -116,7 +121,6 @@ function Register() {
                             </Button>
                         </Paper>
 
-                        {error && <Alert severity="error">{error}</Alert>}
 
                         <p>
                             Already have an account?{' '}

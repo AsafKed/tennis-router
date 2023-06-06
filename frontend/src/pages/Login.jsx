@@ -58,6 +58,7 @@ const Login = () => {
                                 variant="outlined"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                onKeyPress={(e) => { if (e.key === 'Enter') onLogin(e); }}
                                 required
                             />
                             <TextField
@@ -68,6 +69,7 @@ const Login = () => {
                                 type='password'
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                onKeyPress={(e) => { if (e.key === 'Enter') onLogin(e); }}
                                 required
                             />
 

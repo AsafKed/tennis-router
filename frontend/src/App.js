@@ -8,7 +8,7 @@ import Register from "./pages/Register";
 
 // Post-login pages
 import UserPage from "./pages/UserPage";
-import PreferenceSolicitationPage from "./pages/PreferenceSolicitationPage";
+import BrowsingPage from "./pages/GeneralBrowsingPage";
 import BottomNavigationMenu from "./components/BottomNavigationMenu";
 import TopNavigationMenu from "./components/TopNavigationMenu";
 
@@ -92,7 +92,9 @@ function App() {
           <Routes>
             <Route path="/" element={<WelcomePage />} />
             <Route path="/user" element={loggedIn ? <UserPage /> : <Navigate to="/" />} />
-            <Route path="/preferences" element={<PreferenceSolicitationPage />} />
+            <Route path="/browser" element={<BrowsingPage />} />
+            {/* TODO the following */}
+            {/* <Route path="/browser/:player" element={<PreferenceSolicitationPage />} /> */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>

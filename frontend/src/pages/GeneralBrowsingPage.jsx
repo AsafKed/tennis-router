@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import PlayerSelectionPage from '../components/PlayerSelection';
-import UserPreferences from "../components/UserPreferences";
+import PlayerBrowsing from './PlayerBrowsingPage';
+import ParameterBrowsing from "../components/ParameterBrowsing";
 import TriangleSlider from "../components/TriangleSlider";
 
 // Tracking
@@ -8,7 +8,7 @@ import { dispatchTrackingData } from '../TrackingDispatcher';
 import { track, useTracking } from 'react-tracking';
 import { Box, Button, Typography } from '@mui/material';
 
-const PreferenceSolicitationPage = () => {
+const BrowsingPage = ({ inputPlayer }) => {
     // Have a toggle to show either the player selection page or the user preferences page
     const [showPlayerSelectionPage, setShowPlayerSelectionPage] = useState(true);
 
@@ -33,9 +33,9 @@ const PreferenceSolicitationPage = () => {
                 <Button onClick={handleToggle} variant='contained'>Toggle browse type</Button>
             </Box>
             {showPlayerSelectionPage ? <Typography variant="h2">Player Browsing</Typography> : <Typography variant="h2">Parameter Browsing</Typography>}
-            {showPlayerSelectionPage ? <PlayerSelectionPage /> : <UserPreferences />}
+            {showPlayerSelectionPage ? <PlayerBrowsing  /> : <ParameterBrowsing />}
         </div>
     )
 }
 
-export default track({ page: 'preferences' }, { dispatch: dispatchTrackingData })(PreferenceSolicitationPage);
+export default track({ page: 'browsing' }, { dispatch: dispatchTrackingData })(BrowsingPage);

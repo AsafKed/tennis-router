@@ -2,20 +2,21 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, Button } from '@mui/material';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
-import PlayerSimilarity from './PlayerBrowser/PlayerSimilarity';
+import PlayerSimilarity from '../components/PlayerBrowser/PlayerSimilarity';
 import ReactCountryFlag from "react-country-flag";
-import LikeButton from './LikeButton';
+import LikeButton from '../components/LikeButton';
 
 // Tracking
 import { useTracking } from 'react-tracking';
 
-const PlayerSelection = () => {
+const PlayerBrowsing = () => {
     const [players, setPlayers] = useState([]);
     const [filteredPlayers, setFilteredPlayers] = useState([]);
     const [sortOption, setSortOption] = useState('rank');
     const [userId, setId] = useState("");
     const [likedPlayers, setLikedPlayers] = useState([]);
     const [sortedLikedPlayers, setSortedLikedPlayers] = useState([]);
+
     // Player clicking
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [isPlayerCardOpen, setIsPlayerCardOpen] = useState(false);
@@ -255,4 +256,4 @@ const PlayerSelection = () => {
     );
 };
 
-export default PlayerSelection;
+export default PlayerBrowsing;

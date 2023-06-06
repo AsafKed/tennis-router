@@ -4,7 +4,7 @@ import PlayerCard from './PlayerCard';
 import PlayerCardMini from './PlayerCardMini';
 
 // Tracking
-import track, { useTracking } from 'react-tracking';
+import { useTracking } from 'react-tracking';
 
 const PlayerSimilarity = ({ playerName, userId, open, handleClose, isLoggedIn }) => {
     const [similarityWeight, setSimilarityWeight] = useState("all");

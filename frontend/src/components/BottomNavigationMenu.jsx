@@ -18,7 +18,7 @@ const BottomNavigationMenu = ({ loggedIn }) => {
 
   const routeToValueMap = {
     '/': 0,
-    '/preferences': 1,
+    '/browser': 1,
     '/user': 2,
     '/login': loggedIn ? -1 : 1,
     '/register': loggedIn ? -1 : 2,
@@ -47,10 +47,10 @@ const BottomNavigationMenu = ({ loggedIn }) => {
           onClick={() => handleNavigation('/')}
         />
         <BottomNavigationAction
-          key="preferences"
-          label="Preferences solicitation"
+          key="browser"
+          label="Player Browser"
           icon={<SportsTennisIcon />}
-          onClick={() => handleNavigation('/preferences')}
+          onClick={() => handleNavigation('/browser')}
         />,
         {loggedIn ? (
           [

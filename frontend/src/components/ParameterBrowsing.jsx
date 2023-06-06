@@ -7,7 +7,7 @@ import Slider from '@mui/material/Slider';
 // Firebase
 import { auth } from '../firebase';
 
-function UserPreferences() {
+function ParameterBrowsing() {
     const [preference1, setPreference1] = useState('');
     const [preference2, setPreference2] = useState('');
     const [sliderValue, setSliderValue] = useState(0);
@@ -106,4 +106,4 @@ function UserPreferences() {
     );
 }
 
-export default UserPreferences;
+export default ParameterBrowsing;

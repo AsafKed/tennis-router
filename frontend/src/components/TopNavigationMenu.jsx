@@ -33,7 +33,7 @@ const TopNavigationMenu = ({ loggedIn }) => {
         </Typography>
 
         {/* This should always be accessible */}
-        <IconButton color="inherit" onClick={() => handleNavigation('/preferences')}>
+        <IconButton color="inherit" onClick={() => handleNavigation('/browser')}>
           {/* Suitable Icon */}
           <SportsTennisIcon />
         </IconButton>

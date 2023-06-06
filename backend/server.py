@@ -7,6 +7,7 @@ from database_workers.Neo4j_User_Worker import User_Worker
 from database_workers.Neo4j_Player_Worker import Player_Worker
 from database_workers.Neo4j_Relation_Worker import Relation_Worker
 from database_workers.Neo4j_Similarity_Worker import Similarity_Worker
+from database_workers.Neo4j_Parameter_Worker import Parameter_Worker
 from database_workers.Neo4j_Event_Worker import Event_Worker
 import uuid
 import json
@@ -258,6 +259,21 @@ def get_player_data(player_name):
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error while getting player data'}), 500
+
+#################
+# Parameters
+#################
+@app.route('/parameter_options', methods=['GET'])
+def get_parameter_options():
+    try:
+        print("Getting parameter options")
+        neo4j_worker = Parameter_Worker()
+        parameter_options = neo4j_worker.get_parameter_options()
+        neo4j_worker.close()
+        return json.dumps(parameter_options, ensure_ascii=False), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Error while getting parameter options'}), 500
 
 # Track user
 @app.route('/users/track', methods=['POST'])

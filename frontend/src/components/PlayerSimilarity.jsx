@@ -6,7 +6,7 @@ import PlayerCardMini from './PlayerCardMini';
 // Tracking
 import track, { useTracking } from 'react-tracking';
 
-const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
+const PlayerSimilarity = ({ playerName, userId, open, handleClose, isLoggedIn }) => {
     const [similarityWeight, setSimilarityWeight] = useState("all");
     const [similarPlayers, setSimilarPlayers] = useState([]);
     const [showSimilarPlayers, setShowSimilarPlayers] = useState(false);
@@ -19,14 +19,17 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
 
     // Fetch similarity weight from the user
     useEffect(() => {
+        console.log('Is logged in?', isLoggedIn)
+
         const fetchSimilarityWeight = async () => {
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/get_similarity_weights`);
             const text = await response.text();
             const data = JSON.parse(text);
+            console.log(data)
             setSimilarityWeight(data);
         };
 
-        fetchSimilarityWeight();
+        if (isLoggedIn) fetchSimilarityWeight();
     }, [userId]);
 
     // Fetch similar players
@@ -34,7 +37,7 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose }) => {
         const fetchSimilarPlayers = async () => {
             // Turn spaces into underscores
             const playerNameForURL = playerName.replace(/ /g, '_');
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/similar/${playerNameForURL}/?user_id=${userId}`);
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/similar/${playerNameForURL}/?similarity_weight=${similarityWeight}`);
             const data = await response.json(); // Use response.json() instead of response.text()
             setSimilarPlayers(data);
         };

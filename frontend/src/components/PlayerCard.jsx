@@ -53,7 +53,7 @@ const PlayerCard = ({ playerName }) => {
                     <CircularProgress />
                 ) : (
                     playerData && (
-                        <Card>
+                        <Card sx={{':hover': {boxShadow: 20}}}>
                             <CardContent>
                                 <CardMedia
                                     component="img"

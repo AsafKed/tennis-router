@@ -178,15 +178,11 @@ def get_similar_players(player_name):
     # Convert underscores to spaces in player name
     player_name = player_name.replace("_", " ")
     query = request.args.to_dict(flat=False)
-    user_id = query['user_id'][0]
+    similarity_weight = query['similarity_weight'][0]
 
     try:
-        user_worker = User_Worker()
-        weight = user_worker.get_similarity_weights(user_id)
-        user_worker.close()
-
         sim_worker = Similarity_Worker()
-        similar_players = sim_worker.get_top_similarities(player_name, weight)
+        similar_players = sim_worker.get_top_similarities(player_name, similarity_weight)
         sim_worker.close()
 
         return json.dumps(similar_players, ensure_ascii=False), 200

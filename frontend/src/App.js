@@ -92,7 +92,7 @@ function App() {
           <Routes>
             <Route path="/" element={<WelcomePage />} />
             <Route path="/user" element={loggedIn ? <UserPage /> : <Navigate to="/" />} />
-            <Route path="/preferences" element={loggedIn ? <PreferenceSolicitationPage /> : <Navigate to="/" />} />
+            <Route path="/preferences" element={<PreferenceSolicitationPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>

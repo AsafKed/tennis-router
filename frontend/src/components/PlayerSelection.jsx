@@ -18,6 +18,8 @@ const PlayerSelection = () => {
     // Player clicking
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [isPlayerCardOpen, setIsPlayerCardOpen] = useState(false);
+    // Only allow to like if logged in
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     // Tracking
     const { trackEvent } = useTracking();
 
@@ -72,9 +74,11 @@ const PlayerSelection = () => {
             if (user) {
                 const uid = user.uid;
                 setId(uid);
+                setIsLoggedIn(true);
             } else {
                 // User is signed out
-                // console.log("user is logged out")
+                console.log("user is logged out")
+                setIsLoggedIn(false);
             }
         });
 
@@ -154,32 +158,36 @@ const PlayerSelection = () => {
                 <MenuItem value="rank">Rank</MenuItem>
                 <MenuItem value="alphabetical">Alphabetical</MenuItem>
             </TextField>
-            <h2>Liked Players</h2>
 
-            {/* To do turn this into like a carousel thing */}
-            <Grid container spacing={4}>
-                {likedPlayers.map((player) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
-                        <Card>
-                            <CardMedia
-                                component="img"
-                                height="300"
-                                image={player.image_url}
-                                alt={player.name}
-                                sx={{ objectFit: 'contain' }}
-                            />
-                            <CardContent>
-                                <Typography gutterBottom variant="h5" component="div">
-                                    {player.name}
-                                </Typography>
-                                <Button onClick={() => handleUnlike(player.name)}>
-                                    Unlike
-                                </Button>
-                            </CardContent>
-                        </Card>
+            {isLoggedIn && (
+                <div>
+                    <h2>Liked Players</h2>
+
+                    <Grid container spacing={4}>
+                        {likedPlayers.map((player) => (
+                            <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
+                                <Card>
+                                    <CardMedia
+                                        component="img"
+                                        height="300"
+                                        image={player.image_url}
+                                        alt={player.name}
+                                        sx={{ objectFit: 'contain' }}
+                                    />
+                                    <CardContent>
+                                        <Typography gutterBottom variant="h5" component="div">
+                                            {player.name}
+                                        </Typography>
+                                        <Button onClick={() => handleUnlike(player.name)}>
+                                            Unlike
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))}
                     </Grid>
-                ))}
-            </Grid>
+                </div>
+            )}
 
             <h2>All Competitors</h2>
             <Grid container spacing={4}>
@@ -215,10 +223,13 @@ const PlayerSelection = () => {
                                 <Typography variant="body1" color="text.secondary">
                                     Rank: {player.rank}
                                 </Typography>
-                                <LikeButton isLiked={isLiked(player.name)}
-                                    onLike={() => handleLike(player.name)}
-                                    onUnlike={() => handleUnlike(player.name)}
-                                />
+                                {/* Only display the like button if the user is logged in */}
+                                {isLoggedIn && (
+                                    <LikeButton isLiked={isLiked(player.name)}
+                                        onLike={() => handleLike(player.name)}
+                                        onUnlike={() => handleUnlike(player.name)}
+                                    />
+                                )}
                             </CardContent>
                         </Card>
                     </Grid>

@@ -46,14 +46,14 @@ const BottomNavigationMenu = ({ loggedIn }) => {
           icon={<HomeIcon />}
           onClick={() => handleNavigation('/')}
         />
+        <BottomNavigationAction
+          key="preferences"
+          label="Preferences solicitation"
+          icon={<SportsTennisIcon />}
+          onClick={() => handleNavigation('/preferences')}
+        />,
         {loggedIn ? (
           [
-            <BottomNavigationAction
-              key="preferences"
-              label="Preferences solicitation"
-              icon={<SportsTennisIcon />}
-              onClick={() => handleNavigation('/preferences')}
-            />,
             <BottomNavigationAction
               key="user"
               label="User"
@@ -63,12 +63,6 @@ const BottomNavigationMenu = ({ loggedIn }) => {
           ]
         ) : (
           [
-            <BottomNavigationAction
-              key="login"
-              label="Login"
-              icon={<LoginIcon />}
-              onClick={() => handleNavigation('/login')}
-            />,
             <BottomNavigationAction
               key="register"
               label="Register"

@@ -32,13 +32,14 @@ const TopNavigationMenu = ({ loggedIn }) => {
           Tennis Router
         </Typography>
 
+        {/* This should always be accessible */}
+        <IconButton color="inherit" onClick={() => handleNavigation('/preferences')}>
+          {/* Suitable Icon */}
+          <SportsTennisIcon />
+        </IconButton>
         {/* Only show these pages if the user is logged in */}
         {loggedIn && (
           <>
-            <IconButton color="inherit" onClick={() => handleNavigation('/preferences')}>
-              {/* Suitable Icon */}
-              <SportsTennisIcon />
-            </IconButton>
             <IconButton color="inherit" onClick={() => handleNavigation('/user')}>
               <PersonIcon />
             </IconButton>

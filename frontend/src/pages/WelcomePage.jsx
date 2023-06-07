@@ -18,25 +18,47 @@ function WelcomePage() {
     // Add styling to the div. Make it look nice.
     <div style={{ maxWidth: "90%", textAlign: "left", flexGrow: 1, padding: "1rem", wordWrap: "break-word" }}>
       <Typography variant="h1">Welcome to the Match Recommender!</Typography>
-      <Typography variant="h2">What is this?</Typography>
-      <p>This is a tool to help you find a suitable tennis match.</p>
-      <p>Explore with it.</p>
 
-      <Typography variant="h2">How does it work?</Typography>
-      <p>Check out the players in the browse page.</p>
+      <Typography variant="h5">Browsing players</Typography>
+      <Typography variant="body1">
+        You can use this website to <a href="/browser">browse</a> the list of players participating in the Libema-
+        open tournament. Click the racket icon to open the player browser. When clicking a player,
+        you will get to see several player characteristics such as play style and personality. You can
+        also view similar players.
+      </Typography>
 
-      <Typography variant="h2">How do I get recommendations?</Typography>
-      <p>Navigate to the user page.</p>
-      <p>In Settings, specify which days you'll come.</p>
-      <p>In Groups, join or create a group, if you plan to come with one.</p>
+      <br />
 
+      <Typography variant="h5">Get recommendations on which player to watch</Typography>
+      <Typography variant="body1">
+        We offer more functionality if you <a href="/register">register</a> for our system with your email address. An
+        account will be created and the browser tool will allow you to indicate your player
+        preferences. It will show you player recommendations based on the player characteristics
+        you select or the players you mark with a like.
+        If you are visiting the tournament, we can provide you with a schedule with recommended
+        matches to watch on the day of your visit. On the user page you can indicate which days you
+        are visiting the tournament. The evening before each day we will email you a schedule as
+        well. The day after your visit we will send you a short survey about our system.
+      </Typography>
 
+      <br />
 
-      <Typography variant="h2">More info</Typography>
-      <p>We'll make recommendations for singles matches.</p>
-      <p>This tool is created by Asaf Kedem for his Master thesis at the Jheronimus Academy of Data Science, to be used at the Libema Open.</p>
-      <p>The goal is to research group recommendations in a real-life context.</p>
-      <p>For more information, contact Asaf at <a href="mailto:a.kedem@tilburguniversity.edu">a.kedem@tilburguniversity.edu</a>.</p>
+      <Typography variant="h5">We also recommend for groups!</Typography>
+      <Typography variant="body1">
+        If you visit the tournament with a group (2 people or more), each group member can register
+        and indicate their preferences. One member ca create a group and share the link with the
+        other members. Our system will then recommend you what matches to watch that fit the
+        preferences of the group best.
+      </Typography>
+
+      <br />
+      <br />
+
+      <Typography variant="caption">
+        This tool is created by Asaf Kedem for his Master thesis at the Jheronimus Academy of Data Science, to be used
+        at the Libema Open. The goal is to research group recommendations in a real-life context. For more information,
+        contact Asaf at <a href="mailto:a.kedem@tilburguniversity.edu">a.kedem@tilburguniversity.edu</a>.
+      </Typography>
 
     </div>
   );

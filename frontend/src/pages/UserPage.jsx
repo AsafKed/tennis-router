@@ -1,11 +1,12 @@
 import "../App.css";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Divider, Typography, List, ListItem, ListItemButton, ListItemText, Badge } from '@mui/material';
+import { Box, Button, Divider, List, ListItem, ListItemButton, ListItemText, Badge } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import RecommendationsView from "../components/userComponents/RecommendationsView";
 import GroupView from "../components/userComponents/GroupView";
 import SettingsView from "../components/userComponents/SettingsView";
+import InfoPopup from "../components/InfoPopup";
 
 // Firebase
 import { onAuthStateChanged } from "firebase/auth";
@@ -25,7 +26,7 @@ function UserPage() {
 
   const listItems = [{ view: 'Recommendations', component: <RecommendationsView userId={userId} /> },
   { view: 'Groups', component: <GroupView userId={userId} /> },
-  { view: 'Settings', component: <SettingsView userId={userId} /> }]
+  { view: 'Days', component: <SettingsView userId={userId} /> }]
 
   // Tracking
   const { trackEvent } = useTracking();
@@ -106,7 +107,11 @@ function UserPage() {
 
   return (
     <div>
-      <h1>User Page</h1>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <h1>User Page</h1>
+        <InfoPopup infoText="On this page you create and join groups and indicate which days you plan to visit the
+tournament. You can also view the recommended matches for the next day (when available)" />
+      </Box>
       <h3>Welcome back, {name}.</h3>
       <Divider />
       <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
@@ -140,7 +145,7 @@ function UserPage() {
           >
             <ListItemText primary={listItems[2].view} secondary={
               <React.Fragment>
-                {"Fill these in to get recommendations."}
+                {"Fill in the days you're attending to get recommendations."}
               </React.Fragment>
             } />
           </ListItemButton>

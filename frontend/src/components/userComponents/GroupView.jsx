@@ -3,10 +3,12 @@ import GroupForm from "./GroupForm";
 import GroupDetailsCard from "./GroupDetailsCard";
 import UserList from "../UserList";
 import { io } from "socket.io-client";
+import { Box } from '@mui/material';
 
 // Tracking
 import { dispatchTrackingData } from '../../TrackingDispatcher';
 import { track, useTracking } from 'react-tracking';
+import InfoPopup from '../InfoPopup';
 
 function GroupView({ userId }) {
     const [socketInstance, setSocketInstance] = useState(null);
@@ -126,7 +128,13 @@ function GroupView({ userId }) {
     return (
         <div onClick={handlePageClick}>
             <div>
-                <h1>Groups</h1>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <h1>Groups</h1>
+                    <InfoPopup infoText="you can create a new group and ask other people to join the group by sending them
+                a link with an access code. The recommendations for which matches to watch will then take
+                into account the group you are in. Our recommender will try to schedule matches in such a
+                way that it satisfies the preferences in the group as much as possible." />
+                </Box>
                 <div>
                     {groups.map((group, ind) => (
                         <GroupDetailsCard

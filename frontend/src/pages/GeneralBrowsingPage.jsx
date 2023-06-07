@@ -2,11 +2,15 @@ import React, { useEffect, useState } from 'react';
 import PlayerBrowsing from './PlayerBrowsingPage';
 import ParameterBrowsing from "../components/ParameterBrowsing";
 import TriangleSlider from "../components/TriangleSlider";
+import InfoPopup from '../components/InfoPopup';
+
+// Styling
+import { Box, Typography } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 // Tracking
 import { dispatchTrackingData } from '../TrackingDispatcher';
 import { track, useTracking } from 'react-tracking';
-import { Box, Button, Typography } from '@mui/material';
 
 const BrowsingPage = ({ inputPlayer }) => {
     // Have a toggle to show either the player selection page or the user preferences page
@@ -27,13 +31,20 @@ const BrowsingPage = ({ inputPlayer }) => {
 
     return (
         <div>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <Typography variant="h1">Browser Page</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                    <Typography variant="h1">Browser Page</Typography>
+                    <InfoPopup infoText="On this page you browse players at Libema-open. You can order players alphabetically or by rank. You can also find players by indicating what characteristics you prefer. If you click on a
+                                         player, you can see player characteristics and also find similar players to this player.<br />
+                                         If you want to get personalized recommendations for which players or matches to watch
+                                         during the tournament, please register/login first."
+                    />
+                </Box>
                 {/* <TriangleSlider /> */}
-                <Button onClick={handleToggle} variant='contained'>Toggle browse type</Button>
+                {/* <Button onClick={handleToggle} variant='contained'>{showPlayerSelectionPage ? "Browse by parameters" : "Browse by players"}</Button> */}
             </Box>
             {showPlayerSelectionPage ? <Typography variant="h2">Player Browsing</Typography> : <Typography variant="h2">Parameter Browsing</Typography>}
-            {showPlayerSelectionPage ? <PlayerBrowsing  /> : <ParameterBrowsing />}
+            {showPlayerSelectionPage ? <PlayerBrowsing /> : <ParameterBrowsing />}
         </div>
     )
 }

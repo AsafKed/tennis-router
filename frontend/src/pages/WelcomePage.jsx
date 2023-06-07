@@ -16,7 +16,7 @@ function WelcomePage() {
 
   return (
     // Add styling to the div. Make it look nice.
-    <div style={{ width: "50%", textAlign: "left" }}>
+    <div style={{ maxWidth: "90%", textAlign: "left", flexGrow: 1, padding: "1rem", wordWrap: "break-word" }}>
       <Typography variant="h1">Welcome to the Match Recommender!</Typography>
       <Typography variant="h2">What is this?</Typography>
       <p>This is a tool to help you find a suitable tennis match.</p>

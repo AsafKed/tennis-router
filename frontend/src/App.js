@@ -99,7 +99,7 @@ function App() {
             <Route path="/register" element={<Register />} />
           </Routes>
           <div style={{ flexGrow: 1 }}></div>
-          <BottomNavigationMenu loggedIn={loggedIn} />
+          <BottomNavigationMenu loggedIn={loggedIn}/>
         </BrowserRouter>
       </ThemeProvider>
     </div >

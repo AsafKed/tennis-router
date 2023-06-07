@@ -152,6 +152,7 @@ function ParameterBrowsing() {
             </Grid>
             <Grid item xs={12} sm={8}>
                 <Typography variant='h3' sx={{ mb: 2 }}>Players</Typography>
+                <Typography variant='h6' sx={{ mb: 2 }}>This page is under development.</Typography>
             </Grid>
         </Grid>
     );

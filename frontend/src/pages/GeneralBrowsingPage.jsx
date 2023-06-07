@@ -14,9 +14,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { dispatchTrackingData } from '../TrackingDispatcher';
 import { track, useTracking } from 'react-tracking';
 
-const BrowsingPage = ({ inputPlayer }) => {
-    const { browseType } = useParams();
+const BrowsingPage = () => {
+    const params = useParams();
     const navigate = useNavigate();
+    console.log("params: ", params)
+
+    // Get the browse type from the url
+    const browseType = params.browseType;
+    const playerName = params.playerName;
 
     useEffect(() => {
         if (browseType !== 'player' && browseType !== 'parameter') {
@@ -27,7 +32,7 @@ const BrowsingPage = ({ inputPlayer }) => {
     // Have a toggle to show either the player selection page or the user preferences page
     const [showPlayerSelectionPage, setShowPlayerSelectionPage] = useState(true);
 
-    console.log("browseType: ", browseType)
+
     //Tracking
     const { trackEvent } = useTracking();
     // Upon opening the page
@@ -55,7 +60,7 @@ const BrowsingPage = ({ inputPlayer }) => {
             </Box>
             {/* Remove the conditional rendering of PlayerBrowsing and ParameterBrowsing */}
             {browseType === 'player' ? <Typography variant="h2">Player Browsing</Typography> : <Typography variant="h2">Parameter Browsing</Typography>}
-            {browseType === 'player' ? <PlayerBrowsing /> : <ParameterBrowsing />}
+            {browseType === 'player' ? <PlayerBrowsing selectedPlayer={playerName} /> : <ParameterBrowsing />}
         </div>
     )
 }

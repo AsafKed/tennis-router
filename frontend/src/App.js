@@ -100,7 +100,7 @@ function App() {
             <Route path="/user" element={loggedIn ? <UserPage /> : <Navigate to="/" />} />
             
             <Route path="/browser" element={<BrowsingPage />}>
-              <Route path="/browser/:browseType" element={<BrowsingPage />} />
+              <Route path="/browser/:browseType/:playerName?" element={<BrowsingPage />} />
             </Route>
 
             {/* TODO the following */}

@@ -3,10 +3,15 @@ import { Button, Modal, useMediaQuery, useTheme } from '@mui/material';
 import PlayerCard from './PlayerCard';
 import PlayerCardMini from './PlayerCardMini';
 
+import { useParams } from 'react-router-dom';
+
 // Tracking
 import { useTracking } from 'react-tracking';
 
-const PlayerSimilarity = ({ playerName, userId, open, handleClose, isLoggedIn }) => {
+const PlayerSimilarity = ({ userId, open, handleClose, isLoggedIn }) => {
+    const { playerName: playerNameInUrl } = useParams();
+    const playerName = playerNameInUrl || playerName;
+
     const [similarityWeight, setSimilarityWeight] = useState("all");
     const [similarPlayers, setSimilarPlayers] = useState([]);
     const [showSimilarPlayers, setShowSimilarPlayers] = useState(false);
@@ -55,7 +60,7 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose, isLoggedIn })
             }}>
                 <div>
 
-                    <PlayerCard playerName={playerName} />
+                    <PlayerCard playerName={playerName} handleClose={handleClose}/>
                     <Button
                         onClick={() => setShowSimilarPlayers(!showSimilarPlayers)}
                         variant="contained"

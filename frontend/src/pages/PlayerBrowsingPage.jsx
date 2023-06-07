@@ -6,10 +6,13 @@ import PlayerSimilarity from '../components/PlayerBrowser/PlayerSimilarity';
 import ReactCountryFlag from "react-country-flag";
 import LikeButton from '../components/LikeButton';
 
-// Tracking
-import { useTracking } from 'react-tracking';
+import { useNavigate } from 'react-router-dom';
 
-const PlayerBrowsing = () => {
+// Tracking
+import { track, useTracking } from 'react-tracking';
+import { dispatchTrackingData } from '../TrackingDispatcher';
+
+const PlayerBrowsing = ({ selectedPlayer }) => {
     const [players, setPlayers] = useState([]);
     const [filteredPlayers, setFilteredPlayers] = useState([]);
     const [sortOption, setSortOption] = useState('rank');
@@ -18,8 +21,10 @@ const PlayerBrowsing = () => {
     const [sortedLikedPlayers, setSortedLikedPlayers] = useState([]);
 
     // Player clicking
-    const [selectedPlayer, setSelectedPlayer] = useState(null);
-    const [isPlayerCardOpen, setIsPlayerCardOpen] = useState(false);
+    // const [selectedPlayer, setSelectedPlayer] = useState(null);
+    const [isPlayerCardOpen, setIsPlayerCardOpen] = useState(selectedPlayer ? true : false);
+    const navigate = useNavigate();
+
     // Only allow to like if logged in
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     // Tracking
@@ -144,16 +149,27 @@ const PlayerBrowsing = () => {
         return likedPlayers.some(likedPlayer => likedPlayer.name === playerName);
     };
 
+    useEffect(() => {
+        if (selectedPlayer) {
+            trackEvent({ action: 'view_player', player_name: selectedPlayer })
+        }
+        console.log(`selectedPlayer: ${selectedPlayer}, isPlayerCardOpen: ${isPlayerCardOpen}`)
+    }, [selectedPlayer]);
+
     // Player clicking
     const handlePlayerClick = (playerName) => {
-        setSelectedPlayer(playerName);
-        setIsPlayerCardOpen(true);
+        // Replace spaces in the player's name with underscores
+        const playerNameInUrl = playerName.replace(/ /g, '_');
+
         trackEvent({ action: 'view_player', player_name: playerName });
+
+        // Navigate to the new URL
+        navigate(`/browser/player/${playerNameInUrl}`);
     };
 
     const handlePlayerCardClose = () => {
-        setIsPlayerCardOpen(false);
         trackEvent({ action: 'close_player' });
+        navigate('/browser/player');
     };
 
     return (
@@ -254,8 +270,9 @@ const PlayerBrowsing = () => {
                     </Grid>
                 ))}
             </Grid>
-            {selectedPlayer && <PlayerSimilarity playerName={selectedPlayer} userId={userId} open={isPlayerCardOpen} handleClose={handlePlayerCardClose} isLoggedIn={isLoggedIn} />}        </div>
+            {selectedPlayer && <PlayerSimilarity playerName={selectedPlayer} userId={userId} open={isPlayerCardOpen} handleClose={handlePlayerCardClose} isLoggedIn={isLoggedIn} />}
+        </div>
     );
 };
 
-export default PlayerBrowsing;
+export default track({ page: 'browsing/player' }, { dispatch: dispatchTrackingData })(PlayerBrowsing);

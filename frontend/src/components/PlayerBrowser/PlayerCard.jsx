@@ -11,7 +11,7 @@ import ReactCountryFlag from "react-country-flag";
 // Tracking
 import { useTracking } from 'react-tracking';
 
-const PlayerCard = ({ playerName }) => {
+const PlayerCard = ({ playerName, handleClose }) => {
     const [playerData, setPlayerData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
@@ -22,11 +22,6 @@ const PlayerCard = ({ playerName }) => {
     const handleExpandClick = () => {
         setExpanded(!expanded);
         trackEvent({ action: expanded ? 'player_card_hide_more_info' : 'player_card_show_more_info', player_name: playerName });
-    };
-
-    const handleClose = () => {
-        // TODO add going back to the previous page
-        trackEvent({ action: 'player_card_close', player_name: playerName });
     };
 
     useEffect(() => {

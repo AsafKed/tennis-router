@@ -63,7 +63,6 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose, isLoggedIn })
                         style={{
                             position: 'relative',
                             bottom: 0,
-                            right: 0,
                             height: '50px',
                         }}
                     >

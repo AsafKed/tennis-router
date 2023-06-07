@@ -89,7 +89,7 @@ const PlayerBrowsing = () => {
                 setIsLoggedIn(true);
             } else {
                 // User is signed out
-                console.log("user is logged out")
+                // console.log("user is logged out")
                 setIsLoggedIn(false);
             }
         });

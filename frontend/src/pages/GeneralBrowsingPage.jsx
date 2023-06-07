@@ -1,21 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import PlayerBrowsing from './PlayerBrowsingPage';
-import ParameterBrowsing from "../components/ParameterBrowsing";
+import ParameterBrowsing from "./ParameterBrowsingPage";
 import TriangleSlider from "../components/TriangleSlider";
 import InfoPopup from '../components/InfoPopup';
 
 // Styling
 import { Box, Typography } from '@mui/material';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+
+// Navigating
+import { useNavigate, useParams } from 'react-router-dom';
 
 // Tracking
 import { dispatchTrackingData } from '../TrackingDispatcher';
 import { track, useTracking } from 'react-tracking';
 
 const BrowsingPage = ({ inputPlayer }) => {
+    const { browseType } = useParams();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (browseType !== 'player' && browseType !== 'parameter') {
+            navigate('/browser/player');
+        }
+    }, [browseType]);
+
     // Have a toggle to show either the player selection page or the user preferences page
     const [showPlayerSelectionPage, setShowPlayerSelectionPage] = useState(true);
 
+    console.log("browseType: ", browseType)
     //Tracking
     const { trackEvent } = useTracking();
     // Upon opening the page
@@ -40,11 +52,10 @@ const BrowsingPage = ({ inputPlayer }) => {
                                          during the tournament, please register/login first."
                     />
                 </Box>
-                {/* <TriangleSlider /> */}
-                {/* <Button onClick={handleToggle} variant='contained'>{showPlayerSelectionPage ? "Browse by parameters" : "Browse by players"}</Button> */}
             </Box>
-            {showPlayerSelectionPage ? <Typography variant="h2">Player Browsing</Typography> : <Typography variant="h2">Parameter Browsing</Typography>}
-            {showPlayerSelectionPage ? <PlayerBrowsing /> : <ParameterBrowsing />}
+            {/* Remove the conditional rendering of PlayerBrowsing and ParameterBrowsing */}
+            {browseType === 'player' ? <Typography variant="h2">Player Browsing</Typography> : <Typography variant="h2">Parameter Browsing</Typography>}
+            {browseType === 'player' ? <PlayerBrowsing /> : <ParameterBrowsing />}
         </div>
     )
 }

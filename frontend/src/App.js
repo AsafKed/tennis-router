@@ -9,7 +9,11 @@ import Register from "./pages/Register";
 
 // Post-login pages
 import UserPage from "./pages/UserPage";
+
+// Browsing pages
 import BrowsingPage from "./pages/GeneralBrowsingPage";
+
+// Navigation pages
 import BottomNavigationMenu from "./components/BottomNavigationMenu";
 import TopNavigationMenu from "./components/TopNavigationMenu";
 
@@ -94,7 +98,11 @@ function App() {
             <Route path="/" element={<WelcomePage />} />
             <Route path="/data-usage-policy" element={<DataUsagePolicy />} />
             <Route path="/user" element={loggedIn ? <UserPage /> : <Navigate to="/" />} />
-            <Route path="/browser" element={<BrowsingPage />} />
+            
+            <Route path="/browser" element={<BrowsingPage />}>
+              <Route path="/browser/:browseType" element={<BrowsingPage />} />
+            </Route>
+
             {/* TODO the following */}
             {/* <Route path="/browser/:player" element={<PreferenceSolicitationPage />} /> */}
             <Route path="/login" element={<Login />} />

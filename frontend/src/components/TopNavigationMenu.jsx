@@ -4,8 +4,6 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import PersonIcon from '@mui/icons-material/Person';
 import SportsTennisIcon from '@mui/icons-material/SportsTennis';
-import HomeIcon from '@mui/icons-material/Home';
-import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,7 +24,15 @@ const TopNavigationMenu = ({ loggedIn }) => {
     <AppBar position="sticky" color="primary">
       <Toolbar>
         <IconButton edge="start" color="inherit" onClick={() => handleNavigation('/')}>
-          <HomeIcon />
+          <img src={`${process.env.PUBLIC_URL}/JADS_logo_WHITE.png`} alt="JADS Logo"
+            // <img src={`${process.env.PUBLIC_URL}/JADS_logo_RGB.ico`} alt="JADS Logo"
+            display="block"
+            width="auto"
+            height="40" />
+          <img src={`${process.env.PUBLIC_URL}/libemaopen-logo.png`} alt="Libema Logo"
+            display="block"
+            width="auto"
+            height="35" />
         </IconButton>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           JADS – Libéma Recommender

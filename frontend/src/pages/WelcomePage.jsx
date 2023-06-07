@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Typography } from "@mui/material";
+import { Divider, Typography } from "@mui/material";
 
 // Tracking
 import { dispatchTrackingData } from '../TrackingDispatcher';
@@ -54,11 +54,21 @@ function WelcomePage() {
       <br />
       <br />
 
+      <Divider style={{ marginTop: "1rem", marginBottom: "1rem" }} />
       <Typography variant="caption">
         This tool is created by Asaf Kedem for his Master thesis at the Jheronimus Academy of Data Science, to be used
         at the Libema Open. The goal is to research group recommendations in a real-life context. For more information,
         contact Asaf at <a href="mailto:a.kedem@tilburguniversity.edu">a.kedem@tilburguniversity.edu</a>.
       </Typography>
+      <br />
+      <br />
+
+
+      {/* Display the logos below the text, centered */}
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "1rem" }}>
+        <img src={`${process.env.PUBLIC_URL}/JADS_logo_RGB.ico`} alt="JADS logo" style={{ width: "150px", height: "auto" }} />
+        <img src={`${process.env.PUBLIC_URL}/libemaopen-logo.png`} alt="Libema logo" style={{ width: "150px", height: "auto" }} />
+      </div>
 
     </div>
   );

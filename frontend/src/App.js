@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 // Pre-login pages
 import WelcomePage from "./pages/WelcomePage";
+import DataUsagePolicy from "./pages/DataUsagePolicy";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
@@ -91,6 +92,7 @@ function App() {
           <TopNavigationMenu loggedIn={loggedIn} />
           <Routes>
             <Route path="/" element={<WelcomePage />} />
+            <Route path="/data-usage-policy" element={<DataUsagePolicy />} />
             <Route path="/user" element={loggedIn ? <UserPage /> : <Navigate to="/" />} />
             <Route path="/browser" element={<BrowsingPage />} />
             {/* TODO the following */}

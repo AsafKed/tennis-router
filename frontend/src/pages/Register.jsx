@@ -109,25 +109,9 @@ function Register() {
                             {error && <Alert severity="error">{error}</Alert>}
 
                             <Typography variant="body2" gutterBottom sx={{ paddingBlockStart: '2rem' }}>
-                                By clicking Sign up, you agree to our <a href="https://www.jads.nl/privacy-statement/" target='_blank'>Privacy Policy</a>.
+                                By clicking Sign up, you agree to our <a href="https://www.jads.nl/privacy-statement/" target='_blank'>Privacy Policy</a> and <a href="/data-usage-policy">Data Usage Policy</a>.
                             </Typography>
 
-                            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: '1rem' }}>
-                                <Typography variant="body2" gutterBottom>
-                                    By clicking Sign up, you agree to the data usage policy.
-                                </Typography>
-                                <InfoPopup infoText="
-                                By clicking Sign up, you consent to participate in the research on our
-                                recommender system, which is part of a MSc thesis Research project of Asaf Kedem at
-                                JADS, supervised by dr. Martijn Willemsen. The web app will securely store your email
-                                address, your interactions with the app and answers to questions in our surveys. The web-
-                                app is hosted on a European server of Heroku that adheres to GDPR guidelines, You will
-                                receive emails during the tournament with recommended schedules and links to short
-                                questionnaires to evaluate the system. After the tournament is over, we will anonymize the
-                                data and permanently delete your email address. The anonymized data might be shared with
-                                other researchers for follow-up research."
-                                />
-                            </Box>
                             <Button
                                 variant="contained"
                                 type="submit"

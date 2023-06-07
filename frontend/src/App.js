@@ -37,7 +37,7 @@ function App() {
   const theme = createTheme({
     palette: {
       primary: {
-        main: "#2D2F7F",
+        main: "#2D2F7F"
       },
       secondary: {
         main: "#CA4F55",
@@ -101,7 +101,7 @@ function App() {
             <Route path="/register" element={<Register />} />
           </Routes>
           <div style={{ flexGrow: 1 }}></div>
-          <BottomNavigationMenu loggedIn={loggedIn}/>
+          <BottomNavigationMenu loggedIn={loggedIn} />
         </BrowserRouter>
       </ThemeProvider>
     </div >

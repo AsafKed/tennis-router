@@ -29,7 +29,7 @@ const TopNavigationMenu = ({ loggedIn }) => {
           <HomeIcon />
         </IconButton>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Tennis Router
+          JADS – Libéma Recommender
         </Typography>
 
         {/* This should always be accessible */}

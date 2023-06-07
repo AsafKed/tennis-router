@@ -25,7 +25,7 @@ const InfoPopup = ({ infoText }) => {
         <>
             <Tooltip title="More Info">
                 <IconButton onClick={handleClick}>
-                    <InfoOutlinedIcon sx={{ fontSize: "2rem" }} color='primary' />
+                    <InfoOutlinedIcon sx={{ fontSize: "2rem" }} color='secondary' />
                 </IconButton>
             </Tooltip>
             <Popover

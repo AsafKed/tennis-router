@@ -177,7 +177,8 @@ const PlayerBrowsing = () => {
                     <Grid container spacing={4}>
                         {sortedLikedPlayers.map((player) => (
                             <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
-                                <Card onClick={() => handlePlayerClick(player.name)} style={{ position: 'relative' }}>
+                                <Card onClick={() => handlePlayerClick(player.name)}
+                                    sx={{ position: 'relative', '&:hover': { boxShadow: 3 } }}>
                                     <CardMedia
                                         component="img"
                                         height="300"
@@ -210,7 +211,8 @@ const PlayerBrowsing = () => {
             <Grid container spacing={4}>
                 {filteredPlayers.map((player) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
-                        <Card onClick={() => handlePlayerClick(player.name)} style={{ position: 'relative' }}>
+                        <Card onClick={() => handlePlayerClick(player.name)}
+                            sx={{ position: 'relative', '&:hover': { boxShadow: 4 } }}>
                             <CardMedia
                                 component="img"
                                 height="300"

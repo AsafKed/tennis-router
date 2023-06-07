@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
+// Styling
 import { Card, CardContent, Typography, Select, MenuItem } from '@mui/material';
-import ReactCountryFlag from "react-country-flag";
 import Chip from '@mui/material/Chip';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+
+import ReactCountryFlag from "react-country-flag";
 
 const PlayerCardMini = ({ player }) => {
     // Get info on the player
     const [playerInfo, setPlayerInfo] = useState({});
     const [dataType, setDataType] = useState('description');
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => {
         const fetchPlayerInfo = async () => {
@@ -24,13 +31,13 @@ const PlayerCardMini = ({ player }) => {
     };
 
     return (
-        <Card style={{ width: '33vw', height: '33vh', marginBottom: '20px' }}>
-            <CardContent>
+        <Card style={{ width: isMobile ? '90vw' : '33vw', height: 'auto', marginBottom: '20px' }}>
+            <CardContent style={{ padding: '20px' }}>
                 <Typography variant="h5" component="div">
                     {player.player2}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    Similarity: {Math.round(player.similarity*100)}%
+                    Similarity: {Math.round(player.similarity * 100)}%
                 </Typography>
                 <Select
                     value={dataType}

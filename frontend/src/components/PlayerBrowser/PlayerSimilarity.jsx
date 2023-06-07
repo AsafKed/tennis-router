@@ -19,13 +19,11 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose, isLoggedIn })
 
     // Fetch similarity weight from the user
     useEffect(() => {
-        console.log('Is logged in?', isLoggedIn)
-
         const fetchSimilarityWeight = async () => {
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/get_similarity_weights`);
             const text = await response.text();
             const data = JSON.parse(text);
-            console.log(data)
+            // console.log(data)
             setSimilarityWeight(data);
         };
 
@@ -46,31 +44,32 @@ const PlayerSimilarity = ({ playerName, userId, open, handleClose, isLoggedIn })
     }, [playerName, userId, similarityWeight]);
 
     return (
-        <Modal open={open} onClose={handleClose}>
+        <Modal open={open} onClose={handleClose} style={{ overflow: 'auto' }}>
             <div style={{
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
                 justifyContent: 'center',
                 alignItems: 'center',
-                padding: '20px',
+                padding: isMobile ? '10px' : '20px',
                 position: 'relative'
             }}>
-                <PlayerCard playerName={playerName} />
-                <Button
-                    onClick={() => setShowSimilarPlayers(!showSimilarPlayers)}
-                    variant="contained"
-                    color="primary"
-                    style={{
-                        position: 'absolute',
-                        bottom: showSimilarPlayers ? 'initial' : '20px',
-                        right: showSimilarPlayers ? 'initial' : '0px',
-                        height: '50px',
-                        alignSelf: showSimilarPlayers ? 'center' : 'initial',
-                        marginTop: showSimilarPlayers ? '20px' : 'initial'
-                    }}
-                >
-                    {showSimilarPlayers ? 'Hide Similar Players' : 'Show Similar Players'}
-                </Button>
+                <div>
+
+                    <PlayerCard playerName={playerName} />
+                    <Button
+                        onClick={() => setShowSimilarPlayers(!showSimilarPlayers)}
+                        variant="contained"
+                        color={showSimilarPlayers ? 'secondary' : 'primary'}
+                        style={{
+                            position: 'relative',
+                            bottom: 0,
+                            right: 0,
+                            height: '50px',
+                        }}
+                    >
+                        {showSimilarPlayers ? 'Hide Similar Players' : 'Show Similar Players'}
+                    </Button>
+                </div>
                 {showSimilarPlayers && (
                     <div style={{ paddingLeft: isMobile ? "0px" : "20px" }}>
                         {similarPlayers.map(player => <PlayerCardMini key={player.player2} player={player} />)}

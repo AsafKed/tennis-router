@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
+
+// Styling
 import { Card, CardContent, Typography, Box, CircularProgress, CardMedia, Grid, Divider, Chip, Button, Collapse } from '@mui/material';
-import ReactCountryFlag from "react-country-flag";
 import { ExpandMore } from '@mui/icons-material';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+
+import ReactCountryFlag from "react-country-flag";
 
 // Tracking
 import { useTracking } from 'react-tracking';
@@ -17,6 +22,11 @@ const PlayerCard = ({ playerName }) => {
     const handleExpandClick = () => {
         setExpanded(!expanded);
         trackEvent({ action: expanded ? 'player_card_hide_more_info' : 'player_card_show_more_info', player_name: playerName });
+    };
+
+    const handleClose = () => {
+        // TODO add going back to the previous page
+        trackEvent({ action: 'player_card_close', player_name: playerName });
     };
 
     useEffect(() => {
@@ -53,7 +63,7 @@ const PlayerCard = ({ playerName }) => {
                     <CircularProgress />
                 ) : (
                     playerData && (
-                        <Card sx={{':hover': {boxShadow: 20}}}>
+                        <Card sx={{ ':hover': { boxShadow: 20 } }}>
                             <CardContent>
                                 <CardMedia
                                     component="img"
@@ -62,6 +72,26 @@ const PlayerCard = ({ playerName }) => {
                                     alt={playerData.name}
                                     sx={{ objectFit: 'contain' }}
                                 />
+                                {/* Add box in the top right corner */}
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        right: 0,
+                                        m: 1,
+                                        bgcolor: 'background.paper',
+                                        color: 'text.primary',
+                                        zIndex: 1,
+                                    }}
+                                >
+                                    <IconButton
+                                        aria-label="close"
+                                        onClick={handleClose}
+                                        sx={{ position: 'absolute', right: 8, top: 8 }}
+                                    >
+                                        <CloseIcon />
+                                    </IconButton>
+                                </Box>
                                 <Box display="flex" alignContent={'center'} alignItems={'center'}>
                                     <Typography variant="h1" component="div">
                                         {playerData.rank}

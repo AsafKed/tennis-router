@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-// Material UI
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography, Grid } from '@mui/material';
-import Slider from '@mui/material/Slider';
+import { Box, Button, FormControl, FormControlLabel, Checkbox, Radio, RadioGroup, Typography, Grid, Paper } from '@mui/material';
 
 // Firebase
 import { auth } from '../firebase';
@@ -26,11 +23,31 @@ function ParameterBrowsing() {
         fetchParameters();
     }, []);
 
+    // Display parameter title with spaces
+    const displayParameterTitle = (parameter) => {
+        const words = parameter.split('_');
+        // Capitalize each word
+        const capitalizedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+        // Join words with spaces
+        return capitalizedWords.join(' ');
+    };
+
     const handlePreferenceChange = (parameter) => (event, newValue) => {
-        setPreferences(prevPreferences => ({
-            ...prevPreferences,
-            [parameter]: newValue || event.target.value,
-        }));
+        const value = event.target.type === 'checkbox' ? event.target.value : newValue || event.target.value;
+        if (event.target.type === 'checkbox') {
+            setPreferences(prevPreferences => ({
+                ...prevPreferences,
+                [parameter]: event.target.checked
+                    ? [...prevPreferences[parameter], value]
+                    : prevPreferences[parameter].filter(option => option !== value),
+            }));
+        } else {
+            setPreferences(prevPreferences => ({
+                ...prevPreferences,
+                [parameter]: value,
+            }));
+        }
+        console.log(`Preference for ${parameter} changed to ${value}`)
     };
 
     const handleSavePreferences = async () => {
@@ -51,50 +68,50 @@ function ParameterBrowsing() {
     };
 
     return (
-        <Grid container>
-            <Grid item xs={12} sm={6}>
+        <Grid container paddingTop={2}>
+            <Grid item xs={12} sm={4}>
                 <Box sx={{ marginTop: 2 }}>
-                    <h3>Preferences</h3>
-                    <Grid container spacing={3}>
-                        {Object.entries(parameters).map(([parameter, options]) => (
-                            Array.isArray(options) && options.length > 2 ? (
-                                <Grid item xs={12} sm={6} md={4} key={parameter}>
-                                    <FormControl fullWidth>
-                                        <InputLabel id={`${parameter}-label`}>{parameter}</InputLabel>
-                                        <Select
-                                            labelId={`${parameter}-label`}
-                                            id={`${parameter}-select`}
-                                            value={preferences[parameter]}
-                                            label={parameter}
-                                            onChange={handlePreferenceChange(parameter)}
-                                        >
+                    <Paper elevation={2} sx={{ p: 2 }}>
+                        <Typography variant='h3' sx={{ mb: 2 }}>Preferences</Typography>
+                        <Grid container spacing={3} alignItems="flex-start">
+                            {Object.entries(parameters).map(([parameter, options]) => (
+                                Array.isArray(options) && options.length > 2 ? (
+                                    <Grid item xs={12} key={parameter}>
+                                        <FormControl component="fieldset">
+                                            <Typography variant='h6' >{displayParameterTitle(parameter)}</Typography>
                                             {options.map(option => (
-                                                <MenuItem key={option} value={option}>{option}</MenuItem>
+                                                <FormControlLabel
+                                                    key={option}
+                                                    control={<Checkbox checked={preferences[parameter].includes(option)} onChange={handlePreferenceChange(parameter)} value={option} />}
+                                                    label={option}
+                                                />
                                             ))}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                            ) : (
-                                <Grid item xs={12} sm={6} md={4} key={parameter}>
-                                    <Typography id={`${parameter}-label`}>{parameter}</Typography>
-                                    <Slider
-                                        aria-labelledby={`${parameter}-label`}
-                                        value={preferences[parameter]}
-                                        min={options[0]}
-                                        max={options[1]}
-                                        step={1}
-                                        marks={[
-                                            { value: options[0], label: '<' + options[0] },
-                                            { value: (options[0] + options[1]) / 2, label: (options[0] + options[1]) / 2 },
-                                            { value: options[1], label: '>' + options[1] },
-                                        ]}
-                                        valueLabelDisplay="auto"
-                                        onChange={handlePreferenceChange(parameter)}
-                                    />
-                                </Grid>
-                            )
-                        ))}
-                    </Grid>
+                                        </FormControl>
+                                    </Grid>
+                                ) : (
+                                    <Grid item xs={12} key={parameter}>
+                                        <FormControl component="fieldset">
+                                            <Typography variant='h6'>{displayParameterTitle(parameter)}</Typography>
+                                            <RadioGroup
+                                                aria-label={parameter}
+                                                value={preferences[parameter]}
+                                                onChange={handlePreferenceChange(parameter)}
+                                            >
+                                                {options.map(option => (
+                                                    <FormControlLabel
+                                                        key={option}
+                                                        value={option}
+                                                        control={<Radio />}
+                                                        label={option}
+                                                    />
+                                                ))}
+                                            </RadioGroup>
+                                        </FormControl>
+                                    </Grid>
+                                )
+                            ))}
+                        </Grid>
+                    </Paper>
                     <Box sx={{ marginTop: 2 }}>
                         <Button onClick={handleSavePreferences} variant="contained">
                             Save Preferences
@@ -102,8 +119,8 @@ function ParameterBrowsing() {
                     </Box>
                 </Box>
             </Grid>
-            <Grid item xs={12} sm={6}>
-                <h3>Players</h3>
+            <Grid item xs={12} sm={8}>
+                <Typography variant='h3' sx={{ mb: 2 }}>Players</Typography>
             </Grid>
         </Grid>
     );

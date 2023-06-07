@@ -48,6 +48,11 @@ const PlayerSimilarity = ({ userId, open, handleClose, isLoggedIn }) => {
         fetchSimilarPlayers();
     }, [playerName, userId, similarityWeight]);
 
+    const handleShowSimilarPlayers = () => {
+        setShowSimilarPlayers(!showSimilarPlayers);
+        trackEvent({ action: showSimilarPlayers ? 'hide_similar_players' : 'show_similar_players', player_name: playerName, similarity_weight: similarityWeight });
+    };
+
     return (
         <Modal open={open} onClose={handleClose} style={{ overflow: 'auto' }}>
             <div style={{
@@ -62,7 +67,7 @@ const PlayerSimilarity = ({ userId, open, handleClose, isLoggedIn }) => {
 
                     <PlayerCard playerName={playerName} handleClose={handleClose}/>
                     <Button
-                        onClick={() => setShowSimilarPlayers(!showSimilarPlayers)}
+                        onClick={() => handleShowSimilarPlayers()}
                         variant="contained"
                         color={showSimilarPlayers ? 'secondary' : 'primary'}
                         style={{

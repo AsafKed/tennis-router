@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 // Styling
-import { Card, CardContent, Typography, Select, MenuItem } from '@mui/material';
+import { Card, CardContent, Typography, Select, MenuItem, CardMedia, Divider, CardHeader, Box } from '@mui/material';
 import Chip from '@mui/material/Chip';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 import ReactCountryFlag from "react-country-flag";
+
+// Tracking
+import { track, trackEvent } from 'react-tracking';
+import { dispatchTrackingData } from '../../TrackingDispatcher';
 
 const PlayerCardMini = ({ player }) => {
     // Get info on the player
@@ -30,15 +36,46 @@ const PlayerCardMini = ({ player }) => {
         setDataType(event.target.value);
     };
 
+    const handlePlayerClick = () => {
+        trackEvent({ action: 'click_player_card_mini', from: player.player1, to: player.player2, similarity_weight: player.similarity });
+        // Slight delay
+        setTimeout(100);
+        // Replace spaces with underscores
+        return player.player2.replace(/ /g, '_');
+    };
+
     return (
         <Card style={{ width: isMobile ? '90vw' : '33vw', height: 'auto', marginBottom: '20px' }}>
+            <CardHeader title={player.player2} subheader={Math.round(player.similarity * 100) + "% similar to " + player.player1}
+                action={
+                    <IconButton aria-label="settings" href={handlePlayerClick()}>
+                        <OpenInNewIcon />
+                    </IconButton>
+                } />
+            {playerInfo.image_url &&
+                <CardMedia
+                    component="img"
+                    image={playerInfo.image_url}
+                    alt={playerInfo.name}
+                    sx={{ padding: '1rem', }}>
+                </CardMedia>
+            }
+            <Divider />
             <CardContent style={{ padding: '20px' }}>
-                <Typography variant="h5" component="div">
-                    {player.player2}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                    Similarity: {Math.round(player.similarity * 100)}%
-                </Typography>
+                {playerInfo.country_code && (
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <ReactCountryFlag
+                            countryCode={playerInfo.country_code}
+                            style={{
+                                width: '1em',
+                                height: '1em',
+                                paddingRight: '0.5em',
+                            }}
+                            svg
+                        />
+                        <Typography variant="body2">{playerInfo.country}</Typography>
+                    </Box>
+                )}
                 <Select
                     value={dataType}
                     onChange={handleDataTypeChange}
@@ -50,19 +87,7 @@ const PlayerCardMini = ({ player }) => {
                     <MenuItem value="numeric">Numeric Stats</MenuItem>
                     <MenuItem value="categorical">Categorical Stats</MenuItem>
                 </Select>
-                {playerInfo.image_url && <img src={playerInfo.image_url} alt={playerInfo.name} style={{ width: '50%', height: 'auto' }} />}
-                {playerInfo.country_code && (
-                    <ReactCountryFlag
-                        countryCode={playerInfo.country_code}
-                        style={{
-                            width: '1em',
-                            height: '1em',
-                            paddingRight: '0.5em',
-                        }}
-                        svg
-                    />
-                )}
-                {playerInfo.country && <Typography variant="body2">{playerInfo.country}</Typography>}
+                <br />
                 {dataType === 'description' && <Typography variant="body2">{playerInfo.personality_long}</Typography>}
                 {dataType === 'personality_tags' && playerInfo.personality_tags.map((tag) => (
                     <Chip label={tag} key={tag} />
@@ -74,4 +99,4 @@ const PlayerCardMini = ({ player }) => {
     )
 }
 
-export default PlayerCardMini;
+export default track({ page: "mini_card" }, { dispatch: dispatchTrackingData })(PlayerCardMini);

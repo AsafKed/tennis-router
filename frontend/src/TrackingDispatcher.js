@@ -9,6 +9,7 @@ export async function dispatchTrackingData(data) {
         data['guest_id'] = localStorage.getItem('userPreLoginId');
     }
 
+    console.log(data);
     // Introduce a delay before making the fetch call to prevent guest node duplicates
     await new Promise(resolve => setTimeout(resolve, 1000));
 

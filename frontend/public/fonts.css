@@ -1,0 +1,16 @@
+@font-face {
+    font-family: 'Gravur Condensed';
+    src: url('/fonts/GravurCondensed-Regular.otf') format('otf');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Swiss';
+    src: url('/fonts/Swis721BT-Regular2.otf') format('otf'),
+         url('/fonts/Swis721BT-Regular3.otf') format('otf');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}

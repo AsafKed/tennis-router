@@ -52,13 +52,77 @@ function App() {
     },
   });
 
-  // theme.typography.h1 = {
-  //   fontSize: '2.5rem',
-  //   fontWeight: 500,
-  //   lineHeight: 1.2,
-  //   letterSpacing: '-0.01562em',
-  //   color: '#2D2F7F',
-  // };
+  theme.typography.h1 = ({
+
+        fontSize: '2.125rem', // 34px
+        fontWeight: 'bold',
+        lineHeight: 1,
+        letterSpacing: '-0.0625rem', // -1px
+        [theme.breakpoints.down('md')]: {
+          fontSize: '2.125rem', // 34px
+        },
+        [theme.breakpoints.down('sm')]: {
+          fontSize: '1.5rem', // 24px
+        },
+      });
+
+  theme.typography.h2 = ({
+        fontSize: '1.875rem', // 30px
+        fontWeight: 'bold',
+        lineHeight: 1.067,
+        letterSpacing: '-0.05rem', // -0.8px
+        [theme.breakpoints.down('md')]: {
+          fontSize: '1.5rem', // 24px
+        },
+        [theme.breakpoints.down('sm')]: {
+          fontSize: '1.125rem', // 18px
+        },
+      });
+
+  theme.typography.h3 = ({
+
+        fontSize: '1.5rem', // 24px
+        fontWeight: 'bold',
+        lineHeight: 1.083,
+        letterSpacing: '-0.0375rem', // -0.5px
+        [theme.breakpoints.down('md')]: {
+          fontSize: '1.25rem', // 20px
+        },
+        [theme.breakpoints.down('sm')]: {
+          fontSize: '1.125rem', // 18px
+        },
+      });
+
+  theme.typography.h4 = ({
+        fontSize: '1.25rem', // 20px
+        fontWeight: 'bold',
+        lineHeight: 1.1,
+        letterSpacing: '-0.025rem', // -0.4px
+        [theme.breakpoints.down('md')]: {
+          fontSize: '1.125rem', // 18px
+        },
+        [theme.breakpoints.down('sm')]: {
+          fontSize: '1rem', // 16px
+        },
+      });
+
+  theme.typography.h5 = ({
+        fontSize: '1.125rem', // 18px
+        fontWeight: 'bold',
+        lineHeight: 1.111,
+        letterSpacing: '-0.0125rem', // -0.2px
+        [theme.breakpoints.down('md')]: {
+          fontSize: '1rem', // 16px
+        },
+      });
+
+  theme.typography.h6 = ({
+
+        fontSize: '1rem', // 16px
+        fontWeight: 'bold',
+        lineHeight: 1.125,
+        letterSpacing: '-0.00625rem', // -0.1px
+      });  
 
   // And other variables
   const [loggedIn, setLoggedIn] = useState(false);

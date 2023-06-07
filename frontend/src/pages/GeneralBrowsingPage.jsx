@@ -59,6 +59,7 @@ const BrowsingPage = () => {
             </Box>
             {/* Remove the conditional rendering of PlayerBrowsing and ParameterBrowsing */}
             {browseType === 'player' ? <Typography variant="h2">Player Browsing</Typography> : <Typography variant="h2">Parameter Browsing</Typography>}
+            <br />
             {browseType === 'player' ? <PlayerBrowsing selectedPlayer={playerName} /> : <ParameterBrowsing />}
         </div>
     )

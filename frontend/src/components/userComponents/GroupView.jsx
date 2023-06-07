@@ -57,7 +57,7 @@ function GroupView({ userId }) {
 
 
     // To expand the group and show the users in the group
-    const handleGroupClicked = async (groupId) => {
+    const handleClickGroup = async (groupId) => {
         if (expandedGroup !== groupId) {
             setExpandedGroup(groupId);
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/group-users/${groupId}`, {
@@ -75,13 +75,16 @@ function GroupView({ userId }) {
         }
     };
 
-    const handleGroupLeave = (groupId) => {
+    const handleLeaveGroup = (groupId) => {
         if (socketInstance) {
             socketInstance.emit("leave_group", { group_id: groupId, user: { user_id: userId } });
         }
+        trackEvent({ action: 'leave_group' })
+        window.location.reload(false);
     };
 
     const handleDeleteGroup = async (groupId) => {
+        console.log("Deleting group: ", groupId)
         try {
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/groups/${groupId}/delete?user_id=${userId}`, {
                 method: "DELETE",
@@ -90,6 +93,10 @@ function GroupView({ userId }) {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
+
+            trackEvent({ action: 'delete_group' })
+            // Reload the page
+            window.location.reload(false);
 
         } catch (error) {
             console.error("Error deleting group: ", error);
@@ -140,10 +147,9 @@ function GroupView({ userId }) {
                         <GroupDetailsCard
                             key={ind}
                             group={group}
-                            onGroupClicked={handleGroupClicked}
-                            onGroupLeave={handleGroupLeave}
-                            onDeleteGroup={handleDeleteGroup}
-                            users={expandedGroupUsers}
+                            handleClickGroup={handleClickGroup}
+                            handleLeaveGroup={handleLeaveGroup}
+                            handleDeleteGroup={handleDeleteGroup}
                             expandedGroup={expandedGroup}
                         />
                     ))}

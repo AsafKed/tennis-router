@@ -94,7 +94,6 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                 setIsLoggedIn(true);
             } else {
                 // User is signed out
-                // console.log("user is logged out")
                 setIsLoggedIn(false);
             }
         });
@@ -154,7 +153,6 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
             trackEvent({ action: 'view_player', player_name: selectedPlayer })
             setIsPlayerCardOpen(true);
         }
-        console.log(`selectedPlayer: ${selectedPlayer}, isPlayerCardOpen: ${isPlayerCardOpen}`)
     }, [selectedPlayer]);
 
     // Player clicking

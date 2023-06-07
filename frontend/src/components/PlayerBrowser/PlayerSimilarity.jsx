@@ -28,7 +28,6 @@ const PlayerSimilarity = ({ userId, open, handleClose, isLoggedIn }) => {
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/get_similarity_weights`);
             const text = await response.text();
             const data = JSON.parse(text);
-            // console.log(data)
             setSimilarityWeight(data);
         };
 

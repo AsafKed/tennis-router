@@ -31,7 +31,6 @@ const TriangleSlider = () => {
 
   const handleWeightChange = async () => {
     // Send the new weightDistribution to the backend
-    // console.log(weightDistribution)
 
     // Get User ID from Firebase
     const user = auth.currentUser;
@@ -50,7 +49,6 @@ const TriangleSlider = () => {
     }
 
     const data = await response.json();
-    // console.log(data);
   }
 
 

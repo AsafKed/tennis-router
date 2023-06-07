@@ -17,7 +17,6 @@ import { track, useTracking } from 'react-tracking';
 const BrowsingPage = () => {
     const params = useParams();
     const navigate = useNavigate();
-    console.log("params: ", params)
 
     // Get the browse type from the url
     const browseType = params.browseType;

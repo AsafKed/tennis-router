@@ -34,6 +34,9 @@ import { dispatchTrackingData } from "./TrackingDispatcher";
 import { track, useTracking } from 'react-tracking';
 import { v4 as uuidv4 } from 'uuid';
 
+function LoadingScreen() {
+  return <div>Loading...</div>;
+}
 
 // Main app component
 function App() {
@@ -49,7 +52,6 @@ function App() {
     },
   });
 
-
   // theme.typography.h1 = {
   //   fontSize: '2.5rem',
   //   fontWeight: 500,
@@ -62,8 +64,9 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const { trackEvent } = useTracking();
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    // Check if user is logged in, used for available navigation pages
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setLoggedIn(true);
@@ -78,10 +81,8 @@ function App() {
           localStorage.removeItem('userId');
         }
       }
+      setLoading(false);
     });
-
-    // Track user if logged in, otherwise use unique ID
-    trackEvent({ action: 'mounted' })
 
     return () => {
       unsubscribe();
@@ -97,14 +98,13 @@ function App() {
           <Routes>
             <Route path="/" element={<WelcomePage />} />
             <Route path="/data-usage-policy" element={<DataUsagePolicy />} />
-            <Route path="/user" element={loggedIn ? <UserPage /> : <Navigate to="/" />} />
-            
+            {/* <Route path="/user" element={loggedIn ? <UserPage /> : <Navigate to="/" />} /> */}
+            <Route path="/user/:tab?" element={!loading ? (loggedIn ? <UserPage /> : <Navigate to="/" />) : <LoadingScreen />} />
+
             <Route path="/browser" element={<BrowsingPage />}>
               <Route path="/browser/:browseType/:playerName?" element={<BrowsingPage />} />
             </Route>
 
-            {/* TODO the following */}
-            {/* <Route path="/browser/:player" element={<PreferenceSolicitationPage />} /> */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>

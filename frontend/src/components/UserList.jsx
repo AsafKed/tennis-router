@@ -12,7 +12,6 @@ export default function UserList({ socket, group, user, leavingGroup, users }) {
     }
 
     socket.on("update_group_users", (users) => {
-      // console.log("users", users);
     });
 
     return () => {

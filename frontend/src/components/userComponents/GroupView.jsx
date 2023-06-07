@@ -30,7 +30,6 @@ function GroupView({ userId }) {
     useEffect(() => {
         if (leavingGroup && socketInstance) {
             socketInstance.on("update_group_users", (users) => {
-                // console.log("users", users);
                 setLeavingGroup(false);
                 window.location.reload(false);
             });
@@ -39,6 +38,10 @@ function GroupView({ userId }) {
 
     // To get the groups that the user is in
     const getGroups = async (userId) => {
+        if (!userId) {
+            return;
+        }
+        
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user-groups/${userId}`, {
             method: "GET",
             headers: {
@@ -46,7 +49,6 @@ function GroupView({ userId }) {
             },
         });
         const data = await response.json();
-        // console.log("Server response:", data);
         setGroups(data);
         trackEvent({ action: 'get_groups' })
     };
@@ -67,7 +69,6 @@ function GroupView({ userId }) {
                 },
             });
             const data = await response.json();
-            // console.log("Server response:", data);
             setExpandedGroupUsers(data);
         } else {
             setExpandedGroup(null);
@@ -84,7 +85,6 @@ function GroupView({ userId }) {
     };
 
     const handleDeleteGroup = async (groupId) => {
-        console.log("Deleting group: ", groupId)
         try {
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/groups/${groupId}/delete?user_id=${userId}`, {
                 method: "DELETE",
@@ -118,11 +118,9 @@ function GroupView({ userId }) {
             setSocketInstance(socket);
 
             socket.on("connect", (data) => {
-                // console.log(data);
             });
 
             socket.on("disconnect", (data) => {
-                // console.log(data);
             });
         }
     }, [socketInstance]);

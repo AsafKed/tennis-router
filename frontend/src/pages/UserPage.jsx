@@ -1,6 +1,6 @@
 import "../App.css";
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Button, Divider, List, ListItem, ListItemButton, ListItemText, Badge } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import RecommendationsView from "../components/userComponents/RecommendationsView";
@@ -19,6 +19,10 @@ import { track, useTracking } from 'react-tracking';
 
 function UserPage() {
   const navigate = useNavigate();
+  const params = useParams();
+  const tab = params.tab;
+  const tabNames = ['recommendations', 'groups', 'days'];
+
   const [userId, setUserId] = useState("");
   const [name, setName] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -33,12 +37,17 @@ function UserPage() {
 
   // Upon opening the page
   useEffect(() => {
+    const index = tabNames.indexOf(tab);
+    if (index !== -1) {
+      setSelectedIndex(index);
+    }
     trackEvent({ action: 'page_open' })
-  }, []);
+  }, [tab]);
 
   const handleListItemClick = (event, index) => {
     setSelectedIndex(index);
     trackEvent({ action: 'tab_open', tab: listItems[index].view })
+    navigate(`/user/${listItems[index].view.toLowerCase()}`);
   };
 
   const handleLogout = () => {
@@ -46,10 +55,8 @@ function UserPage() {
     signOut(auth).then(() => {
       // Sign-out successful.
       navigate("/");
-      // console.log("Signed out successfully.");
     }).catch((error) => {
       // An error happened.
-      // console.log("Error signing out.");
     });
   }
 
@@ -90,7 +97,6 @@ function UserPage() {
         getGroupNum(uid);
       } else {
         // User is signed out
-        // console.log("user is logged out")
       }
     });
 

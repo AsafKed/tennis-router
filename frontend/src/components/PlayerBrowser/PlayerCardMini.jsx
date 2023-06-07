@@ -37,9 +37,8 @@ const PlayerCardMini = ({ player }) => {
     };
 
     const handlePlayerClick = () => {
-        trackEvent({ action: 'click_player_card_mini', from: player.player1, to: player.player2, similarity_weight: player.similarity });
-        // Slight delay
-        setTimeout(100);
+        // trackEvent({ action: 'click_player_card_mini', from: player.player1, to: player.player2, similarity_weight: player.similarity });
+        // // Slight delay
         // Replace spaces with underscores
         return player.player2.replace(/ /g, '_');
     };

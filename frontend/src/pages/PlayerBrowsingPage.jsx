@@ -152,6 +152,7 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
     useEffect(() => {
         if (selectedPlayer) {
             trackEvent({ action: 'view_player', player_name: selectedPlayer })
+            setIsPlayerCardOpen(true);
         }
         console.log(`selectedPlayer: ${selectedPlayer}, isPlayerCardOpen: ${isPlayerCardOpen}`)
     }, [selectedPlayer]);

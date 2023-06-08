@@ -7,7 +7,7 @@ import MuiAlert from '@mui/material/Alert';
 import { track, useTracking } from 'react-tracking';
 import { dispatchTrackingData } from '../../TrackingDispatcher';
 
-function SettingsView({ userId }) {
+function SettingsView({ }) {
     const [days, setDays] = useState({
         '10/06/2023: Saturday': false,
         '11/06/2023: Sunday': false,
@@ -22,28 +22,31 @@ function SettingsView({ userId }) {
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const userId = localStorage.getItem("userId");
 
     const { trackEvent } = useTracking();
 
     useEffect(() => {
-        setLoading(true);
-        fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/settings`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                let newDays = { ...days };
-                data.days.forEach(day => {
-                    const dayOfWeek = new Date(day.split('/').reverse().join('-')).toLocaleString('en-US', { weekday: 'long' });
-                    newDays[`${day}: ${dayOfWeek}`] = true;
+        if (userId) {
+            setLoading(true);
+            fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/settings`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    let newDays = { ...days };
+                    data.days.forEach(day => {
+                        const dayOfWeek = new Date(day.split('/').reverse().join('-')).toLocaleString('en-US', { weekday: 'long' });
+                        newDays[`${day}: ${dayOfWeek}`] = true;
+                    });
+                    setDays(newDays);
+                    trackEvent({ action: 'get_settings' })
                 });
-                setDays(newDays);
-                trackEvent({ action: 'get_settings' })
-            });
-        setLoading(false);
+            setLoading(false);
+        }
     }, [userId]);
 
     const handleChange = (event) => {
@@ -51,8 +54,8 @@ function SettingsView({ userId }) {
     };
 
     const handleSubmit = () => {
-        const selectedDays = Object.keys(days).filter(day => days[day]).map(day => day.split(":")[0].trim());
         setSubmitting(true);
+        const selectedDays = Object.keys(days).filter(day => days[day]).map(day => day.split(":")[0].trim());
         fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/settings`, {
             method: "PUT",
             headers: {
@@ -63,13 +66,20 @@ function SettingsView({ userId }) {
             }),
         })
             .then((response) => {
+                if (response.ok) {
+                    let newDays = { ...days };
+                    selectedDays.forEach(day => {
+                        const dayOfWeek = new Date(day.split('/').reverse().join('-')).toLocaleString('en-US', { weekday: 'long' });
+                        newDays[`${day}: ${dayOfWeek}`] = true;
+                    });
+                }
                 return response.json();
             })
         setSubmitting(false);
-        setSubmitting(false);
         setOpenSnackbar(true);
-        trackEvent({ action: 'update_settings', days: selectedDays })
+        trackEvent({ action: 'update_settings', days: selectedDays });
     }
+
 
     const handleCloseSnackbar = (event, reason) => {
         if (reason === 'clickaway') {
@@ -113,8 +123,8 @@ function SettingsView({ userId }) {
                     </Box>
                 </MuiAlert>
             </Snackbar>
-            <br /> 
-            <Button variant="contained" onClick={handleSubmit}>Submit</Button>
+            <br />
+            {userId && <Button variant="contained" onClick={handleSubmit}>Submit</Button>}
         </div>
     )
 }

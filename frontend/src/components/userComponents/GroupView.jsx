@@ -10,7 +10,7 @@ import { dispatchTrackingData } from '../../TrackingDispatcher';
 import { track, useTracking } from 'react-tracking';
 import InfoPopup from '../InfoPopup';
 
-function GroupView({ userId }) {
+function GroupView() {
     const [socketInstance, setSocketInstance] = useState(null);
     const [loading, setLoading] = useState(true);
     const [group, setGroup] = useState("");
@@ -18,7 +18,8 @@ function GroupView({ userId }) {
     const [groups, setGroups] = useState([]);
     const [expandedGroup, setExpandedGroup] = useState(null);
     const [expandedGroupUsers, setExpandedGroupUsers] = useState([]);
-
+    const userId = localStorage.getItem("userId");
+    
     const { trackEvent } = useTracking();
 
     // When the page is clicked, collapse the card
@@ -41,7 +42,7 @@ function GroupView({ userId }) {
         if (!userId) {
             return;
         }
-        
+
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user-groups/${userId}`, {
             method: "GET",
             headers: {

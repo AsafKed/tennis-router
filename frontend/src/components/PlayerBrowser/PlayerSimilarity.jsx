@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
 // Tracking
 import { useTracking } from 'react-tracking';
 
-const PlayerSimilarity = ({ userId, open, handleClose, isLoggedIn }) => {
+const PlayerSimilarity = ({ open, handleClose, isLoggedIn }) => {
     const { playerName: playerNameInUrl } = useParams();
     const playerName = playerNameInUrl || playerName;
     const [loading, setLoading] = useState(false);
@@ -20,41 +20,50 @@ const PlayerSimilarity = ({ userId, open, handleClose, isLoggedIn }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+    const userId = localStorage.getItem('user_id');
+    
     // Tracking
     const { trackEvent } = useTracking();
 
     // Fetch similarity weight from the user
     useEffect(() => {
         const fetchSimilarityWeight = async () => {
-            setLoading(true);
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/get_similarity_weights`);
             const text = await response.text();
             const data = JSON.parse(text);
             setSimilarityWeight(data);
+            localStorage.setItem('similarity_weight', JSON.stringify(data));
         };
 
-        if (isLoggedIn) fetchSimilarityWeight();
+        // Use locally stored similarity weight if it exists
+        const storedSimilarityWeight = localStorage.getItem('similarity_weight');
+        if (isLoggedIn && !similarityWeight) fetchSimilarityWeight();
+        else setSimilarityWeight(JSON.parse(storedSimilarityWeight));
     }, [userId]);
 
     // Fetch similar players
-    useEffect(() => {
-        const fetchSimilarPlayers = async () => {
-            setLoading(true);
-            // Turn spaces into underscores
-            const playerNameForURL = playerName.replace(/ /g, '_');
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/similar/${playerNameForURL}/?similarity_weight=${similarityWeight}`);
-            const data = await response.json(); // Use response.json() instead of response.text()
-            setSimilarPlayers(data);
-            setLoading(false);
-        };
+    const fetchSimilarPlayers = async () => {
+        // Turn spaces into underscores
+        const playerNameForURL = playerName.replace(/ /g, '_');
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/similar/${playerNameForURL}/?similarity_weight=${similarityWeight}`);
+        const data = await response.json(); // Use response.json() instead of response.text()
+        setSimilarPlayers(data);
         trackEvent({ action: 'fetch_similar_players', player_name: playerName, similarity_weight: similarityWeight });
-        fetchSimilarPlayers();
-    }, [playerName, userId, similarityWeight]);
+    };
+
+    useEffect(() => {
+        if (showSimilarPlayers && similarPlayers.length === 0) {
+            setLoading(true);
+            fetchSimilarPlayers();
+            setLoading(false);
+        }
+    }, [showSimilarPlayers]);
 
     const handleShowSimilarPlayers = () => {
         setShowSimilarPlayers(!showSimilarPlayers);
         trackEvent({ action: showSimilarPlayers ? 'hide_similar_players' : 'show_similar_players', player_name: playerName, similarity_weight: similarityWeight });
     };
+
 
     return (
         <Modal open={open} onClose={handleClose} style={{ overflow: 'auto' }}>
@@ -68,7 +77,7 @@ const PlayerSimilarity = ({ userId, open, handleClose, isLoggedIn }) => {
             }}>
                 <div>
 
-                    <PlayerCard playerName={playerName} handleClose={handleClose}/>
+                    <PlayerCard playerName={playerName} handleClose={handleClose} />
                     <Button
                         onClick={() => handleShowSimilarPlayers()}
                         variant="contained"

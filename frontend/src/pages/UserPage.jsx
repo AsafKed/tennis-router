@@ -148,7 +148,7 @@ tournament. You can also view the recommended matches for the next day (when ava
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding style={{ paddingBlockEnd: '0.5em' }}>
-          <Badge badgeContent={gettingGroupNum ? <CircularProgress size={20}/> : groupNum} color="primary" style={{ width: '100%' }} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} showZero>
+          <Badge badgeContent={gettingGroupNum ? <CircularProgress size={20} /> : groupNum} color="primary" style={{ width: '100%' }} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} showZero>
             <ListItemButton
               selected={selectedIndex === 1}
               onClick={(event) => handleListItemClick(event, 1)}

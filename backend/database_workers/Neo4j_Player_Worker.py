@@ -365,17 +365,18 @@ class Player_Worker:
         return result
     
     ############################
-    # Get player by id
+    # Get player names
     ############################
-    def get_player_by_id(self, player_id):
+    def get_player_names(self):
         with self.driver.session(database="neo4j") as session:
-            result = session.execute_read(self._get_player_by_id, player_id)
+            result = session.execute_read(self._get_player_names)
             return result
         
     @staticmethod
-    def _get_player_by_id(tx, player_id):
-        query = """ MATCH (p:Player {player_id: $player_id})
-                    RETURN p.name AS name, p.player_id AS player_id
+    def _get_player_names(tx):
+        query = """ MATCH (p:Player)
+                    RETURN p.name AS name
+                    ORDER BY p.name
                 """
-        result = tx.run(query, player_id=player_id).data()
+        result = tx.run(query).data()
         return result

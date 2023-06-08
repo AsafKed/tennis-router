@@ -339,6 +339,23 @@ class Similarity_Worker:
 
         result = tx.run(query)
         return result.data()
+    
+    # Filter for the similarity type
+    def get_all_similarities_of_type(self, similarity_type):
+        with self.driver.session() as session:
+            result = session.execute_read(
+                self._get_all_similarities_of_type, similarity_type=similarity_type
+            )
+            return pd.DataFrame(result)
+        
+    @staticmethod
+    def _get_all_similarities_of_type(tx, similarity_type):
+        query = """ MATCH (p1:Player)-[s:SIMILARITY]->(p2:Player)
+                    RETURN p1.name AS player1, s[$similarity_type] AS similarity, p2.name AS player2
+                """
+
+        result = tx.run(query, similarity_type=similarity_type)
+        return result.data()
 
     #############################
     # Get top 3 most similar players for specified player

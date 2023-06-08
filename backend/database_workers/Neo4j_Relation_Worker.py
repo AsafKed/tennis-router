@@ -47,20 +47,6 @@ class Relation_Worker:
         tx.run(query, user_id=user_id, player_name=player_name)
 
     ##############################
-    # Delete recommend relations
-    ##############################
-    def delete_recommend_relations(self, user_id):
-        with self.driver.session(database="neo4j") as session:
-            session.execute_write(self._delete_recommend_relations, user_id)
-
-    @staticmethod
-    def _delete_recommend_relations(tx, user_id):
-        query = """ MATCH (u:User {user_id: $user_id})-[r:RECOMMEND]->(:Player)
-                    DELETE r
-                """
-        tx.run(query, user_id=user_id)
-
-    ##############################
     # Get liked players
     ##############################
     def get_liked_players(self, user_id):
@@ -177,15 +163,48 @@ class Relation_Worker:
     ##############################
     # Create player recommendations
     ##############################
-    # TODO: use built in similarity function for this
-    def create_recommend_relations(self, user_id, similar_players):
+    def create_recommend_relations(self, user_id, similar_players, similarity_weights, similarity_type):
         with self.driver.session(database="neo4j") as session:
-            session.execute_write(self._create_recommend_relations, user_id, similar_players)
+            session.execute_write(self._create_recommend_relations, user_id, similar_players, similarity_weights, similarity_type)
 
     @staticmethod
-    def _create_recommend_relations(tx, user_id, similar_players):
+    def _create_recommend_relations(tx, user_id, similar_players, similarity_weights, similarity_type):
+        # Do the same but add time
         query = """ UNWIND $similar_players AS similar_player
+                    UNWIND $similarity_weights AS similarity_weight
                     MATCH (u:User {user_id: $user_id}), (p:Player {player_name: similar_player.player_name})
-                    MERGE (u)-[:RECOMMEND]->(p)
+                    MERGE (u)-[:RECOMMEND {created: datetime(), similarity_weight: $similarity_weig, similarity_type: $similarity_type}]->(p)
                 """
-        tx.run(query, user_id=user_id, similar_players=similar_players)
+        tx.run(query, user_id=user_id, similar_players=similar_players, similarity_weights=similarity_weights, similarity_type=similarity_type)
+
+    ##############################
+    # Get player recommendations
+    ##############################
+    def get_player_recommendations(self, user_id):
+        with self.driver.session(database="neo4j") as session:
+            return session.execute_read(self._get_player_recommendations, user_id)
+        
+    @staticmethod
+    def _get_player_recommendations(tx, user_id):
+        query = """ MATCH (u:User {user_id: $user_id})-[r:RECOMMEND]->(p:Player)
+                    RETURN p.player_name AS player_name, r.similarity_weight AS similarity_weight, r.similarity_type AS similarity_type
+                    ORDER BY r.similarity_weight DESC
+                """
+        result = tx.run(query, user_id=user_id)
+        return [record["player_name"] for record in result]
+
+    ##############################
+    # Delete recommend relations
+    ##############################
+    def delete_player_recommendation(self, user_id, player_name):
+        with self.driver.session(database="neo4j") as session:
+            session.execute_write(self._delete_player_recommendation, user_id, player_name)
+
+    @staticmethod
+    def _delete_player_recommendation(tx, user_id, player_name):
+        # Copy the relation into a RECOMMENDED relation, and then delete the RECOMMEND relation
+        query = """ MATCH (u:User {user_id: $user_id})-[r:RECOMMEND]->(p:Player {name: $player_name})
+                    MERGE (u)-[:RECOMMENDED {time_removed: datetime()}]->(p)
+                    DELETE r
+                """
+        tx.run(query, user_id=user_id, player_name=player_name)

@@ -20,24 +20,21 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 socketio.init_app(app, cors_allowed_origins="*")
 
 ########################
-# Initialized variables
+# Get local similarity dfs for faster recommendations
 ########################
-attribute_weights = {
-    "rank": 1,
-    "rank_points": 1,
-    "win_count": 1,
-    "loss_count": 1,
-    "tournaments_played": 1,
-    "win_percent": 1,
-    "aces_avg": 1,
-    "double_faults_avg": 1,
-    "service_points_avg": 1,
-    "first_serve_points_won_avg": 1,
-    "second_serve_points_won_avg": 1,
-    "serve_games_avg": 1,
-    "break_points_saved_avg": 1,
-    "break_points_faced_avg": 1
-}
+from database_workers.Neo4j_Player_Worker import Player_Worker
+player_worker = Player_Worker()
+player_names = player_worker.get_player_names()
+player_worker.close()
+player_names = [record['name'] for record in player_names] # Extract the values into a list
+player_names
+
+# Make similarity dfs
+from database_workers.Recommender import Recommender
+recommender = Recommender(player_names)
+recommender.create_similarity_dfs()
+similarity_dfs = recommender.similarity_dfs
+similarity_dfs
 
 #################
 # HTTP endpoints
@@ -118,25 +115,31 @@ def get_similarity_weights(user_id):
 
     return jsonify(similarity_weights), 200
 
-@app.route("/users/<user_id>/preferences", methods=["PUT"])
-def update_user_preferences(user_id):
+@app.route("/preferences/players", methods=["PUT"])
+def update_user_preferences():
     preferences_data = request.json
-    print(f"\nPreferences data {preferences_data}\n")
+
+    print(f"\nPreferences data:\n{preferences_data}\n")
     # Update this in neo4j
-    neo4j_worker = User_Worker()
-    # TODO make these actual preferences
-    preference1 = preferences_data["preference1"]
-    preference2 = preferences_data["preference2"]
-    sliderValue = preferences_data["sliderValue"]
-    neo4j_worker.update_user_preferences(user_id, preference1, preference2, sliderValue)
+    # if user_id is not None:
+    # neo4j_worker = User_Worker()
+    # # TODO make these actual preferences
+    # preference1 = preferences_data["preference1"]
+    # preference2 = preferences_data["preference2"]
+    # sliderValue = preferences_data["sliderValue"]
+    # neo4j_worker.update_user_preferences(user_id, preference1, preference2, sliderValue)
+    # create recommend relationships
+
+    # Return players that match the preferences
+    neo4j_worker = Parameter_Worker()
+    players = neo4j_worker.get_players_by_preferences(preferences_data)
     neo4j_worker.close()
 
-    return jsonify(preferences_data), 201
+    return jsonify(players), 201
 
 @app.route("/users/<user_id>/settings", methods=["PUT"])
 def update_user_settings(user_id):
     settings_data = request.json
-    print(f"\nSettings data {settings_data}\n")
     # Update this in neo4j
     neo4j_worker = User_Worker()
     days = settings_data["days"]
@@ -160,7 +163,6 @@ def get_group_users(group_id):
     neo4j_worker.close()
 
     return jsonify(users), 200
-
 
 # Get all players
 @app.route('/players', methods=['GET'])
@@ -204,9 +206,6 @@ def like_player():
         # Liking a player updates recommended players
         neo4j_worker = Relation_Worker()
         neo4j_worker.create_likes_relation(user_id, player_name)
-        neo4j_worker.delete_recommend_relations(user_id)
-        # similar_players = neo4j_worker.get_similar_players_based_on_attributes(user_id, attribute_weights)
-        # neo4j_worker.create_recommend_relations(user_id, similar_players)
         neo4j_worker.close()
         return jsonify({'message': 'Successfully liked player and updated recommendations'}), 200
     except Exception as e:
@@ -222,9 +221,6 @@ def unlike_player():
         player_name = request.json['name']
         neo4j_worker = Relation_Worker()
         neo4j_worker.delete_likes_relation(user_id, player_name)
-        neo4j_worker.delete_recommend_relations(user_id)
-        # similar_players = neo4j_worker.get_similar_players_based_on_attributes(user_id, attribute_weights)
-        # neo4j_worker.create_recommend_relations(user_id, similar_players)
         neo4j_worker.close()
         return jsonify({'message': 'Successfully unliked player and updated recommendations'}), 200
     except Exception as e:
@@ -275,7 +271,34 @@ def get_parameter_options():
         print(e)
         return jsonify({'error': 'Error while getting parameter options'}), 500
 
+#################
+# Recommendations
+#################
+@app.route('/recommendations/players', methods=['PUT'])
+def get_recommendations():
+    try:
+        # Get JSON query parameters from request
+        query = request.args.to_dict(flat=False)
+        liked_players = query['liked_players']
+        similarity_type = query['similarity_type'][0]
+        user_id = query['user_id'][0]
+
+        # Convert underscores to spaces in player names
+        liked_players = [player.replace('_', ' ') for player in liked_players]
+
+        recommended_players = recommender.recommend_individual(liked_players, similarity_type)
+
+        print('Recommended players: ', recommended_players)
+        # Get attribute weights from query
+        # player_names, similarity_type, user_id?
+        return json.dumps(recommended_players), 200 
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Error while getting recommendations'}), 500
+
+#################
 # Track user
+#################
 @app.route('/users/track', methods=['POST'])
 def track_user():
     print('Tracking user')

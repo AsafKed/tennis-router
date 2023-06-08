@@ -176,6 +176,38 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
         return likedPlayers.some(likedPlayer => likedPlayer.name === playerName);
     };
 
+    // Get recommendations
+    useEffect(() => {
+        if (userId && likedPlayers.length > 0) {
+            // Define the data to be sent
+            const data = {
+                // Extract the names of the liked players and replace spaces with underscores
+                liked_players: likedPlayers.map(player => player.name.replace(/ /g, '_')),
+                similarity_type: 'all', // Replace 'all' with the actual similarity type
+                user_id: userId
+            };
+
+            // Convert the data to a query string
+            const queryString = Object.keys(data).map(key => key + '=' + encodeURIComponent(data[key])).join('&');
+
+            // Send the GET request
+            fetch(`${process.env.REACT_APP_BACKEND_URL}/recommendations/players?${queryString}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response data
+                    console.log(data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+    }, [likedPlayers, userId]);
+
     useEffect(() => {
         if (selectedPlayer) {
             trackEvent({ action: 'view_player', player_name: selectedPlayer })

@@ -125,8 +125,7 @@ tournament. You can also view the recommended matches for the next day (when ava
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 2 }}>
 
-        <Typography variant="h3">Welcome back,
-          {gettingName ? <CircularProgress /> : name}
+        <Typography variant="h3">Welcome back, {gettingName ? <CircularProgress /> : " " + name}
         </Typography>
 
         <Button onClick={handleLogout}

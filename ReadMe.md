@@ -18,6 +18,12 @@ Use the following code to upload to the frontend and backend respectively. Make 
   git subtree push --prefix backend heroku-backend main
 ```
 
+### Viewing logs
+Assuming your app name is tennis-recommender-backend for the backend, use the following to view logs. Change it to your app's name.
+```bash
+  heroku logs --tail --app tennis-recommender-backend
+```
+
 ## Tech Stack
 
 **Client:** ReactJS,socket.io,socket.io-client

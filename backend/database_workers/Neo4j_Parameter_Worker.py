@@ -29,6 +29,9 @@ class Parameter_Worker:
         # Don't forget to close the driver connection when you are finished with it
         self.driver.close()
 
+    #############################
+    # # Get parameter options # #
+    #############################
     def get_parameter_options(self):
         with self.driver.session() as session:
             result = session.read_transaction(self._get_parameter_options)
@@ -124,3 +127,36 @@ class Parameter_Worker:
             "personality_tags": sorted(list(personality_tags)),
         }
     
+    #############################
+    # Get players by parameters #
+    #############################
+    def get_players_by_preferences(self, preferences):
+        with self.driver.session() as session:
+            result = session.execute_read(self._get_players_by_preferences, preferences)
+            return self._process_players_by_preferences(result)
+        
+    @staticmethod
+    def _get_players_by_preferences(tx, preferences):
+        query = """
+        MATCH (p:Player)
+        """
+        if any(preferences.values()):  # Check if any preferences are set
+            query += "WHERE "
+            for key, value in preferences.items():
+                if isinstance(value, list):
+                    query += f"(p.{key} IN {value}) AND "
+                else:
+                    if key in ['previous_winner', 'gender']:
+                        query += f"(p.{key} = {value}) AND "
+                    else:
+                        if value == '':
+                            continue
+                        elif isinstance(value, list) and value < preferences[key][0]:
+                            query += f"(p.{key} < {value}) AND "
+                        elif isinstance(value, list) and value > preferences[key][1]:
+                            query += f"(p.{key} > {value}) AND "
+                        elif isinstance(value, list):
+                            query += f"(p.{key} >= {preferences[key][0]} AND p.{key} <= {preferences[key][1]}) AND "
+            query = query[:-5]  # remove the last " AND "
+        query += "RETURN p"
+        return tx.run(query)

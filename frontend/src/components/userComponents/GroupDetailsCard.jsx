@@ -7,7 +7,7 @@ import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Button, Divider } from '@mui/material';
+import { Box, Button, Divider, CircularProgress } from '@mui/material';
 import InfoPopup from '../InfoPopup';
 
 const ExpandMore = styled((props) => {
@@ -24,9 +24,13 @@ const ExpandMore = styled((props) => {
 export default function GroupDetailsCard({ group, handleLeaveGroup, handleDeleteGroup }) {
     const [expanded, setExpanded] = React.useState(false);
     const [users, setUsers] = React.useState([]);
+    const [loading, setLoading] = React.useState(false);
 
     const handleExpandClick = async () => {
+        setExpanded(!expanded);
+
         if (!expanded) {
+            setLoading(true);
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/group-users/${group.group_id}`, {
                 method: "GET",
                 headers: {
@@ -35,8 +39,8 @@ export default function GroupDetailsCard({ group, handleLeaveGroup, handleDelete
             });
             const data = await response.json();
             setUsers(data);
+            setLoading(false);
         }
-        setExpanded(!expanded);
     };
 
     return (
@@ -56,6 +60,7 @@ export default function GroupDetailsCard({ group, handleLeaveGroup, handleDelete
                         <>
                             <Divider />
                             <br />
+                            {loading && <CircularProgress />}
                             <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
                                 <Typography><i>Use the following group ID to invite others.</i></Typography>
                                 <InfoPopup infoText="Copy it and send it to them so they can join it in their own user page." />

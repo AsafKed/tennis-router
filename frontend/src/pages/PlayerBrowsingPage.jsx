@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, Button } from '@mui/material';
+import { Card, CardContent, CardMedia, Typography, Grid, TextField, MenuItem, CircularProgress } from '@mui/material';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase';
 import PlayerSimilarity from '../components/PlayerBrowser/PlayerSimilarity';
@@ -19,6 +19,9 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
     const [userId, setId] = useState("");
     const [likedPlayers, setLikedPlayers] = useState([]);
     const [sortedLikedPlayers, setSortedLikedPlayers] = useState([]);
+    const [loadingPlayers, setLoadingPlayers] = useState(true);
+    const [loadingLikedPlayers, setLoadingLikedPlayers] = useState(true);
+
 
     // Player clicking
     // const [selectedPlayer, setSelectedPlayer] = useState(null);
@@ -33,10 +36,12 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
     // Get all players
     useEffect(() => {
         const fetchPlayers = async () => {
+            setLoadingPlayers(true);
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players`);
             const text = await response.text(); // if this doesn't work, try response.json()
             const data = JSON.parse(text)
             setPlayers(data);
+            setLoadingPlayers(false);
         };
 
         fetchPlayers();
@@ -44,10 +49,12 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
 
     // Update liked players (only after UID is known though)
     const fetchLikedPlayers = useCallback(async () => {
+        setLoadingLikedPlayers(true);
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/liked/${userId}`);
         const text = await response.text();
         const data = JSON.parse(text);
         setLikedPlayers(data);
+        setLoadingLikedPlayers(false);
     }, [userId]);
 
 
@@ -189,6 +196,9 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                 <div>
                     <h2>Liked Players</h2>
 
+                    {loadingLikedPlayers && <CircularProgress />}
+                    {!loadingLikedPlayers && likedPlayers.length === 0 && <p style={{paddingBottom: '2rem'}}>You haven't liked any players yet.</p>}
+
                     <Grid container spacing={4}>
                         {sortedLikedPlayers.map((player) => (
                             <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
@@ -223,6 +233,8 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
             )}
 
             <h2>Other Competitors</h2>
+            {loadingPlayers && <CircularProgress />}
+            
             <Grid container spacing={4}>
                 {filteredPlayers.map((player) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>

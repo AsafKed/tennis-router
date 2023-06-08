@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 // Styling
-import { Card, CardContent, Typography, Select, MenuItem, CardMedia, Divider, CardHeader, Box } from '@mui/material';
+import { Card, CardContent, Typography, Select, MenuItem, CardMedia, Divider, CardHeader, Box, CircularProgress } from '@mui/material';
 import Chip from '@mui/material/Chip';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
@@ -10,23 +10,29 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import ReactCountryFlag from "react-country-flag";
 
 // Tracking
-import { track, trackEvent } from 'react-tracking';
+import { track, useTracking } from 'react-tracking';
 import { dispatchTrackingData } from '../../TrackingDispatcher';
 
 const PlayerCardMini = ({ player }) => {
     // Get info on the player
     const [playerInfo, setPlayerInfo] = useState({});
     const [dataType, setDataType] = useState('description');
+    const [loading, setLoading] = useState(false);
+
+    // Tracking
+    const { trackEvent } = useTracking();
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => {
         const fetchPlayerInfo = async () => {
+            setLoading(true);
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/data/${player.player2}`);
             const text = await response.text();
             const data = JSON.parse(text);
             setPlayerInfo(data);
+            setLoading(false);
         };
 
         fetchPlayerInfo();
@@ -37,7 +43,7 @@ const PlayerCardMini = ({ player }) => {
     };
 
     const handlePlayerClick = () => {
-        // trackEvent({ action: 'click_player_card_mini', from: player.player1, to: player.player2, similarity_weight: player.similarity });
+        trackEvent({ action: 'click_player_card_mini', from: player.player1, to: player.player2, similarity_weight: player.similarity });
         // // Slight delay
         // Replace spaces with underscores
         return player.player2.replace(/ /g, '_');
@@ -45,6 +51,7 @@ const PlayerCardMini = ({ player }) => {
 
     return (
         <Card style={{ width: isMobile ? '90vw' : '33vw', height: 'auto', marginBottom: '20px' }}>
+            {loading && (<CircularProgress />)}
             <CardHeader title={player.player2} subheader={Math.round(player.similarity * 100) + "% similar to " + player.player1}
                 action={
                     <IconButton aria-label="settings" href={handlePlayerClick()}>

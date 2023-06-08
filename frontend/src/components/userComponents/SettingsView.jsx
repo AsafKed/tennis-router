@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Checkbox, FormGroup, FormControlLabel, Typography, Button } from '@mui/material';
+import { Checkbox, FormGroup, FormControlLabel, Typography, Button, CircularProgress, Snackbar, Box } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import MuiAlert from '@mui/material/Alert';
 
 // Tracking
 import { track, useTracking } from 'react-tracking';
@@ -17,10 +19,14 @@ function SettingsView({ userId }) {
         '17/06/2023: Saturday': false,
         '18/06/2023: Sunday': false,
     });
+    const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [openSnackbar, setOpenSnackbar] = useState(false);
 
     const { trackEvent } = useTracking();
 
     useEffect(() => {
+        setLoading(true);
         fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/settings`, {
             method: "GET",
             headers: {
@@ -37,6 +43,7 @@ function SettingsView({ userId }) {
                 setDays(newDays);
                 trackEvent({ action: 'get_settings' })
             });
+        setLoading(false);
     }, [userId]);
 
     const handleChange = (event) => {
@@ -45,7 +52,7 @@ function SettingsView({ userId }) {
 
     const handleSubmit = () => {
         const selectedDays = Object.keys(days).filter(day => days[day]).map(day => day.split(":")[0].trim());
-
+        setSubmitting(true);
         fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/settings`, {
             method: "PUT",
             headers: {
@@ -58,9 +65,18 @@ function SettingsView({ userId }) {
             .then((response) => {
                 return response.json();
             })
-
+        setSubmitting(false);
+        setSubmitting(false);
+        setOpenSnackbar(true);
         trackEvent({ action: 'update_settings', days: selectedDays })
     }
+
+    const handleCloseSnackbar = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpenSnackbar(false);
+    };
 
     return (
         <div>
@@ -85,6 +101,19 @@ function SettingsView({ userId }) {
                     />
                 ))}
             </FormGroup>
+            {/* If submitting load a Circular progress over the entire page. If submitted, change it to a checkmark which goes away by itself after 0.8 seconds */}
+            {submitting && <CircularProgress />}
+            <Snackbar open={openSnackbar} autoHideDuration={800} onClose={handleCloseSnackbar}>
+                <MuiAlert onClose={handleCloseSnackbar} severity="success" elevation={6} variant="filled">
+                    <Box display="flex" alignItems="center">
+                        <CheckCircleIcon />
+                        <Typography variant="body1" style={{ paddingLeft: '10px' }}>
+                            Settings updated successfully!
+                        </Typography>
+                    </Box>
+                </MuiAlert>
+            </Snackbar>
+            <br /> 
             <Button variant="contained" onClick={handleSubmit}>Submit</Button>
         </div>
     )

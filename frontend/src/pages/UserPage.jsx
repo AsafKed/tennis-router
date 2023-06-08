@@ -1,7 +1,7 @@
 import "../App.css";
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, Button, Divider, List, ListItem, ListItemButton, ListItemText, Badge } from '@mui/material';
+import { Box, Button, Divider, List, ListItem, ListItemButton, ListItemText, Badge, Typography, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import RecommendationsView from "../components/userComponents/RecommendationsView";
 import GroupView from "../components/userComponents/GroupView";
@@ -27,6 +27,9 @@ function UserPage() {
   const [name, setName] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [groupNum, setGroupNum] = useState(0);
+
+  const [gettingName, setGettingName] = useState(true);
+  const [gettingGroupNum, setGettingGroupNum] = useState(true);
 
   const listItems = [{ view: 'Recommendations', component: <RecommendationsView userId={userId} /> },
   { view: 'Groups', component: <GroupView userId={userId} /> },
@@ -73,6 +76,7 @@ function UserPage() {
       .then((data) => {
         setGroupNum(data.length);
       });
+    setGettingGroupNum(false);
   };
 
   const getName = async (userId) => {
@@ -85,6 +89,7 @@ function UserPage() {
     const data = await response.json();
     setUserId(data.user_id);
     setName(data.name);
+    setGettingName(false);
   };
 
   useEffect(() => {
@@ -112,13 +117,26 @@ function UserPage() {
   }));
 
   return (
-    <div>
+    <Box sx={{ flexGrow: 1, minWidth: 400, margin: 'auto', minHeight: 1000, padding: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <h1>User Page</h1>
         <InfoPopup infoText="On this page you create and join groups and indicate which days you plan to visit the
 tournament. You can also view the recommended matches for the next day (when available)" />
       </Box>
-      <h3>Welcome back, {name}.</h3>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 2 }}>
+
+        <Typography variant="h3">Welcome back,
+          {gettingName ? <CircularProgress /> : name}
+        </Typography>
+
+        <Button onClick={handleLogout}
+          variant="outlined"
+          color="secondary"
+          sx={{ marginLeft: 2 }}>
+          Logout
+        </Button>
+
+      </Box>
       <Divider />
       <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
         <ListItem disablePadding style={{ paddingBlockEnd: '0.5em' }}>
@@ -130,7 +148,7 @@ tournament. You can also view the recommended matches for the next day (when ava
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding style={{ paddingBlockEnd: '0.5em' }}>
-          <Badge badgeContent={groupNum} color="primary" style={{ width: '100%' }} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} showZero>
+          <Badge badgeContent={gettingGroupNum ? <CircularProgress size={20}/> : groupNum} color="primary" style={{ width: '100%' }} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} showZero>
             <ListItemButton
               selected={selectedIndex === 1}
               onClick={(event) => handleListItemClick(event, 1)}
@@ -158,11 +176,12 @@ tournament. You can also view the recommended matches for the next day (when ava
         </ListItem>
       </List>
 
+      <br />
+
       {/* Render the selected component */}
       {listItems[selectedIndex].component}
 
-      <Button onClick={handleLogout}>Logout</Button>
-    </div>
+    </Box>
   )
 }
 

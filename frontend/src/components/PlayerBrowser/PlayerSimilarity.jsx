@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, useMediaQuery, useTheme } from '@mui/material';
+import { Button, Modal, useMediaQuery, useTheme, CircularProgress } from '@mui/material';
 import PlayerCard from './PlayerCard';
 import PlayerCardMini from './PlayerCardMini';
 
@@ -11,6 +11,7 @@ import { useTracking } from 'react-tracking';
 const PlayerSimilarity = ({ userId, open, handleClose, isLoggedIn }) => {
     const { playerName: playerNameInUrl } = useParams();
     const playerName = playerNameInUrl || playerName;
+    const [loading, setLoading] = useState(false);
 
     const [similarityWeight, setSimilarityWeight] = useState("all");
     const [similarPlayers, setSimilarPlayers] = useState([]);
@@ -25,6 +26,7 @@ const PlayerSimilarity = ({ userId, open, handleClose, isLoggedIn }) => {
     // Fetch similarity weight from the user
     useEffect(() => {
         const fetchSimilarityWeight = async () => {
+            setLoading(true);
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/get_similarity_weights`);
             const text = await response.text();
             const data = JSON.parse(text);
@@ -37,11 +39,13 @@ const PlayerSimilarity = ({ userId, open, handleClose, isLoggedIn }) => {
     // Fetch similar players
     useEffect(() => {
         const fetchSimilarPlayers = async () => {
+            setLoading(true);
             // Turn spaces into underscores
             const playerNameForURL = playerName.replace(/ /g, '_');
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/similar/${playerNameForURL}/?similarity_weight=${similarityWeight}`);
             const data = await response.json(); // Use response.json() instead of response.text()
             setSimilarPlayers(data);
+            setLoading(false);
         };
         trackEvent({ action: 'fetch_similar_players', player_name: playerName, similarity_weight: similarityWeight });
         fetchSimilarPlayers();
@@ -78,6 +82,11 @@ const PlayerSimilarity = ({ userId, open, handleClose, isLoggedIn }) => {
                         {showSimilarPlayers ? 'Hide Similar Players' : 'Show Similar Players'}
                     </Button>
                 </div>
+                {loading && (
+                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                        <CircularProgress />
+                    </div>
+                )}
                 {showSimilarPlayers && (
                     <div style={{ paddingLeft: isMobile ? "0px" : "20px" }}>
                         {similarPlayers.map(player => <PlayerCardMini key={player.player2} player={player} />)}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
-import { Alert, Button, Typography, Paper, TextField, Box } from '@mui/material';
+import { Alert, Button, Typography, Paper, TextField, CircularProgress } from '@mui/material';
 
 // Tracking
 import { dispatchTrackingData } from '../TrackingDispatcher';
@@ -17,6 +17,7 @@ function Register() {
     const [password, setPassword] = useState('');
     const [displayName, setDisplayName] = useState('');
     const [error, setError] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
     // Upon opening the page
     useEffect(() => {
@@ -41,6 +42,7 @@ function Register() {
 
     const onSubmit = async (e) => {
         e.preventDefault()
+        setSubmitting(true);
 
         await createUserWithEmailAndPassword(auth, email, password)
             .then(async (userCredential) => {
@@ -49,11 +51,16 @@ function Register() {
                 await sendUserDataToServer(user.uid, user.email, displayName);
 
                 trackEvent({ action: 'register' });
+                
+                setSubmitting(false);
+                
                 navigate("/user")
             })
             .catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
+                
+                setSubmitting(false);
 
                 trackEvent({ action: 'register_error', 'error': errorCode })
                 setError(errorMessage);
@@ -104,6 +111,8 @@ function Register() {
                             />
                             {error && <Alert severity="error">{error}</Alert>}
 
+                            {submitting && <CircularProgress sx={{ m: 1, width: '25ch' }} /> }
+                            
                             <Typography variant="body2" gutterBottom sx={{ paddingBlockStart: '2rem' }}>
                                 By clicking Sign up, you agree to our <a href="https://www.jads.nl/privacy-statement/" target='_blank'>Privacy Policy</a> and <a href="/data-usage-policy">Data Usage Policy</a>.
                             </Typography>

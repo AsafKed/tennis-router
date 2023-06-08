@@ -28,10 +28,16 @@ const PlayerCard = ({ playerName, handleClose }) => {
         const fetchPlayerData = async () => {
             setLoading(true);
             const playerNameForURL = playerName.replace(/ /g, '_');
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/data/${playerNameForURL}`);
-            const text = await response.text();
-            const data = JSON.parse(text);
-            setPlayerData(data);
+            const storedPlayerData = localStorage.getItem(playerNameForURL);
+            if (!storedPlayerData) {
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/data/${playerNameForURL}`);
+                const text = await response.text();
+                const data = JSON.parse(text);
+                setPlayerData(data);
+                localStorage.setItem(playerNameForURL, JSON.stringify(data));
+            } else {
+                setPlayerData(JSON.parse(storedPlayerData));
+            }
             setLoading(false);
         };
 
@@ -39,6 +45,7 @@ const PlayerCard = ({ playerName, handleClose }) => {
             fetchPlayerData();
         }
     }, [playerName]);
+
 
     return (
         <Box sx={{ boxShadow: 24 }}>

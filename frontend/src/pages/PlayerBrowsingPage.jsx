@@ -24,7 +24,6 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
 
 
     // Player clicking
-    // const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [isPlayerCardOpen, setIsPlayerCardOpen] = useState(selectedPlayer ? true : false);
     const navigate = useNavigate();
 
@@ -35,6 +34,7 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
 
     // Get all players
     useEffect(() => {
+        const storedPlayers = localStorage.getItem('players'); // Get players from local storage
         const fetchPlayers = async () => {
             setLoadingPlayers(true);
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players`);
@@ -42,9 +42,16 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
             const data = JSON.parse(text)
             setPlayers(data);
             setLoadingPlayers(false);
+            localStorage.setItem('players', JSON.stringify(data)); // Store players in local storage
         };
 
-        fetchPlayers();
+        if (!storedPlayers) {
+            fetchPlayers();
+        } else {
+            setLoadingPlayers(true);
+            setPlayers(JSON.parse(storedPlayers));
+            setLoadingPlayers(false);
+        }
     }, []);
 
     // Update liked players (only after UID is known though)
@@ -55,13 +62,21 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
         const data = JSON.parse(text);
         setLikedPlayers(data);
         setLoadingLikedPlayers(false);
+        localStorage.setItem('likedPlayers', JSON.stringify(data));
     }, [userId]);
 
 
     // Get liked players (only after userId is known)
     useEffect(() => {
         if (userId) {
-            fetchLikedPlayers();
+            const storedLikedPlayers = localStorage.getItem('likedPlayers');
+            if (!storedLikedPlayers) {
+                fetchLikedPlayers();
+            } else {
+                setLoadingLikedPlayers(true);
+                setLikedPlayers(JSON.parse(storedLikedPlayers));
+                setLoadingLikedPlayers(false);
+            }
         }
     }, [userId, fetchLikedPlayers]);
 
@@ -107,7 +122,7 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
 
     }, [])
 
-    // Liking -> create user-player relationship
+    /// Liking -> create user-player relationship
     const handleLike = async (playerName) => {
         try {
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/like`, {
@@ -122,7 +137,11 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                 throw new Error('Failed to like player');
             }
             trackEvent({ action: 'like_player', player_name: playerName });
-            fetchLikedPlayers();
+
+            // Update the likedPlayers state and local storage
+            const updatedLikedPlayers = [...likedPlayers, { name: playerName }];
+            setLikedPlayers(updatedLikedPlayers);
+            localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
         } catch (error) {
             console.error(error);
         }
@@ -142,14 +161,16 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                 throw new Error('Failed to unlike player');
             }
             trackEvent({ action: 'unlike_player', player_name: playerName });
-            fetchLikedPlayers();
 
-            // Update the likedPlayers state
-            setLikedPlayers(likedPlayers.filter(likedPlayer => likedPlayer.name !== playerName));
+            // Update the likedPlayers state and local storage
+            const updatedLikedPlayers = likedPlayers.filter(likedPlayer => likedPlayer.name !== playerName);
+            setLikedPlayers(updatedLikedPlayers);
+            localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
         } catch (error) {
             console.error(error);
         }
     };
+
 
     const isLiked = (playerName) => {
         return likedPlayers.some(likedPlayer => likedPlayer.name === playerName);
@@ -197,7 +218,7 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                     <h2>Liked Players</h2>
 
                     {loadingLikedPlayers && <CircularProgress />}
-                    {!loadingLikedPlayers && likedPlayers.length === 0 && <p style={{paddingBottom: '2rem'}}>You haven't liked any players yet.</p>}
+                    {!loadingLikedPlayers && likedPlayers.length === 0 && <p style={{ paddingBottom: '2rem' }}>You haven't liked any players yet.</p>}
 
                     <Grid container spacing={4}>
                         {sortedLikedPlayers.map((player) => (
@@ -234,7 +255,7 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
 
             <h2>Other Competitors</h2>
             {loadingPlayers && <CircularProgress />}
-            
+
             <Grid container spacing={4}>
                 {filteredPlayers.map((player) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>

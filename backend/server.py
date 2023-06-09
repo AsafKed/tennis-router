@@ -279,7 +279,10 @@ def get_recommendations():
     try:
         # Get JSON query parameters from request
         query = request.args.to_dict(flat=False)
-        liked_players = query['liked_players']
+        print(f'\nQuery: {query}\n')
+
+        liked_players = query['liked_players'][0].split(',')
+        print(f'Liked players: {liked_players}\n')
         similarity_type = query['similarity_type'][0]
         user_id = query['user_id'][0]
 
@@ -295,6 +298,50 @@ def get_recommendations():
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error while getting recommendations'}), 500
+    
+@app.route('/recommendations/players/to_db', methods=['PUT'])
+def update_recommendations():
+    try:
+        # Read request body
+        data = request.get_json()
+
+        # Get user ID and recommended players from request body
+        user_id = data['user_id']
+        recommended_players = data['recommended_players']
+
+        # Get currently recommended players
+        neo4j_worker = Relation_Worker()
+        current_recommended_players = neo4j_worker.get_player_recommend_relations(user_id)
+        neo4j_worker.close()
+        print(f'\n\nCurrent recommended players: {current_recommended_players}\n\n')
+        # Extract player names from recommended players
+        recommended_player_names = [player['name'] for player in recommended_players]
+
+        # Get players to add and remove
+        current_recommended_player_names = [player['player_name'] for player in current_recommended_players]
+
+        players_to_add = list(set(recommended_player_names) - set(current_recommended_player_names))
+        players_to_remove = list(set(current_recommended_player_names) - set(recommended_player_names))
+
+        # Add and remove players
+        neo4j_worker = Relation_Worker()
+        for player_name in players_to_add:
+            # Find the player object that corresponds to the player name
+            player = next((player for player in recommended_players if player['name'] == player_name), None)
+            if player is not None:
+                neo4j_worker.create_player_recommend(user_id=user_id, player_name=player['name'], liked_player_name=player['liked_player'], similarity=player['similarity'], similarity_type=player['similarity_type'])
+
+        for player_name in players_to_remove:
+            neo4j_worker.delete_player_recommend(user_id, player_name)
+        neo4j_worker.close()
+
+
+        return jsonify({'message': 'Successfully updated recommended players'}), 200
+    
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Error while updating recommended players'}), 500
+    
 
 #################
 # Track user

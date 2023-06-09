@@ -17,10 +17,15 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
     const [filteredPlayers, setFilteredPlayers] = useState([]);
     const [sortOption, setSortOption] = useState('rank');
     const [userId, setId] = useState("");
+
     const [likedPlayers, setLikedPlayers] = useState([]);
     const [sortedLikedPlayers, setSortedLikedPlayers] = useState([]);
+    const [recommendedPlayers, setRecommendedPlayers] = useState([]);
+
     const [loadingPlayers, setLoadingPlayers] = useState(true);
     const [loadingLikedPlayers, setLoadingLikedPlayers] = useState(true);
+    const [loadingRecommendedPlayers, setLoadingRecommendedPlayers] = useState(false);
+    const [updatingRecommendedPlayers, setUpdatingRecommendedPlayers] = useState(false);
 
 
     // Player clicking
@@ -139,7 +144,8 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
             trackEvent({ action: 'like_player', player_name: playerName });
 
             // Update the likedPlayers state and local storage
-            const updatedLikedPlayers = [...likedPlayers, { name: playerName }];
+            const player = players.find(player => player.name === playerName);
+            const updatedLikedPlayers = [...likedPlayers, player];
             setLikedPlayers(updatedLikedPlayers);
             localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
         } catch (error) {
@@ -166,6 +172,12 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
             const updatedLikedPlayers = likedPlayers.filter(likedPlayer => likedPlayer.name !== playerName);
             setLikedPlayers(updatedLikedPlayers);
             localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
+
+            // Remove the recommended players related to the unliked player
+            const updatedRecommendedPlayers = recommendedPlayers.filter(recommendedPlayer => recommendedPlayer.liked_player !== playerName);
+            setRecommendedPlayers(updatedRecommendedPlayers);
+            localStorage.setItem('recommendedPlayers', JSON.stringify(updatedRecommendedPlayers));
+            setUpdatingRecommendedPlayers(true);
         } catch (error) {
             console.error(error);
         }
@@ -177,8 +189,10 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
     };
 
     // Get recommendations
-    useEffect(() => {
+
+    const getRecommendedPlayers = () => {
         if (userId && likedPlayers.length > 0) {
+            setLoadingRecommendedPlayers(true);
             // Define the data to be sent
             const data = {
                 // Extract the names of the liked players and replace spaces with underscores
@@ -186,7 +200,6 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                 similarity_type: 'all', // Replace 'all' with the actual similarity type
                 user_id: userId
             };
-
             // Convert the data to a query string
             const queryString = Object.keys(data).map(key => key + '=' + encodeURIComponent(data[key])).join('&');
 
@@ -200,14 +213,77 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                 .then(response => response.json())
                 .then(data => {
                     // Handle the response data
-                    console.log(data);
+                    // Find players in the players array that match the names in the response data with keys "rec_player". It's a list of objects.
+                    const recommendedPlayers = players.filter(player => data.some(recPlayer => recPlayer.rec_player === player.name)).map(player => {
+                        // Find the corresponding recommendation data
+                        const recommendationData = data.find(recPlayer => recPlayer.rec_player === player.name);
+
+                        // Add the similarity, similarity type, and liked player to the player object
+                        return {
+                            ...player,
+                            similarity: recommendationData.similarity,
+                            similarity_type: "all",
+                            liked_player: recommendationData.player,
+                            player: recommendationData.name
+                        };
+                    });
+                    console.log('Recommended players:')
+                    console.log(recommendedPlayers);
+                    setRecommendedPlayers(recommendedPlayers);
+                    // Save the recommended players to local storage
+                    localStorage.setItem('recommendedPlayers', JSON.stringify(recommendedPlayers));
                 })
                 .catch((error) => {
                     console.error('Error:', error);
                 });
+            setLoadingRecommendedPlayers(false);
+            setUpdatingRecommendedPlayers(true);
+
+            trackEvent({ action: 'get_recommended_players' });
         }
+    };
+
+
+    useEffect(() => {
+        getRecommendedPlayers();
     }, [likedPlayers, userId]);
 
+    useEffect(() => {
+        if (!loadingLikedPlayers) {
+            getRecommendedPlayers();
+        }
+    }, [loadingLikedPlayers]);
+
+    // Update recommended players in db (FE doesn't need to wait on this, nice!)
+    useEffect(() => {
+        if (userId && setUpdatingRecommendedPlayers) {
+            console.log('Updating recommended players in DB');
+            console.log(recommendedPlayers)
+            // Update in DB 
+            fetch(`${process.env.REACT_APP_BACKEND_URL}/recommendations/players/to_db`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId, recommended_players: recommendedPlayers }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to update recommended players in DB');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Successfully updated recommended players in DB');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            setUpdatingRecommendedPlayers(false);
+        }
+    }, [userId, setUpdatingRecommendedPlayers, recommendedPlayers]);
+
+    // View player 
     useEffect(() => {
         if (selectedPlayer) {
             trackEvent({ action: 'view_player', player_name: selectedPlayer })
@@ -254,6 +330,40 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
 
                     <Grid container spacing={4}>
                         {sortedLikedPlayers.map((player) => (
+                            <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
+                                <Card onClick={() => handlePlayerClick(player.name)}
+                                    sx={{ position: 'relative', '&:hover': { boxShadow: 3 } }}>
+                                    <CardMedia
+                                        component="img"
+                                        height="300"
+                                        image={player.image_url}
+                                        alt={player.name}
+                                        sx={{ objectFit: 'contain' }}
+                                    />
+                                    <CardContent>
+                                        <Typography gutterBottom variant="h5" component="div">
+                                            {player.name}
+                                        </Typography>
+                                        <Typography variant="body1" color="text.secondary">
+                                            Rank: {player.rank}
+                                        </Typography>
+                                        {isLoggedIn && (
+                                            <LikeButton isLiked={isLiked(player.name)}
+                                                onLike={() => handleLike(player.name)}
+                                                onUnlike={() => handleUnlike(player.name)}
+                                            />
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Grid>
+
+                    <h2>Recommended Players</h2>
+                    {loadingRecommendedPlayers && <CircularProgress />}
+                    {!loadingRecommendedPlayers && recommendedPlayers.length === 0 && <p style={{ paddingBottom: '2rem' }}>You haven't liked enough players yet to get recommendations.</p>}
+                    <Grid container spacing={4}>
+                        {recommendedPlayers.map((player) => (
                             <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
                                 <Card onClick={() => handlePlayerClick(player.name)}
                                     sx={{ position: 'relative', '&:hover': { boxShadow: 3 } }}>

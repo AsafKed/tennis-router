@@ -25,6 +25,8 @@ import '@fontsource/roboto/700.css';
 
 // Theme for Material UI (JADS colors)
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Typography, Box } from "@mui/material";
+import EngineeringIcon from '@mui/icons-material/Engineering';
 
 // Firebase
 import { auth } from './firebase';
@@ -52,94 +54,94 @@ function App() {
     },
   });
 
-  theme.typography.h1 = ({
-    fontFamily: 'Gravur Condensed',
-    fontSize: '2.125rem', // 34px
-    fontWeight: 'bold',
-    lineHeight: 1,
-    letterSpacing: '-0.0625rem', // -1px
-    [theme.breakpoints.down('md')]: {
-      fontSize: '2.125rem', // 34px
-    },
-    [theme.breakpoints.down('sm')]: {
-      fontSize: '1.5rem', // 24px
-    },
-  });
+  // theme.typography.h1 = ({
+  //   fontFamily: 'Gravur Condensed',
+  //   fontSize: '2.125rem', // 34px
+  //   fontWeight: 'bold',
+  //   lineHeight: 1,
+  //   letterSpacing: '-0.0625rem', // -1px
+  //   [theme.breakpoints.down('md')]: {
+  //     fontSize: '2.125rem', // 34px
+  //   },
+  //   [theme.breakpoints.down('sm')]: {
+  //     fontSize: '1.5rem', // 24px
+  //   },
+  // });
 
-  theme.typography.h2 = ({
-    fontFamily: 'Gravur Condensed',
-    fontSize: '1.875rem', // 30px
-    fontWeight: 'bold',
-    lineHeight: 1.067,
-    letterSpacing: '-0.05rem', // -0.8px
-    [theme.breakpoints.down('md')]: {
-      fontSize: '1.5rem', // 24px
-    },
-    [theme.breakpoints.down('sm')]: {
-      fontSize: '1.125rem', // 18px
-    },
-  });
+  // theme.typography.h2 = ({
+  //   fontFamily: 'Gravur Condensed',
+  //   fontSize: '1.875rem', // 30px
+  //   fontWeight: 'bold',
+  //   lineHeight: 1.067,
+  //   letterSpacing: '-0.05rem', // -0.8px
+  //   [theme.breakpoints.down('md')]: {
+  //     fontSize: '1.5rem', // 24px
+  //   },
+  //   [theme.breakpoints.down('sm')]: {
+  //     fontSize: '1.125rem', // 18px
+  //   },
+  // });
 
-  theme.typography.h3 = ({
-    fontFamily: 'Gravur Condensed',
-    fontSize: '1.5rem', // 24px
-    fontWeight: 'bold',
-    lineHeight: 1.083,
-    letterSpacing: '-0.0375rem', // -0.5px
-    [theme.breakpoints.down('md')]: {
-      fontSize: '1.25rem', // 20px
-    },
-    [theme.breakpoints.down('sm')]: {
-      fontSize: '1.125rem', // 18px
-    },
-  });
+  // theme.typography.h3 = ({
+  //   fontFamily: 'Gravur Condensed',
+  //   fontSize: '1.5rem', // 24px
+  //   fontWeight: 'bold',
+  //   lineHeight: 1.083,
+  //   letterSpacing: '-0.0375rem', // -0.5px
+  //   [theme.breakpoints.down('md')]: {
+  //     fontSize: '1.25rem', // 20px
+  //   },
+  //   [theme.breakpoints.down('sm')]: {
+  //     fontSize: '1.125rem', // 18px
+  //   },
+  // });
 
-  theme.typography.h4 = ({
-    fontFamily: 'Gravur Condensed',
-    fontSize: '1.25rem', // 20px
-    fontWeight: 'bold',
-    lineHeight: 1.1,
-    letterSpacing: '-0.025rem', // -0.4px
-    [theme.breakpoints.down('md')]: {
-      fontSize: '1.125rem', // 18px
-    },
-    [theme.breakpoints.down('sm')]: {
-      fontSize: '1rem', // 16px
-    },
-  });
+  // theme.typography.h4 = ({
+  //   fontFamily: 'Gravur Condensed',
+  //   fontSize: '1.25rem', // 20px
+  //   fontWeight: 'bold',
+  //   lineHeight: 1.1,
+  //   letterSpacing: '-0.025rem', // -0.4px
+  //   [theme.breakpoints.down('md')]: {
+  //     fontSize: '1.125rem', // 18px
+  //   },
+  //   [theme.breakpoints.down('sm')]: {
+  //     fontSize: '1rem', // 16px
+  //   },
+  // });
 
-  theme.typography.h5 = ({
-    fontFamily: 'Gravur Condensed',
-    fontSize: '1.125rem', // 18px
-    fontWeight: 'bold',
-    lineHeight: 1.111,
-    letterSpacing: '-0.0125rem', // -0.2px
-    [theme.breakpoints.down('md')]: {
-      fontSize: '1rem', // 16px
-    },
-  });
+  // theme.typography.h5 = ({
+  //   fontFamily: 'Gravur Condensed',
+  //   fontSize: '1.125rem', // 18px
+  //   fontWeight: 'bold',
+  //   lineHeight: 1.111,
+  //   letterSpacing: '-0.0125rem', // -0.2px
+  //   [theme.breakpoints.down('md')]: {
+  //     fontSize: '1rem', // 16px
+  //   },
+  // });
 
-  theme.typography.h6 = ({
-    fontFamily: 'Gravur Condensed',
-    fontSize: '1rem', // 16px
-    fontWeight: 'bold',
-    lineHeight: 1.125,
-    letterSpacing: '-0.00625rem', // -0.1px
-  });
+  // theme.typography.h6 = ({
+  //   fontFamily: 'Gravur Condensed',
+  //   fontSize: '1rem', // 16px
+  //   fontWeight: 'bold',
+  //   lineHeight: 1.125,
+  //   letterSpacing: '-0.00625rem', // -0.1px
+  // });
 
-  theme.typography.body1 = ({
-    fontFamily: 'Swiss',
-    fontSize: '1rem', // 16px
-    lineHeight: 1.5,
-    letterSpacing: '0.0125rem', // 0.2px
-  });
+  // theme.typography.body1 = ({
+  //   fontFamily: 'Swiss',
+  //   fontSize: '1rem', // 16px
+  //   lineHeight: 1.5,
+  //   letterSpacing: '0.0125rem', // 0.2px
+  // });
 
-  theme.typography.body2 = ({
-    fontFamily: 'Swiss',
-    fontSize: '0.875rem', // 14px
-    lineHeight: 1.429,
-    letterSpacing: '0.00625rem', // 0.1px
-  });
+  // theme.typography.body2 = ({
+  //   fontFamily: 'Swiss',
+  //   fontSize: '0.875rem', // 14px
+  //   lineHeight: 1.429,
+  //   letterSpacing: '0.00625rem', // 0.1px
+  // });
 
   // And other variables
   const [loggedIn, setLoggedIn] = useState(false);
@@ -176,6 +178,11 @@ function App() {
       <ThemeProvider theme={theme}>
         <BrowserRouter>
           <TopNavigationMenu loggedIn={loggedIn} />
+          <Box style={{ flexGrow: 1, display: 'flex' }}>
+            <EngineeringIcon style={{ marginLeft: '1rem', marginTop: '1rem', marginRight: '1rem' }} />
+            <Typography variant="subtitle1" style={{ textAlign: 'center', marginTop: '1rem' }}>This website is under construction. Feel free to navigate, but not everything is fully working yet.</Typography>
+            <EngineeringIcon style={{ marginLeft: '1rem', marginTop: '1rem' }} />
+          </Box>
           <Routes>
             <Route path="/" element={<WelcomePage />} />
             <Route path="/data-usage-policy" element={<DataUsagePolicy />} />

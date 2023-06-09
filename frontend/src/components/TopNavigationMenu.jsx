@@ -29,10 +29,6 @@ const TopNavigationMenu = ({ loggedIn }) => {
             display="block"
             width="auto"
             height="40" />
-          <img src={`${process.env.PUBLIC_URL}/libemaopen-logo.png`} alt="Libema Logo"
-            display="block"
-            width="auto"
-            height="35" />
         </IconButton>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           JADS – Libéma Recommender

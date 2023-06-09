@@ -227,8 +227,6 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                             player: recommendationData.name
                         };
                     });
-                    console.log('Recommended players:')
-                    console.log(recommendedPlayers);
                     setRecommendedPlayers(recommendedPlayers);
                     // Save the recommended players to local storage
                     localStorage.setItem('recommendedPlayers', JSON.stringify(recommendedPlayers));
@@ -257,8 +255,6 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
     // Update recommended players in db (FE doesn't need to wait on this, nice!)
     useEffect(() => {
         if (userId && setUpdatingRecommendedPlayers) {
-            console.log('Updating recommended players in DB');
-            console.log(recommendedPlayers)
             // Update in DB 
             fetch(`${process.env.REACT_APP_BACKEND_URL}/recommendations/players/to_db`, {
                 method: 'PUT',
@@ -274,7 +270,6 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Successfully updated recommended players in DB');
                 })
                 .catch(error => {
                     console.error('Error:', error);

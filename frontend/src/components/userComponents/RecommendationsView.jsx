@@ -8,8 +8,7 @@ function RecommendationsView() {
 
     useEffect(() => {
         setLoading(true);
-        // Get recommendations from /recommendations/matches/${userId}
-        fetch(`/recommendations/matches/${userId}`)
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/recommendations/matches/${userId}`)
             .then(response => response.json())
             .then(data => {
                 // Sort the data by match_time

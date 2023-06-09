@@ -36,6 +36,9 @@ recommender.create_similarity_dfs()
 similarity_dfs = recommender.similarity_dfs
 similarity_dfs
 
+# Write some code here to run the recommender on all users and store the results in the database
+# TODO
+
 #################
 # HTTP endpoints
 #################
@@ -46,7 +49,6 @@ def http_call():
     return jsonify(data)
 
 users = []
-room_users = {}
 
 ##############################
 # Requests from the front end
@@ -271,9 +273,9 @@ def get_parameter_options():
         print(e)
         return jsonify({'error': 'Error while getting parameter options'}), 500
 
-#################
-# Recommendations
-#################
+############################
+# Recommendations (players)
+############################
 @app.route('/recommendations/players', methods=['PUT'])
 def get_recommendations():
     try:
@@ -342,6 +344,18 @@ def update_recommendations():
         print(e)
         return jsonify({'error': 'Error while updating recommended players'}), 500
     
+#################
+# Recommendations (matches)
+#################
+@app.route('/recommendations/matches/<user_id>', methods=['GET'])
+def get_match_recommendations(user_id):
+    try:
+        # Use the recommender
+        matches = recommender.recommend_matches(user_id)
+        return json.dumps(matches), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Error while getting match recommendations'}), 500
 
 #################
 # Track user

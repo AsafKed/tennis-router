@@ -1,9 +1,27 @@
-import React from "react";
-import { Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Typography, Box, Card, CardContent } from "@mui/material";
 
-function RecommendationsView({ userId }) {
+function RecommendationsView() {
+    const userId = localStorage.getItem("userId");
+    const [recommendations, setRecommendations] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setLoading(true);
+        // Get recommendations from /recommendations/matches/${userId}
+        fetch(`/recommendations/matches/${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                // Sort the data by match_time
+                data.sort((a, b) => a.match_time.localeCompare(b.match_time));
+                setRecommendations(data);
+            })
+            .catch(error => console.error('Error:', error));
+        setLoading(false);
+    }, [userId]);
+
     return (
-        <div>
+        <Box sx={{ flexGrow: 1, m: 2 }}>
             <Typography variant="h1" gutterBottom>
                 To view recommendations, fill in the settings.
             </Typography>
@@ -34,7 +52,24 @@ function RecommendationsView({ userId }) {
                 <li><b>Create a group</b> and invite your friends</li>
                 <li><b>Join a group</b> using the group ID</li>
             </ol>
-        </div>
+
+            <br />
+            <Typography variant="h2" gutterBottom>Recommendations (individual)</Typography>
+            {recommendations && recommendations.map(recommendation => (
+                <Card key={recommendation.match_name} sx={{ marginBottom: 2 }}>
+                    <CardContent>
+                        <Typography variant="h4" gutterBottom>{recommendation.match_name}</Typography>
+                        {/* render the match_date, match_time, match_location, and the priority */}
+                        <Typography variant="body1" gutterBottom>
+                            Date: {recommendation.match_date} <br />
+                            Time: {recommendation.match_time} <br />
+                            Location: {recommendation.match_location} <br />
+                            Priority: {recommendation.priority}
+                        </Typography>
+                    </CardContent>
+                </Card>
+            ))}
+        </Box>
     )
 }
 

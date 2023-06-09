@@ -1,6 +1,7 @@
 from .Neo4j_Relation_Worker import Relation_Worker
 from .Neo4j_Similarity_Worker import Similarity_Worker
 from .Neo4j_Player_Worker import Player_Worker
+from .Neo4j_User_Worker import User_Worker
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -80,7 +81,7 @@ class Recommender:
         similarities = similarities.to_dict('records')
         return similarities
     
-    def recommend_match(self, user_id: str, days: list):
+    def recommend_matches(self, user_id: str):
         """Recommend matches based on the players and the days.
 
         This gives us 3 rankings:
@@ -88,7 +89,11 @@ class Recommender:
             2. The ranking of the matches with the recommended players and the same day
             3. The ranking of the matches with the similar players and the same day
         """
-        
+        # Get the days
+        user_worker = User_Worker()
+        days = user_worker.get_user_settings(user_id)['days']
+        user_worker.close()
+
         # Get the liked players
         relation_worker = Relation_Worker()
         liked_players = relation_worker.get_liked_players_names(user_id)
@@ -109,10 +114,8 @@ class Recommender:
         # Get all matches
         player_worker = Player_Worker()
         matches = player_worker.get_all_matches()
-
-        # Close the workers
-        relation_worker.close()
         player_worker.close()
+
 
         # Extract the dates from the matches
         match_dates = [match['match_date'] for match in matches]

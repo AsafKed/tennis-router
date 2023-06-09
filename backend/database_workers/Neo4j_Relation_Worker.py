@@ -182,54 +182,53 @@ class Relation_Worker:
     ##############################
     # Create player recommendations
     ##############################
-    def create_player_recommend(self, user_id, player_name, liked_player_name, similarity, similarity_type):
+    def create_player_recommend(self, user_id, player_name, liked_player_name=None, similarity=None, similarity_type=None, recommendation_type='player'):
         with self.driver.session(database="neo4j") as session:
-            session.execute_write(self._create_player_recommend, user_id, player_name, liked_player_name, similarity, similarity_type)
+            session.execute_write(self._create_player_recommend, user_id, player_name, liked_player_name, similarity, similarity_type, recommendation_type=recommendation_type)
 
     @staticmethod
-    def _create_player_recommend(tx, user_id, player_name, liked_player_name, similarity, similarity_type):
+    def _create_player_recommend(tx, user_id, player_name, liked_player_name, similarity, similarity_type, recommendation_type='player'):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         query = """ MATCH (u:User {user_id: $user_id})
                     MATCH (p:Player {name: $player_name})
-                    MERGE (u)-[:RECOMMEND {time_created: datetime(), recommendation_type: $recommendation_type, liked_player: $liked_player_name, similarity: $similarity, similarity_type: $similarity_type}]->(p)
-                    MERGE (p)-[:RECOMMENDED_BY {time_created: datetime()}]->(lp)
+                    MERGE (u)-[:RECOMMEND {time_created: $timestamp, recommendation_type: $recommendation_type, liked_player: $liked_player_name, similarity: $similarity, similarity_type: $similarity_type}]->(p)
+                    MERGE (p)-[:RECOMMENDED_BY {time_created: $timestamp}]->(lp)
                 """
-        tx.run(query, user_id=user_id, player_name=player_name, liked_player_name=liked_player_name, similarity=similarity, similarity_type=similarity_type, recommendation_type='player')
-
+        tx.run(query, user_id=user_id, player_name=player_name, timestamp=timestamp, liked_player_name=liked_player_name or "", similarity=similarity or "", similarity_type=similarity_type or "", recommendation_type=recommendation_type)
 
     ##############################
     # Delete recommend relations
     ##############################
-    def delete_player_recommend(self, user_id, player_name):
+    def delete_player_recommend(self, user_id, player_name, recommendation_type='player'):
         with self.driver.session(database="neo4j") as session:
-            session.execute_write(self._delete_player_recommend, user_id, player_name)
+            session.execute_write(self._delete_player_recommend, user_id, player_name, recommendation_type=recommendation_type)
 
     @staticmethod
-    def _delete_player_recommend(tx, user_id, player_name):
+    def _delete_player_recommend(tx, user_id, player_name, recommendation_type='player'):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # Copy the relation into a RECOMMENDED relation, and then delete the RECOMMEND relation
-        query = """ MATCH (u:User {user_id: $user_id})-[r:RECOMMEND]->(p:Player {name: $player_name})
+        query = """ MATCH (u:User {user_id: $user_id})-[r:RECOMMEND {recommendation_type: $recommendation_type}]->(p:Player {name: $player_name})
                     MERGE (u)-[:RECOMMENDED {time_removed: datetime()}]->(p)
                     DELETE r
                 """
-        tx.run(query, user_id=user_id, player_name=player_name, timestamp=timestamp)
+        tx.run(query, user_id=user_id, player_name=player_name, timestamp=timestamp, recommendation_type=recommendation_type)
     
     ##############################
     # Get player recommendations
     ##############################
-    def get_player_recommend_relations(self, user_id):
+    def get_player_recommend_relations(self, user_id, recommendation_type='player'):
         with self.driver.session(database="neo4j") as session:
-            return session.execute_read(self._get_player_recommend_relations, user_id)
+            return session.execute_read(self._get_player_recommend_relations, user_id, recommendation_type=recommendation_type)
         
     @staticmethod
-    def _get_player_recommend_relations(tx, user_id):
+    def _get_player_recommend_relations(tx, user_id, recommendation_type='player'):
         # Get similarity weight, recommendation type, player name, and liked player name
-        query = """ MATCH (u:User {user_id: $user_id})-[r:RECOMMEND]->(p:Player)
+        query = """ MATCH (u:User {user_id: $user_id})-[r:RECOMMEND {recommendation_type: $recommendation_type}]->(p:Player)
                     RETURN r.similarity AS similarity, r.similarity_type AS similarity_type,
                     r.recommendation_type AS recommendation_type, p.name AS player_name, 
                     r.liked_player AS liked_player_name
                 """
         
-        result = tx.run(query, user_id=user_id)
+        result = tx.run(query, user_id=user_id, recommendation_type=recommendation_type)
         # Return a list of dictionaries
         return [record.data() for record in result]

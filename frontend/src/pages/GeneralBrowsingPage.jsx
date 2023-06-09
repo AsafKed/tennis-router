@@ -5,7 +5,7 @@ import TriangleSlider from "../components/TriangleSlider";
 import InfoPopup from '../components/InfoPopup';
 
 // Styling
-import { Box, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 
 // Navigating
 import { useNavigate, useParams } from 'react-router-dom';
@@ -41,8 +41,12 @@ const BrowsingPage = () => {
     }, []);
 
     const handleToggle = () => {
-        setShowPlayerSelectionPage(!showPlayerSelectionPage);
-        trackEvent({ action: setShowPlayerSelectionPage ? 'player_view_open' : 'preference_view_open' })
+        if (browseType === 'player') {
+            navigate('/browser/parameter');
+        } else {
+            navigate('/browser/player');
+            trackEvent({ action: setShowPlayerSelectionPage ? 'player_view_open' : 'preference_view_open' })
+        }
     }
 
     return (
@@ -50,15 +54,20 @@ const BrowsingPage = () => {
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
                     <Typography variant="h1">Browser Page</Typography>
-                    <InfoPopup infoText="On this page you browse players at Libema-open. You can order players alphabetically or by rank. You can also find players by indicating what characteristics you prefer. If you click on a
-                                         player, you can see player characteristics and also find similar players to this player.<br />
-                                         If you want to get personalized recommendations for which players or matches to watch
-                                         during the tournament, please register/login first."
+                    <InfoPopup infoText="Press the switch to toggle between player browsing and parameter browsing."
                     />
+                    <Button variant="contained" onClick={handleToggle}>Toggle</Button>
                 </Box>
             </Box>
             {/* Remove the conditional rendering of PlayerBrowsing and ParameterBrowsing */}
-            {browseType === 'player' ? <Typography variant="h2">Player Browsing</Typography> : <Typography variant="h2">Parameter Browsing</Typography>}
+            {browseType === 'player' ? <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                <Typography variant="h1">Player browsing</Typography>
+                <InfoPopup infoText="On this page you browse players at Libema-open. You can order players alphabetically or by rank. You can also find players by indicating what characteristics you prefer. If you click on a
+                                         player, you can see player characteristics and also find similar players to this player.<br />
+                                         If you want to get personalized recommendations for which players or matches to watch
+                                         during the tournament, please register/login first."
+                />
+            </Box> : <Typography variant="h2">Parameter Browsing</Typography>}
             <br />
             {browseType === 'player' ? <PlayerBrowsing selectedPlayer={playerName} /> : <ParameterBrowsing />}
         </div>

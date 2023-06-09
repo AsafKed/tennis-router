@@ -1,6 +1,7 @@
 from neo4j import GraphDatabase
 import numpy as np
 import pandas as pd
+import json
 
 # Import helpers
 from .Neo4j_Errors import Uniqueness_Check
@@ -175,12 +176,14 @@ class Parameter_Worker:
     #############################
     def save_user_preferences(self, user_id, preferences):
         with self.driver.session() as session:
-            session.write_transaction(self._save_user_preferences, user_id, preferences)
+            # Convert preferences dictionary to JSON string
+            preferences_json = json.dumps(preferences)
+            session.write_transaction(self._save_user_preferences, user_id, preferences_json)
 
     @staticmethod
-    def _save_user_preferences(tx, user_id, preferences):
+    def _save_user_preferences(tx, user_id, preferences_json):
         query = """
         MATCH (u:User {id: $user_id})
-        SET u.preferences = $preferences
+        SET u.preferences = $preferences_json
         """
-        tx.run(query, user_id=user_id, preferences=preferences)
+        tx.run(query, user_id=user_id, preferences_json=preferences_json)

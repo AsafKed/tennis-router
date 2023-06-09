@@ -142,6 +142,44 @@ def update_user_preferences():
     except Exception as e:
         print(f"\nError:\n{e}\n")
         return jsonify({"message": "Error"}), 500
+    
+@app.route("/preferences/user/", methods=["PUT"])
+def update_user_preferences_by_user_id():
+    # This should create a recommend relation between the user and the players
+    try:
+        preferences_data = request.get_json()
+
+        # Get the data
+        user_id = preferences_data.get("user_id")
+        preferences = preferences_data.get("preferences")
+        recommended_player_names = preferences_data.get("player_names")
+
+        print(f"\nPreferences data:\n{preferences_data}\n")
+        print(f"\nPlayer names:\n{recommended_player_names}\n")
+
+        # Get currently recommended players using parameter
+        relation_worker = Relation_Worker()
+        current_recommended_players = relation_worker.get_player_recommend_relations(user_id, recommendation_type="parameter")
+
+        # Get players to add and remove
+        current_recommended_player_names = [player['player_name'] for player in current_recommended_players]
+
+        players_to_add = list(set(recommended_player_names) - set(current_recommended_player_names))
+        players_to_remove = list(set(current_recommended_player_names) - set(recommended_player_names))
+
+        for player_name in players_to_add:
+            # Find the player object that corresponds to the player name
+            player = next((name for name in recommended_player_names if name == player_name), None)
+            if player is not None:
+                relation_worker.create_player_recommend(user_id=user_id, player_name=player_name, recommendation_type="parameter")
+
+        for player_name in players_to_remove:
+            relation_worker.delete_player_recommend(user_id, player_name)
+        relation_worker.close()
+        return "OK", 201
+    except Exception as e:
+        print(f"\nError:\n{e}\n")
+        return jsonify({"message": "Error"}), 500
 
 @app.route("/users/<user_id>/settings", methods=["PUT"])
 def update_user_settings(user_id):
@@ -209,14 +247,13 @@ def like_player():
     try:
         user_id = request.json['user_id']
         player_name = request.json['name']
-        # Liking a player updates recommended players
         neo4j_worker = Relation_Worker()
         neo4j_worker.create_likes_relation(user_id, player_name)
         neo4j_worker.close()
-        return jsonify({'message': 'Successfully liked player and updated recommendations'}), 200
+        return jsonify({'message': 'Successfully liked player'}), 200
     except Exception as e:
         print(e)
-        return jsonify({'error': 'Error while liking player and updating recommendations'}), 500
+        return jsonify({'error': 'Error while liking player'}), 500
 
 # User unlikes player
 @app.route('/players/unlike', methods=['POST'])
@@ -228,10 +265,10 @@ def unlike_player():
         neo4j_worker = Relation_Worker()
         neo4j_worker.delete_likes_relation(user_id, player_name)
         neo4j_worker.close()
-        return jsonify({'message': 'Successfully unliked player and updated recommendations'}), 200
+        return jsonify({'message': 'Successfully unliked player'}), 200
     except Exception as e:
         print(e)
-        return jsonify({'error': 'Error while unliking player and updating recommendations'}), 500
+        return jsonify({'error': 'Error while unliking player'}), 500
 
 # TODO add attribute weights assigned by the user
 # TODO add dislike player

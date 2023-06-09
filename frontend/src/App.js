@@ -178,7 +178,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <BrowserRouter>
           <TopNavigationMenu loggedIn={loggedIn} />
-          <Box style={{ flexGrow: 1, display: 'flex' }}>
+          <Box style={{ display: 'flex' }}>
             <EngineeringIcon style={{ marginLeft: '1rem', marginTop: '1rem', marginRight: '1rem' }} />
             <Typography variant="subtitle1" style={{ textAlign: 'center', marginTop: '1rem' }}>This website is under construction. Feel free to navigate, but not everything is fully working yet.</Typography>
             <EngineeringIcon style={{ marginLeft: '1rem', marginTop: '1rem' }} />

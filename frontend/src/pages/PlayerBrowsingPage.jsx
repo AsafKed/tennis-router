@@ -332,7 +332,18 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                         {sortedLikedPlayers.map((player) => (
                             <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
                                 <Card onClick={() => handlePlayerClick(player.name)}
-                                    sx={{ position: 'relative', '&:hover': { boxShadow: 3 } }}>
+                                    sx={{
+                                        position: 'relative',
+                                        '&:hover': {
+                                            boxShadow: 4,
+                                            transition: '0.3s',
+                                            boxShadow: '0 8px 40px -12px rgba(0,0,0,0.3)',
+                                            '& $image': {
+                                                borderRadius: '50%',
+                                            },
+                                        }
+                                    }}
+                                >
                                     <CardMedia
                                         component="img"
                                         height="300"
@@ -366,7 +377,18 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                         {recommendedPlayers.map((player) => (
                             <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
                                 <Card onClick={() => handlePlayerClick(player.name)}
-                                    sx={{ position: 'relative', '&:hover': { boxShadow: 3 } }}>
+                                    sx={{
+                                        position: 'relative',
+                                        '&:hover': {
+                                            boxShadow: 4,
+                                            transition: '0.3s',
+                                            boxShadow: '0 8px 40px -12px rgba(0,0,0,0.3)',
+                                            '& $image': {
+                                                borderRadius: '50%',
+                                            },
+                                        }
+                                    }}
+                                >
                                     <CardMedia
                                         component="img"
                                         height="300"
@@ -402,7 +424,18 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                 {filteredPlayers.map((player) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={player.name}>
                         <Card onClick={() => handlePlayerClick(player.name)}
-                            sx={{ position: 'relative', '&:hover': { boxShadow: 4 } }}>
+                            sx={{
+                                position: 'relative',
+                                '&:hover': {
+                                    boxShadow: 4,
+                                    transition: '0.3s',
+                                    boxShadow: '0 8px 40px -12px rgba(0,0,0,0.3)',
+                                    '& $image': {
+                                        borderRadius: '50%',
+                                    },
+                                }
+                            }}
+                        >
                             <CardMedia
                                 component="img"
                                 height="300"

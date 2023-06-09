@@ -53,7 +53,10 @@ function RecommendationsView() {
             </ol>
 
             <br />
-            <Typography variant="h2" gutterBottom>Recommendations (individual)</Typography>
+            <Typography variant="h2" gutterBottom>Recommended matches (individual)</Typography>
+            <Typography variant="body1" gutterBottom>
+                These will be made available every match day. Check back then!
+            </Typography>
             {recommendations && recommendations.map(recommendation => (
                 <Card key={recommendation.match_name} sx={{ marginBottom: 2 }}>
                     <CardContent>

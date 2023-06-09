@@ -64,6 +64,24 @@ class Relation_Worker:
                 """
         result = tx.run(query, user_id=user_id).data()
         return result
+    
+    def get_liked_players_names(self, user_id):
+        liked_players = self.get_liked_players(user_id)
+        liked_players_names = []
+        
+        for player in liked_players:
+            liked_players_names.append(player["name"])
+        
+        return liked_players_names
+    
+    def get_liked_players_countries(self, user_id):
+        liked_players = self.get_liked_players(user_id)
+        liked_players_countries = []
+        
+        for player in liked_players:
+            liked_players_countries.append(player["country"])
+        
+        return liked_players_countries
 
 
     def get_liked_player_attributes(self, user_id):

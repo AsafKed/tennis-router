@@ -245,6 +245,9 @@ class Player_Worker:
         result = tx.run(query, {'match_num': kwargs['match_num'], 'match_name': kwargs['match_name'], 'tourney_id': kwargs['tourney_id'], 'props': non_null_properties})
         return result.single()[0]
 
+    ############################
+    # Create match simple
+    ############################
     def create_match_simple(self, match_date, match_time, match_location, match_name):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(self._create_and_return_match_simple, match_date=match_date, match_time=match_time, match_location=match_location, match_name=match_name)
@@ -284,7 +287,7 @@ class Player_Worker:
         query = """ MATCH (p:Player { player_id: $player_id })
                 MATCH (m:Match { match_name: $match_name })
                 MATCH (p)-[r:PLAYS]->(m)
-                RETURN p.name AS name, p.player_id AS player_id, m.match_name AS match_name, m.date AS date, m.time as time
+                RETURN p.name AS name, p.player_id AS player_id, m.match_name AS match_name, m.date AS date, m.match_time as time
             """
         result = tx.run(
             query, player_id=player_id, match_name=match_name
@@ -327,7 +330,7 @@ class Player_Worker:
         query = """ MATCH (p:Player { name: $player_name })
                 MATCH (m:Match { match_name: $match_name })
                 MATCH (p)-[r:PLAYS]->(m)
-                RETURN p.name AS name, m.match_name AS match_name, m.date AS date, m.time as time
+                RETURN p.name AS name, m.match_name AS match_name, m.date AS date, m.match_time as time
             """
         result = tx.run(
             query, player_name=player_name, match_name=match_name
@@ -377,6 +380,41 @@ class Player_Worker:
         query = """ MATCH (p:Player)
                     RETURN p.name AS name
                     ORDER BY p.name
+                """
+        result = tx.run(query).data()
+        return result
+    
+    ############################
+    # Get matches by day
+    ############################
+    def get_matches_by_day(self, date):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(self._get_matches_by_day, date)
+            return result
+        
+    @staticmethod
+    def _get_matches_by_day(tx, date):
+        query = """ MATCH (m:Match)
+                    WHERE date(m.date) = date($date)
+                    RETURN m.match_name AS match_name, m.match_date AS match_date, m.match_time as match_time, m.match_location as match_location
+                    ORDER BY m.match_time
+                """
+        result = tx.run(query, date=date).data()
+        return result
+    
+    ############################
+    # Get all matches
+    ############################
+    def get_all_matches(self):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(self._get_all_matches)
+            return result
+        
+    @staticmethod
+    def _get_all_matches(tx):
+        query = """ MATCH (m:Match)
+                    RETURN m.match_name AS match_name, m.match_date AS match_date, m.match_time as match_time, m.match_location as match_location
+                    ORDER BY m.match_time
                 """
         result = tx.run(query).data()
         return result

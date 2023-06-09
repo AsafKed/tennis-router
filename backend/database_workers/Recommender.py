@@ -1,7 +1,9 @@
 from .Neo4j_Relation_Worker import Relation_Worker
 from .Neo4j_Similarity_Worker import Similarity_Worker
+from .Neo4j_Player_Worker import Player_Worker
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
 class Recommender:
     def __init__(self, player_names):
@@ -77,11 +79,78 @@ class Recommender:
         # Turn similarities into list of dictionaries
         similarities = similarities.to_dict('records')
         return similarities
+    
+    def recommend_match(self, user_id: str, days: list):
+        """Recommend matches based on the players and the days.
 
+        This gives us 3 rankings:
+            1. The ranking of the matches with the liked players and the same day
+            2. The ranking of the matches with the recommended players and the same day
+            3. The ranking of the matches with the similar players and the same day
+        """
+        
+        # Get the liked players
+        relation_worker = Relation_Worker()
+        liked_players = relation_worker.get_liked_players_names(user_id)
 
-# Get players from the database
-# Compute similarity between players using euclidean similarity on the numeric features
-# Compute cosine similarity between players using the categorical features
-# Combine the two similarities using a weighted average based on the input of the user
+        # Get relation types between user and players
+        _recommended_p = relation_worker.get_player_recommend_relations(user_id)
+        relation_worker.close()
 
-# Return similar player based on the similarity score and an input player
+        # Convert the list of dictionaries to a DataFrame
+        _recommended_p_df = pd.DataFrame(_recommended_p)
+
+        print(liked_players)
+        print(_recommended_p_df)
+
+        # Get the matches for those days
+        formatted_days = [datetime.strptime(day, "%d/%m/%Y").strftime("%Y-%m-%d") for day in days]
+
+        # Get all matches
+        player_worker = Player_Worker()
+        matches = player_worker.get_all_matches()
+
+        # Close the workers
+        relation_worker.close()
+        player_worker.close()
+
+        # Extract the dates from the matches
+        match_dates = [match['match_date'] for match in matches]
+
+        # Find the intersection of the user's days and the match dates
+        intersecting_days = list(set(formatted_days) & set(match_dates))
+        matches_on_days = [match for match in matches if match['match_date'] in intersecting_days]
+
+        # 1. Check if the liked players are in the matches by checking if the player names are in the match_name. If so, add that match to a list of dictionaries with priority 1
+        liked_player_matches = [match for match in matches_on_days if any(player in match['match_name'] for player in liked_players)]
+        for match in liked_player_matches:
+            match['priority'] = 1
+
+        # 2. Check if the recommended players are in the matches by checking if the player names are in the match_name. If so, add that match to a list of dictionaries with priority equal to similarity
+        recommended_player_matches = [match for match in matches_on_days if any(player in match['match_name'] for player in _recommended_p_df['player_name'])]
+        for match in recommended_player_matches:
+            player_name = next(player for player in _recommended_p_df['player_name'] if player in match['match_name'])
+            match['priority'] = _recommended_p_df[_recommended_p_df['player_name'] == player_name]['similarity'].values[0]
+
+        # If there are no found matches yet, extract the player names from the matches, then rank them by similarities to the liked players and to the recommended players. Then add the matches to the list of dictionaries with priority equal to the higher similarity (max similarity between those players and recommended players)
+        if not liked_player_matches and not recommended_player_matches:
+            match_player_names = [name.split(' vs ')[0] for name in [match['match_name'] for match in matches_on_days]]
+            match_player_names += [name.split(' vs ')[1] for name in [match['match_name'] for match in matches_on_days]]
+            match_player_names = list(set(match_player_names))  # Remove duplicates
+
+            for player_name in match_player_names:
+                similarity_liked = self.similarity_dfs['all'].loc[player_name, liked_players].max()
+                similarity_recommended = self.similarity_dfs['all'].loc[player_name, _recommended_p_df['player_name']].max()
+                priority = max(similarity_liked, similarity_recommended)
+
+                for match in matches_on_days:
+                    if player_name in match['match_name']:
+                        match['priority'] = priority
+
+        # Combine all the matches
+        all_matches = liked_player_matches + recommended_player_matches + matches_on_days
+
+        # Sort the matches by priority
+        all_matches.sort(key=lambda x: x['priority'], reverse=True)
+
+        return all_matches

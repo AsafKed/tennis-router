@@ -15,6 +15,10 @@ class MatchEditor:
             match_name = match['player1'] + ' vs ' + match['player2']
             # Format time to be HH:MM (24 hour)
             match['time'] = match['time'].strftime('%H:%M')
+
+            # Convert date to the format "yyyy-mm-dd"
+            match['date'] = pd.to_datetime(match['date']).strftime('%Y-%m-%d')
+
             worker.create_match_simple(match_date=match['date'], match_time=match['time'],  match_location=match['location'], match_name=match_name)
             worker.create_player_match_relationship_simple(player_name=match['player1'], match_name=match_name)
             worker.create_player_match_relationship_simple(player_name=match['player2'], match_name=match_name)

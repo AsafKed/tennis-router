@@ -12,16 +12,16 @@ For this to work, the backend must run before the frontend.
 ## Running on Heroku
 Use the following code to upload to the frontend and backend respectively. Make sure you're in the root directory when running this from a terminal (e.g. tennis-router/, not tennis-router/frontend for example.)
 ```bash
-  git subtree push --prefix frontend heroku-frontend main
+  git subtree push --prefix frontend heroku-frontend-eu main
 ```
 ```bash
-  git subtree push --prefix backend heroku-backend main
+  git subtree push --prefix backend heroku-backend-eu main
 ```
 
 ### Viewing logs
 Assuming your app name is tennis-recommender-backend for the backend, use the following to view logs. Change it to your app's name.
 ```bash
-  heroku logs --tail --app tennis-recommender-backend
+  heroku logs --tail --app tennis-recommender-backend-eu
 ```
 
 ## Tech Stack

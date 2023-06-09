@@ -79,10 +79,10 @@ class Parameter_Worker:
             career_high_years_ago.append(row["career_high_years_ago"])
             previous_winner.add(row["previous_winner"])
 
-        years_on_tour = np.percentile(years_on_tour, [33, 66])
-        height = np.percentile(height, [33, 66])
-        career_high_rank = np.percentile(career_high_rank, [33, 66])
-        career_high_years_ago = np.percentile(career_high_years_ago, [33, 66])
+        years_on_tour = ['Fewer', 'Medium', 'More']
+        height = ['Shorter', 'Medium', 'Taller']
+        career_high_rank = ['Lower', 'Medium', 'Higher']
+        career_high_years_ago = ['Peak was not recent', 'Peak was recent but not this year', 'Peak is this year']
         personality_tags = sorted(list(self.tag_categories['Category'].unique()))
         # Remove "Ignore" from personality tags
         personality_tags.remove("Ignore")
@@ -90,12 +90,12 @@ class Parameter_Worker:
         return {
             "play_style": list(play_style),
             "favorite_shot": list(favorite_shot),
-            "years_on_tour": years_on_tour.tolist(),
+            "years_on_tour": years_on_tour,
             "country_zone": list(country_zone),
             "gender": list(gender),
-            "height": height.tolist(),
-            "career_high_rank": career_high_rank.tolist(),
-            "career_high_years_ago": career_high_years_ago.tolist(),
+            "height": height,
+            "career_high_rank": career_high_rank,
+            "career_high_years_ago": career_high_years_ago,
             "previous_winner": list(previous_winner),
             "personality_tags": personality_tags
         }
@@ -133,30 +133,54 @@ class Parameter_Worker:
     def get_players_by_preferences(self, preferences):
         with self.driver.session() as session:
             result = session.execute_read(self._get_players_by_preferences, preferences)
-            return self._process_players_by_preferences(result)
-        
+            return list(result)
+
     @staticmethod
     def _get_players_by_preferences(tx, preferences):
+        category_to_quantile = {
+            'Fewer': [0, 33],
+            'Medium': [33, 66],
+            'More': [66, 100],
+            'Shorter': [0, 33],
+            'Taller': [66, 100],
+            'Lower': [66, 100],
+            'Higher': [0, 33],
+            'Peak was not recent': [66, 100],
+            'Peak was recent but not this year': [33, 66],
+            'Peak is this year': [0, 33],
+        }
+
         query = """
         MATCH (p:Player)
         """
         if any(preferences.values()):  # Check if any preferences are set
             query += "WHERE "
             for key, value in preferences.items():
-                if isinstance(value, list):
-                    query += f"(p.{key} IN {value}) AND "
-                else:
-                    if key in ['previous_winner', 'gender']:
-                        query += f"(p.{key} = {value}) AND "
+                if isinstance(value, list) and value:  # If value is a non-empty list
+                    if key in ['years_on_tour', 'height', 'career_high_rank', 'career_high_years_ago']:
+                        for category in value:
+                            quantile = category_to_quantile[category]
+                            query += f"(percentileCont(p.{key}, 0.01) >= {quantile[0]} AND percentileCont(p.{key}, 0.01) <= {quantile[1]}) AND "
                     else:
-                        if value == '':
-                            continue
-                        elif isinstance(value, list) and value < preferences[key][0]:
-                            query += f"(p.{key} < {value}) AND "
-                        elif isinstance(value, list) and value > preferences[key][1]:
-                            query += f"(p.{key} > {value}) AND "
-                        elif isinstance(value, list):
-                            query += f"(p.{key} >= {preferences[key][0]} AND p.{key} <= {preferences[key][1]}) AND "
+                        query += f"(p.{key} IN {value}) AND "
+                elif isinstance(value, str) and value:  # If value is a non-empty string
+                    query += f"(p.{key} = '{value}') AND "
             query = query[:-5]  # remove the last " AND "
         query += "RETURN p"
-        return tx.run(query)
+        result = tx.run(query)
+        return [dict(record["p"]) for record in result]
+
+    #############################
+    # Save user preferences
+    #############################
+    def save_user_preferences(self, user_id, preferences):
+        with self.driver.session() as session:
+            session.write_transaction(self._save_user_preferences, user_id, preferences)
+
+    @staticmethod
+    def _save_user_preferences(tx, user_id, preferences):
+        query = """
+        MATCH (u:User {id: $user_id})
+        SET u.preferences = $preferences
+        """
+        tx.run(query, user_id=user_id, preferences=preferences)

@@ -119,25 +119,29 @@ def get_similarity_weights(user_id):
 
 @app.route("/preferences/players", methods=["PUT"])
 def update_user_preferences():
-    preferences_data = request.json
+    try:
+        preferences_data = request.json
+        user_id = preferences_data.get("user_id")
+        preferences = preferences_data.get("preferences")
 
-    print(f"\nPreferences data:\n{preferences_data}\n")
-    # Update this in neo4j
-    # if user_id is not None:
-    # neo4j_worker = User_Worker()
-    # # TODO make these actual preferences
-    # preference1 = preferences_data["preference1"]
-    # preference2 = preferences_data["preference2"]
-    # sliderValue = preferences_data["sliderValue"]
-    # neo4j_worker.update_user_preferences(user_id, preference1, preference2, sliderValue)
-    # create recommend relationships
+        print(f"\nPreferences data:\n{preferences_data}\n")
 
-    # Return players that match the preferences
-    neo4j_worker = Parameter_Worker()
-    players = neo4j_worker.get_players_by_preferences(preferences_data)
-    neo4j_worker.close()
+        neo4j_worker = Parameter_Worker()
 
-    return jsonify(players), 201
+        # Save preferences to the user
+        if user_id:
+            neo4j_worker.save_user_preferences(user_id, preferences)
+
+        # Return players that match the preferences
+        players = neo4j_worker.get_players_by_preferences(preferences)
+        neo4j_worker.close()
+
+        print(f"\nPlayers:\n{players}\n")
+
+        return jsonify(players), 201
+    except Exception as e:
+        print(f"\nError:\n{e}\n")
+        return jsonify({"message": "Error"}), 500
 
 @app.route("/users/<user_id>/settings", methods=["PUT"])
 def update_user_settings(user_id):

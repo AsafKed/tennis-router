@@ -9,6 +9,7 @@ function RecommendationsView() {
     const [recommendations, setRecommendations] = useState(null);
     const [loading, setLoading] = useState(false);
     const [sortBy, setSortBy] = useState('time_priority_best'); // default sort by location+time
+    const [zeroPriorityCount, setZeroPriorityCount] = useState(0); // bug handling
 
     const sortData = (data, sortBy) => {
         if (sortBy === 'location_time') {
@@ -71,7 +72,12 @@ function RecommendationsView() {
 
 
     // Bug handling
-    let zeroPriorityCount = recommendations.filter(recommendation => recommendation.priority === 0).length;
+    useEffect(() => {
+        if (recommendations) {
+            setZeroPriorityCount(recommendations.filter(recommendation => recommendation.priority === 0).length);
+        }
+    }, [recommendations]);
+
 
     return (
         <Box sx={{ flexGrow: 1, m: 2 }}>

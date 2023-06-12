@@ -115,7 +115,9 @@ class Recommender:
         _recommended_p_df = pd.DataFrame(_recommended_p)
 
         # Get the matches for those days
-        formatted_days = [datetime.strptime(day, "%d/%m/%Y").strftime("%Y-%m-%d") for day in days]
+        formatted_days = []
+        if days is not None:
+            formatted_days = [datetime.strptime(day, "%d/%m/%Y").strftime("%Y-%m-%d") for day in days]
 
         # Get all matches
         player_worker = Player_Worker()
@@ -163,8 +165,19 @@ class Recommender:
             match['recommendation_type'] = 'liked' if match in liked_player_matches else 'recommended_by_player' if match in recommended_player_matches else 'similar_by_player'
             if 'priority' not in match:
                 match['priority'] = 0
+            if pd.isnull(match['priority']):
+                match['priority'] = 0
 
         # Sort the matches by priority
         all_matches.sort(key=lambda x: x.get('priority', 0), reverse=True)
 
         return all_matches
+    
+    # def recommend_matches_for_groups(self, user_id: str):
+        # Get the users of the groups the user is in
+
+        # Run the recommend_matches function for each user to get their priority for every match
+
+        # Combine the priorities of the matches for each user in an easy to use data structure
+
+

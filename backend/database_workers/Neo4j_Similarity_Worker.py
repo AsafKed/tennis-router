@@ -11,6 +11,7 @@ from .Neo4j_Player_Worker import Player_Worker
 # Other imports
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
+import csv
 
 
 class Similarity_Worker:
@@ -361,9 +362,10 @@ class Similarity_Worker:
 
         result = tx.run(query)
         return result.data()
+
     
     # Filter for the similarity type
-    def get_all_similarities_of_type(self, similarity_type):
+    def get_all_similarities_of_type(self, similarity_type="all"):
         with self.driver.session() as session:
             result = session.execute_read(
                 self._get_all_similarities_of_type, similarity_type=similarity_type
@@ -373,7 +375,7 @@ class Similarity_Worker:
     @staticmethod
     def _get_all_similarities_of_type(tx, similarity_type):
         query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
-                    RETURN p1.name AS player1, s[$similarity_type] AS similarity, p2.name AS player2
+                    RETURN p1.name AS player1, s.all AS similarity, p2.name AS player2 LIMIT 20000
                 """
 
         result = tx.run(query, similarity_type=similarity_type)
@@ -427,3 +429,46 @@ class Similarity_Worker:
             top_n=top_n,
         )
         return result.data()
+
+    #############################
+    # Download all similarities
+    #############################
+    def download_all_similarities(self):
+        query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
+                    RETURN p1.name AS player1, s.numeric AS numeric, s.tag_similarity as tag_similarity, s.categorical AS categorical, s.tag_numeric AS tag_numeric, s.tag_categorical AS tag_categorical, s.numeric_categorical AS numeric_categorical, s.all AS all, p2.name AS player2
+                """
+        with self.driver.session() as session:
+            result_cursor = session.run(query)
+            with open("./data/similarities.csv", "w", newline="") as csv_file:
+                writer = csv.writer(csv_file)
+                writer.writerow(["player1", "numeric", "tag_similarity", "categorical", "tag_numeric", "tag_categorical", "numeric_categorical", "all", "player2"])  # Writing headers
+                for record in result_cursor:
+                    writer.writerow([record['player1'], record['numeric'], record['tag_similarity'], record['categorical'], record['tag_numeric'], record['tag_categorical'], record['numeric_categorical'], record['all'], record['player2']])
+
+
+    #############################
+    # Upload similarity relations to Neo4j from a pandas dataframe
+    #############################
+    def upload_similarities(self, df):
+        with self.driver.session() as session:
+            result = session.execute_write(
+                self._upload_similarities, df=df.to_dict("records")
+            )
+            return result
+        
+    @staticmethod
+    def _upload_similarities(tx, df):
+        query = """
+            UNWIND $df AS row
+            MATCH (p1:Player {name: row.player1}), (p2:Player {name: row.player2})
+            MERGE (p1)-[s:SIMILARITY]-(p2)
+            SET s.numeric = row.numeric,
+                s.tag_similarity = row.tag_similarity,
+                s.categorical = row.categorical,
+                s.tag_numeric = row.tag_numeric,
+                s.tag_categorical = row.tag_categorical,
+                s.numeric_categorical = row.numeric_categorical,
+                s.all = row.all
+        """
+        
+        tx.run(query, df=df)

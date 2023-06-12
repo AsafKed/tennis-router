@@ -171,7 +171,7 @@ function ParameterBrowsing() {
             <Grid item xs={12} sm={4}>
                 <Box sx={{ marginTop: 2 }}>
                     <Paper elevation={2} sx={{ p: 2 }}>
-                        <Typography variant='h3' sx={{ mb: 2 }}>Preferences</Typography>
+                        <Typography variant='h3' sx={{ mb: 2 }}>Filter</Typography>
                         <Grid container spacing={3} alignItems="flex-start" justifyContent="flex-end">
                             {/* Hide these parameters because backend can't handle them yet. TODO fix this! */}
                             {Object.entries(parameters)

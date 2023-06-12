@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Box, Card, CardContent, Button, Grid, Link } from "@mui/material";
+import { Typography, Box, Card, CardContent, Button, Grid, Link, Paper } from "@mui/material";
 import InfoPopup from "../InfoPopup";
 import { useNavigate } from "react-router-dom";
 
@@ -8,7 +8,7 @@ function RecommendationsView() {
     const userId = localStorage.getItem("userId");
     const [recommendations, setRecommendations] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [sortBy, setSortBy] = useState('priority'); // default sort by location+time
+    const [sortBy, setSortBy] = useState('time_priority'); // default sort by location+time
 
     const sortData = (data, sortBy) => {
         if (sortBy === 'location_time') {
@@ -18,6 +18,12 @@ function RecommendationsView() {
                 if (a.match_time < b.match_time) return -1;
                 if (a.match_time > b.match_time) return 1;
                 return 0;
+            });
+        } else if (sortBy === 'time_priority') {
+            return data.sort((a, b) => {
+                if (a.match_time < b.match_time) return -1;
+                if (a.match_time > b.match_time) return 1;
+                return b.priority - a.priority;
             });
         } else { // priority
             return data.sort((a, b) => {
@@ -51,8 +57,15 @@ function RecommendationsView() {
                 <Typography variant="h2" gutterBottom>Recommended matches (individual)</Typography>
                 <InfoPopup infoText="These are today's matches, based on similar players to the ones you liked." />
             </Box>
-            <Button variant={sortBy === 'priority' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('priority')}>Sort by Priority</Button>
-            <Button variant={sortBy === 'location_time' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('location_time')}>Sort by Location+Time</Button>
+            <Paper elevation={0} sx={{ padding: 1, marginBottom: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
+                <Typography sx={{marginRight: 3}} variant="h4" gutterBottom>Sort by:</Typography>
+                    <Button sx={{marginRight: 2}} variant={sortBy === 'time_priority' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('time_priority')}>Best matches for you</Button>
+                    <Button sx={{marginRight: 2}} variant={sortBy === 'location_time' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('location_time')}>Normal schedule</Button>
+                    <Button sx={{marginRight: 2}} variant={sortBy === 'priority' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('priority')}>Priority (all)</Button>
+                </Box>
+            </Paper>
+            
             {recommendations && recommendations.map(recommendation => {
                 const players = recommendation.match_name.split(' vs ');
                 return (
@@ -69,11 +82,13 @@ function RecommendationsView() {
                                     </Link>
                                 </Grid>
                                 <Grid item xs={4}>
-                                    <Typography variant="h5" align="center">{Math.round(recommendation.priority*100)}% match</Typography>
+                                    <Typography variant="h5" align="center">{Math.round(recommendation.priority * 100)}% match</Typography>
                                 </Grid>
                                 <Grid item xs={4}>
-                                    <Typography variant="body1">
-                                        {recommendation.match_location} <br />
+                                    <Typography variant="h5">
+                                        {recommendation.match_location} 
+                                        <br />
+                                        <br />
                                         timeslot {recommendation.match_time}
                                     </Typography>
                                 </Grid>

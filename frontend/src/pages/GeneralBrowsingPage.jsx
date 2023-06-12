@@ -51,23 +51,22 @@ const BrowsingPage = () => {
 
     return (
         <div>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-                    <Typography variant="h1">Browser Page</Typography>
-                    <InfoPopup infoText="Press the switch to toggle between player browsing and parameter browsing."
-                    />
-                    <Button variant="contained" onClick={handleToggle}>Toggle</Button>
-                </Box>
-            </Box>
             {/* Remove the conditional rendering of PlayerBrowsing and ParameterBrowsing */}
             {browseType === 'player' ? <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-                <Typography variant="h1">Player browsing</Typography>
-                <InfoPopup infoText="On this page you browse players at Libema-open. You can order players alphabetically or by rank. You can also find players by indicating what characteristics you prefer. If you click on a
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                    <Typography variant="h2" marginRight={2} >Similar Players</Typography>
+                    <Button variant="contained" onClick={handleToggle}>Explore by characteristics</Button>
+                    <InfoPopup infoText="On this page you browse players at Libema-open. You can order players alphabetically or by rank. You can also find players by indicating what characteristics you prefer. If you click on a
                                          player, you can see player characteristics and also find similar players to this player.<br />
                                          If you want to get personalized recommendations for which players or matches to watch
                                          during the tournament, please register/login first."
-                />
-            </Box> : <Typography variant="h2">Parameter Browsing</Typography>}
+                    />
+                </Box>
+            </Box> :
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                    <Typography variant="h2" marginRight={2}>Characteristics</Typography>
+                    <Button variant="contained" onClick={handleToggle}>Explore by similiarity</Button>
+                </Box>}
             <br />
             {browseType === 'player' ? <PlayerBrowsing selectedPlayer={playerName} /> : <ParameterBrowsing />}
         </div>

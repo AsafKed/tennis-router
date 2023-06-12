@@ -118,11 +118,6 @@ function UserPage() {
 
   return (
     <Box sx={{ flexGrow: 1, minWidth: 400, margin: 'auto', minHeight: 1000, padding: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <h1>User Page</h1>
-        <InfoPopup infoText="On this page you create and join groups and indicate which days you plan to visit the
-tournament. You can also view the recommended matches for the next day (when available)" />
-      </Box>
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 2 }}>
 
         <Typography variant="h3">Welcome back, {gettingName ? <CircularProgress /> : " " + name}
@@ -161,7 +156,7 @@ tournament. You can also view the recommended matches for the next day (when ava
             </ListItemButton>
           </Badge>
         </ListItem>
-        <ListItem disablePadding>
+        {/* <ListItem disablePadding>
           <ListItemButton
             selected={selectedIndex === 2}
             onClick={(event) => handleListItemClick(event, 2)}
@@ -172,7 +167,7 @@ tournament. You can also view the recommended matches for the next day (when ava
               </React.Fragment>
             } />
           </ListItemButton>
-        </ListItem>
+        </ListItem> */}
       </List>
 
       <br />

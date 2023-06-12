@@ -305,7 +305,7 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
     };
 
     const handlePlayerCardClose = () => {
-        trackEvent({ action: 'close_player' });
+        trackEvent({ action: 'close_player', player_name: selectedPlayer });
         navigate('/browser/player');
     };
 

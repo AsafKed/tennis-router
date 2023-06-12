@@ -11,7 +11,7 @@ import ReactCountryFlag from "react-country-flag";
 // Tracking
 import { useTracking } from 'react-tracking';
 
-const PlayerCard = ({ playerName, handleClose }) => {
+const PlayerCard = React.forwardRef(({ playerName, handleClose }, ref) => {
     const [playerData, setPlayerData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
@@ -172,6 +172,7 @@ const PlayerCard = ({ playerName, handleClose }) => {
             </Card>
         </Box>
     );
-};
+}
+);
 
 export default PlayerCard;

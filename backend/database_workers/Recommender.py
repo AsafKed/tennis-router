@@ -23,6 +23,12 @@ class Recommender:
             # Get all similarities of the specified type
             df = similarity_worker.get_all_similarities_of_type(similarity_type)
 
+            # Sort by 'similarity', placing NaNs at the end
+            df = df.sort_values(by='similarity', ascending=False, na_position='last')
+
+            # Remove duplicates, keeping the first (highest similarity) value
+            df = df.drop_duplicates(subset=['player1', 'player2'])
+
             # Pivot the dataframe to create a matrix
             df = df.pivot(index='player1', columns='player2', values='similarity')
 
@@ -36,6 +42,9 @@ class Recommender:
                         all_players_df.loc[player1, player2] = df.loc[player1, player2]
                     else:
                         all_players_df.loc[player1, player2] = np.nan
+
+            # Fill in the diagonal with 0, so as not to compare a player to themselves
+            np.fill_diagonal(all_players_df.values, 0)
 
             # Store the dataframe in the dictionary
             similarity_dfs[similarity_type] = all_players_df
@@ -64,17 +73,17 @@ class Recommender:
             similarities = similarities[similarities['rec_player'].isin(rec_players)]
 
             relation_worker = Relation_Worker()
-            prev_rec_players = relation_worker.get_player_recommendations(used_id)
+            prev_rec_players = relation_worker.get_player_recommend_relations(used_id)
             prev_rec_players = prev_rec_players['player_name'].unique()
 
             # Delete players from the db that were already recommended if they are not in rec_players
             for prev_rec_player in prev_rec_players:
                 if prev_rec_player not in rec_players:
-                    relation_worker.delete_player_recommendation(used_id, prev_rec_player)
+                    relation_worker.delete_player_recommend(used_id, prev_rec_player)
                 else:
                     rec_players = rec_players[rec_players != prev_rec_player]
 
-            relation_worker.create_recommend_relations(used_id, rec_players, similarities, similarity_type)
+            relation_worker.create_player_recommend(used_id, rec_players, similarities, similarity_type)
             relation_worker.close()
         
         # Turn similarities into list of dictionaries
@@ -152,6 +161,9 @@ class Recommender:
 
         # Combine all the matches
         all_matches = liked_player_matches + recommended_player_matches + matches_on_days
+
+        for match in all_matches:
+            match['recommendation_type'] = 'liked' if match in liked_player_matches else 'recommended_by_player' if match in recommended_player_matches else 'similar_by_player'
 
         # Sort the matches by priority
         all_matches.sort(key=lambda x: x['priority'], reverse=True)

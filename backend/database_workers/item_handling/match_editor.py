@@ -14,7 +14,7 @@ class MatchEditor:
         for match in matches:
             match_name = match['player1'] + ' vs ' + match['player2']
             # Format time to be HH:MM (24 hour)
-            match['time'] = match['time'].strftime('%H:%M')
+            match['time'] = match['time']
 
             # Convert date to the format "yyyy-mm-dd"
             match['date'] = pd.to_datetime(match['date']).strftime('%Y-%m-%d')

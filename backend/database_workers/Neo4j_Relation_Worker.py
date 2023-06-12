@@ -197,7 +197,7 @@ class Relation_Worker:
         tx.run(query, user_id=user_id, player_name=player_name, timestamp=timestamp, liked_player_name=liked_player_name or "", similarity=similarity or "", similarity_type=similarity_type or "", recommendation_type=recommendation_type)
 
     ##############################
-    # Delete recommend relations
+    # Delete player recommend relations
     ##############################
     def delete_player_recommend(self, user_id, player_name, recommendation_type='player'):
         with self.driver.session(database="neo4j") as session:
@@ -227,6 +227,57 @@ class Relation_Worker:
                     RETURN r.similarity AS similarity, r.similarity_type AS similarity_type,
                     r.recommendation_type AS recommendation_type, p.name AS player_name, 
                     r.liked_player AS liked_player_name
+                """
+        
+        result = tx.run(query, user_id=user_id, recommendation_type=recommendation_type)
+        # Return a list of dictionaries
+        return [record.data() for record in result]
+
+    ##############################
+    # Create match recommendations
+    ##############################
+    def create_match_recommend(self, user_id, match_name, priority, recommendation_type='player'):
+        with self.driver.session(database="neo4j") as session:
+            session.execute_write(self._create_match_recommend, user_id, match_name, priority, recommendation_type=recommendation_type)
+
+    @staticmethod
+    def _create_match_recommend(tx, user_id, match_name, priority, recommendation_type='player'):
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        query = """ MATCH (u:User {user_id: $user_id})
+                    MATCH (m:Match {match_name: $match_name})
+                    MERGE (u)-[:RECOMMEND {time_created: $timestamp, recommendation_type: $recommendation_type, priority: $priority}]->(m)
+                """
+        tx.run(query, user_id=user_id, match_name=match_name, timestamp=timestamp, priority=priority, recommendation_type=recommendation_type)
+
+    ##############################
+    # Delete match recommend relations
+    ##############################
+    def delete_match_recommend(self, user_id, match_name, recommendation_type='player'):
+        with self.driver.session(database="neo4j") as session:
+            session.execute_write(self._delete_match_recommend, user_id, match_name, recommendation_type=recommendation_type)
+
+    @staticmethod
+    def _delete_match_recommend(tx, user_id, match_name, recommendation_type='player'):
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Copy the relation into a RECOMMENDED relation, and then delete the RECOMMEND relation
+        query = """ MATCH (u:User {user_id: $user_id})-[r:RECOMMEND {recommendation_type: $recommendation_type}]->(m:Match {match_name: $match_name})
+                    MERGE (u)-[:RECOMMENDED {time_removed: datetime()}]->(m)
+                    DELETE r
+                """
+        tx.run(query, user_id=user_id, match_name=match_name, timestamp=timestamp, recommendation_type=recommendation_type)
+
+    ##############################
+    # Get match recommendations
+    ##############################
+    def get_match_recommend_relations(self, user_id, recommendation_type='player'):
+        with self.driver.session(database="neo4j") as session:
+            return session.execute_read(self._get_match_recommend_relations, user_id, recommendation_type=recommendation_type)
+        
+
+    @staticmethod
+    def _get_match_recommend_relations(tx, user_id, recommendation_type='player'):
+        query = """ MATCH (u:User {user_id: $user_id})-[r:RECOMMEND {recommendation_type: $recommendation_type}]->(m:Match)
+                    RETURN r.priority AS priority, r.recommendation_type AS recommendation_type, m.match_name AS match_name
                 """
         
         result = tx.run(query, user_id=user_id, recommendation_type=recommendation_type)

@@ -1,76 +1,87 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Box, Card, CardContent } from "@mui/material";
+import { Typography, Box, Card, CardContent, Button, Grid, Link } from "@mui/material";
+import InfoPopup from "../InfoPopup";
+import { useNavigate } from "react-router-dom";
 
 function RecommendationsView() {
+    const navigate = useNavigate();
     const userId = localStorage.getItem("userId");
     const [recommendations, setRecommendations] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [sortBy, setSortBy] = useState('priority'); // default sort by location+time
+
+    const sortData = (data, sortBy) => {
+        if (sortBy === 'location_time') {
+            return data.sort((a, b) => {
+                if (a.match_location < b.match_location) return -1;
+                if (a.match_location > b.match_location) return 1;
+                if (a.match_time < b.match_time) return -1;
+                if (a.match_time > b.match_time) return 1;
+                return 0;
+            });
+        } else { // priority
+            return data.sort((a, b) => {
+                return b.priority - a.priority;
+            });
+        }
+    }
 
     useEffect(() => {
         setLoading(true);
         fetch(`${process.env.REACT_APP_BACKEND_URL}/recommendations/matches/${userId}`)
             .then(response => response.json())
             .then(data => {
-                // Sort the data by match_time
-                data.sort((a, b) => a.match_time.localeCompare(b.match_time));
+                data = sortData(data, sortBy);
                 setRecommendations(data);
             })
             .catch(error => console.error('Error:', error));
         setLoading(false);
-    }, [userId]);
+    }, [userId, sortBy]);
+
+    const navigateToPlayer = (player) => {
+        // Convert spaces to underscores
+        player = player.replace(/ /g, '_');
+        console.log(player);
+        navigate(`/browser/player/${player}`);
+    }
 
     return (
         <Box sx={{ flexGrow: 1, m: 2 }}>
-            <Typography variant="h1" gutterBottom>
-                To view recommendations, fill in the settings.
-            </Typography>
-            <Typography variant="h5" gutterBottom>
-                Why?
-            </Typography>
-            <Typography variant="body1" gutterBottom paddingBottom={2}>
-                We use your settings to find the best recommendations for you.
-                <br />
-                For example, we need to know which day you're attending to recommend matches for that day.
-            </Typography>
-            <Typography variant="h5" gutterBottom>
-                How?
-            </Typography>
-            <Typography variant="body1" gutterBottom paddingBottom={2}>
-                <b>Click the Settings tab</b> and fill them in, then click the "Submit" button.
-                <br />
-                The recommendations will appear back on this tab.
-            </Typography>
-            <Typography variant="h5" gutterBottom>
-                Attending with others?
-            </Typography>
-
-            <Typography variant="body1" gutterBottom>
-                <b>Click the Groups tab.</b> There you can
-            </Typography>
-            <ol>
-                <li><b>Create a group</b> and invite your friends</li>
-                <li><b>Join a group</b> using the group ID</li>
-            </ol>
-
-            <br />
-            <Typography variant="h2" gutterBottom>Recommended matches (individual)</Typography>
-            <Typography variant="body1" gutterBottom>
-                These will be made available every match day. Check back then!
-            </Typography>
-            {recommendations && recommendations.map(recommendation => (
-                <Card key={recommendation.match_name} sx={{ marginBottom: 2 }}>
-                    <CardContent>
-                        <Typography variant="h4" gutterBottom>{recommendation.match_name}</Typography>
-                        {/* render the match_date, match_time, match_location, and the priority */}
-                        <Typography variant="body1" gutterBottom>
-                            Date: {recommendation.match_date} <br />
-                            Time: {recommendation.match_time} <br />
-                            Location: {recommendation.match_location} <br />
-                            Priority: {recommendation.priority}
-                        </Typography>
-                    </CardContent>
-                </Card>
-            ))}
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 2 }}>
+                <Typography variant="h2" gutterBottom>Recommended matches (individual)</Typography>
+                <InfoPopup infoText="These are today's matches, based on similar players to the ones you liked." />
+            </Box>
+            <Button variant={sortBy === 'priority' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('priority')}>Sort by Priority</Button>
+            <Button variant={sortBy === 'location_time' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('location_time')}>Sort by Location+Time</Button>
+            {recommendations && recommendations.map(recommendation => {
+                const players = recommendation.match_name.split(' vs ');
+                return (
+                    <Card key={recommendation.match_name} sx={{ marginBottom: 2 }}>
+                        <CardContent>
+                            <Grid container spacing={2}>
+                                <Grid item xs={4}>
+                                    <Link component="button" variant="h6" onClick={() => navigateToPlayer(players[0])}>
+                                        {players[0]}
+                                    </Link>
+                                    <Typography variant="body1">vs</Typography>
+                                    <Link component="button" variant="h6" onClick={() => navigateToPlayer(players[1])}>
+                                        {players[1]}
+                                    </Link>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Typography variant="h5" align="center">{Math.round(recommendation.priority*100)}% match</Typography>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Typography variant="body1">
+                                        {recommendation.match_location} <br />
+                                        timeslot {recommendation.match_time}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                )
+            })}
         </Box>
     )
 }

@@ -397,6 +397,43 @@ def get_match_recommendations(user_id):
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error while getting match recommendations'}), 500
+    
+@app.route('/recommendations/matches/to_db', methods=['PUT'])
+def update_match_recommendations():
+    try:
+        # Read request body
+        data = request.get_json()
+        user_id = data['user_id']
+
+        # Use the recommender
+        matches = recommender.recommend_matches(user_id)
+        relation_worker = Relation_Worker()
+        current_matches = relation_worker.get_match_recommend_relations(user_id)
+        # Extract match names from recommended matches and matches
+        recommended_match_names = [match['match_name'] for match in matches]
+        current_match_names = [match['match_name'] for match in current_matches]
+
+        # Get matches to add and remove
+        matches_to_add = list(set(recommended_match_names) - set(current_match_names))
+        matches_to_remove = list(set(current_match_names) - set(recommended_match_names))
+
+        # Add and remove matches
+        for match_name in matches_to_add:
+            # Find the match object that corresponds to the match name
+            match = next((match for match in matches if match['match_name'] == match_name), None)
+            if match is not None:
+                relation_worker.create_match_recommend(user_id=user_id, match_name=match['match_name'], priority=match['priority'], recommendation_type=match['recommendation_type'])
+
+        for match_name in matches_to_remove:
+            relation_worker.delete_match_recommend(user_id, match_name)
+        relation_worker.close()
+
+        return jsonify({'message': 'Successfully updated recommended matches'}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Error while updating recommended matches'}), 500
+
+
 
 #################
 # Track user

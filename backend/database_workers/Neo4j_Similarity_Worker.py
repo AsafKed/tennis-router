@@ -311,17 +311,39 @@ class Similarity_Worker:
         # This should take all combinations of weights of the three similarity types.
         # That means that for a relationship, similarity_100=1*tag_similarity + 0*numeric + 0*categorical, similarity_010=0*tag_similarity + 1*numeric + 0*categorical, etc.
         # This is a bit of a hack, but it works
-        query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
-                    WHERE p1 <> p2
-                    WITH p1, p2, s, s.tag_similarity AS tag_similarity, s.numeric AS numeric, s.categorical AS categorical
-                    SET s.tag_numeric = 0.5*tag_similarity + 0.5*numeric, 
-                    s.tag_categorical = 0.5*tag_similarity + 0.5*categorical, 
-                    s.numeric_categorical = 0.5*numeric + 0.5*categorical, 
-                    s.all = 0.3333*tag_similarity + 0.3333*numeric + 0.3333*categorical
-                """
+        query = """
+            MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
+            WHERE p1 <> p2
+            RETURN s.tag_similarity AS tag_similarity, 
+                   s.numeric AS numeric, 
+                   s.categorical AS categorical, 
+                   id(s) AS id
+        """
 
         result = tx.run(query)
-        return result
+         
+        for record in result:
+            tag_similarity = record["tag_similarity"]
+            numeric = record["numeric"]
+            categorical = record["categorical"]
+            id = record["id"]
+            count = 0
+            total = 0
+            if tag_similarity is not None:
+                total += tag_similarity
+                count += 1
+            if numeric is not None:
+                total += numeric
+                count += 1
+            if categorical is not None:
+                total += categorical
+                count += 1
+            if count > 0:
+                all = total / count
+                tx.run("""
+                    MATCH ()-[s:SIMILARITY]->() WHERE id(s) = $id
+                    SET s.all = $all
+                """, id=id, all=all)
 
     #############################
     # Get similarities between all players
@@ -333,7 +355,7 @@ class Similarity_Worker:
 
     @staticmethod
     def _get_all_similarities(tx):
-        query = """ MATCH (p1:Player)-[s:SIMILARITY]->(p2:Player)
+        query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
                     RETURN p1.name AS player1, s.numeric AS numeric, s.tag_similarity as tag_similarity, s.categorical AS categorical, s.tag_numeric AS tag_numeric, s.tag_categorical AS tag_categorical, s.numeric_categorical AS numeric_categorical, s.all AS all, p2.name AS player2
                 """
 
@@ -350,7 +372,7 @@ class Similarity_Worker:
         
     @staticmethod
     def _get_all_similarities_of_type(tx, similarity_type):
-        query = """ MATCH (p1:Player)-[s:SIMILARITY]->(p2:Player)
+        query = """ MATCH (p1:Player)-[s:SIMILARITY]-(p2:Player)
                     RETURN p1.name AS player1, s[$similarity_type] AS similarity, p2.name AS player2
                 """
 

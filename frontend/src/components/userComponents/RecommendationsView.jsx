@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Box, Card, CardContent, Button, Grid, Link, Paper } from "@mui/material";
+import { Typography, Box, Card, CardContent, Button, Grid, Link, Paper, Alert } from "@mui/material";
 import InfoPopup from "../InfoPopup";
 import { useNavigate } from "react-router-dom";
 
@@ -69,6 +69,10 @@ function RecommendationsView() {
         navigate(`/browser/player/${player}`);
     }
 
+
+    // Bug handling
+    let zeroPriorityCount = recommendations.filter(recommendation => recommendation.priority === 0).length;
+
     return (
         <Box sx={{ flexGrow: 1, m: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 2 }}>
@@ -86,6 +90,12 @@ function RecommendationsView() {
             </Paper>
 
             {recommendations && recommendations.map(recommendation => {
+                {zeroPriorityCount > 1 && 
+                    <Alert severity="warning">
+                        There's a bug causing multiple recommendations to have a priority of 0. Try unliking all players, then liking players again to fix this.
+                    </Alert>
+                }
+                
                 const players = recommendation.match_name.split(' vs ');
                 return (
                     <Card key={recommendation.match_name} sx={{ marginBottom: 2 }}>

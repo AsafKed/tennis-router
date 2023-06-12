@@ -114,9 +114,6 @@ class Recommender:
         # Convert the list of dictionaries to a DataFrame
         _recommended_p_df = pd.DataFrame(_recommended_p)
 
-        print(liked_players)
-        print(_recommended_p_df)
-
         # Get the matches for those days
         formatted_days = [datetime.strptime(day, "%d/%m/%Y").strftime("%Y-%m-%d") for day in days]
 
@@ -164,8 +161,10 @@ class Recommender:
 
         for match in all_matches:
             match['recommendation_type'] = 'liked' if match in liked_player_matches else 'recommended_by_player' if match in recommended_player_matches else 'similar_by_player'
+            if 'priority' not in match:
+                match['priority'] = 0
 
         # Sort the matches by priority
-        all_matches.sort(key=lambda x: x['priority'], reverse=True)
+        all_matches.sort(key=lambda x: x.get('priority', 0), reverse=True)
 
         return all_matches

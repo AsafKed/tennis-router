@@ -31,7 +31,7 @@ function UserPage() {
   const [gettingName, setGettingName] = useState(true);
   const [gettingGroupNum, setGettingGroupNum] = useState(true);
 
-  const listItems = [{ view: 'Recommendations', component: <RecommendationsView userId={userId} /> },
+  const listItems = [{ view: 'Matches', component: <RecommendationsView userId={userId} /> },
   { view: 'Groups', component: <GroupView userId={userId} /> },
   { view: 'Days', component: <SettingsView userId={userId} /> }]
 
@@ -138,7 +138,11 @@ function UserPage() {
             selected={selectedIndex === 0}
             onClick={(event) => handleListItemClick(event, 0)}
           >
-            <ListItemText primary={listItems[0].view} />
+            <ListItemText primary={listItems[0].view} secondary={
+            <React.Fragment>
+              {"See your recommended matches."}
+            </React.Fragment>
+            }/>
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding style={{ paddingBlockEnd: '0.5em' }}>

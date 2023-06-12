@@ -8,7 +8,7 @@ function RecommendationsView() {
     const userId = localStorage.getItem("userId");
     const [recommendations, setRecommendations] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [sortBy, setSortBy] = useState('time_priority'); // default sort by location+time
+    const [sortBy, setSortBy] = useState('time_priority_best'); // default sort by location+time
 
     const sortData = (data, sortBy) => {
         if (sortBy === 'location_time') {
@@ -19,6 +19,23 @@ function RecommendationsView() {
                 if (a.match_time > b.match_time) return 1;
                 return 0;
             });
+        } else if (sortBy === 'time_priority_best') {
+            // First, sort by time and then priority.
+            data.sort((a, b) => {
+                if (a.match_time < b.match_time) return -1;
+                if (a.match_time > b.match_time) return 1;
+                return b.priority - a.priority;
+            });
+
+            // Then, filter to keep only the highest priority match in each timeslot.
+            let timeSlots = {};
+            data.forEach(item => {
+                if (!timeSlots[item.match_time] || item.priority > timeSlots[item.match_time].priority) {
+                    timeSlots[item.match_time] = item;
+                }
+            });
+
+            return Object.values(timeSlots);
         } else if (sortBy === 'time_priority') {
             return data.sort((a, b) => {
                 if (a.match_time < b.match_time) return -1;
@@ -31,6 +48,7 @@ function RecommendationsView() {
             });
         }
     }
+
 
     useEffect(() => {
         setLoading(true);
@@ -59,13 +77,14 @@ function RecommendationsView() {
             </Box>
             <Paper elevation={0} sx={{ padding: 1, marginBottom: 2 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
-                <Typography sx={{marginRight: 3}} variant="h4" gutterBottom>Sort by:</Typography>
-                    <Button sx={{marginRight: 2}} variant={sortBy === 'time_priority' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('time_priority')}>Best matches for you</Button>
-                    <Button sx={{marginRight: 2}} variant={sortBy === 'location_time' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('location_time')}>Normal schedule</Button>
-                    <Button sx={{marginRight: 2}} variant={sortBy === 'priority' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('priority')}>Priority (all)</Button>
+                    <Typography sx={{ marginRight: 3 }} variant="h4" gutterBottom>Sort by:</Typography>
+                    <Button sx={{ marginRight: 2 }} variant={sortBy === 'time_priority_best' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('time_priority_best')}>Best matches for you</Button>
+                    <Button sx={{ marginRight: 2 }} variant={sortBy === 'location_time' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('location_time')}>Normal schedule</Button>
+                    <Button sx={{ marginRight: 2 }} variant={sortBy === 'priority' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('priority')}>Priority (all)</Button>
+                    <Button sx={{ marginRight: 2 }} variant={sortBy === 'time_priority' ? "contained" : "outlined"} color="primary" onClick={() => setSortBy('time_priority')}>Priority (timeslot)</Button>
                 </Box>
             </Paper>
-            
+
             {recommendations && recommendations.map(recommendation => {
                 const players = recommendation.match_name.split(' vs ');
                 return (
@@ -86,7 +105,7 @@ function RecommendationsView() {
                                 </Grid>
                                 <Grid item xs={4}>
                                     <Typography variant="h5">
-                                        {recommendation.match_location} 
+                                        {recommendation.match_location}
                                         <br />
                                         <br />
                                         timeslot {recommendation.match_time}

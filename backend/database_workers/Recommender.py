@@ -75,6 +75,7 @@ class Recommender:
                 rec_players_dict[row['rec_player']] = row['similarity']
 
         if user_id is not None:
+            print(f"\nUpdating recommendations for user {user_id}\n")
             # Interaction with the database happens here.
             relation_worker = Relation_Worker()
             prev_rec_players = relation_worker.get_player_recommend_relations(user_id)
@@ -93,12 +94,14 @@ class Recommender:
                 relation_worker.delete_player_recommend(user_id, player)
 
             # If less than 2 recommendations, add more while avoiding previous ones.
-            while len(rec_players_dict) < 2*len(player_names):
+            while len(rec_players_dict) < 2*len(player_names) and len(rec_players_dict) < 3*len(player_names):
                 additional_recs = all_similarities[~all_similarities['rec_player'].isin(set(list(rec_players_dict.keys()) + list(prev_rec_players_set)))]
                 additional_recs = additional_recs.sort_values('similarity', ascending=False).head(1)
                 for index, row in additional_recs.iterrows():
-                    rec_players_dict[row['rec_player']] = row['similarity']
+                    if row['rec_player'] not in rec_players_dict.keys():
+                        rec_players_dict[row['rec_player']] = row['similarity']
 
+            print(f"\nCreating player recommend relations for players {list(rec_players_dict.keys())}\n")
             for player, similarity in rec_players_dict.items():
                 relation_worker.create_player_recommend(user_id, player, similarity, 'all', 'player')
 

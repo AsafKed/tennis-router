@@ -12,6 +12,9 @@ from database_workers.Neo4j_Event_Worker import Event_Worker
 import uuid
 import json
 
+# For the recommender and efficiency
+import threading
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 CORS(app,resources={r"/*":{"origins":"*"}})
@@ -249,8 +252,24 @@ def like_player():
         player_name = request.json['name']
         neo4j_worker = Relation_Worker()
         neo4j_worker.create_likes_relation(user_id, player_name)
+
+        # # We do this here to make it run in a separate thread, so the user doesn't have to wait for the recommendations
+        # def make_recommendations(**kwargs):
+        # user_id = kwargs['user_id']
+
+        # liked_players = neo4j_worker.get_liked_players(user_id)
         neo4j_worker.close()
-        return jsonify({'message': 'Successfully liked player'}), 200
+        # liked_players = [record['name'] for record in liked_players] # Extract the values into a list
+        # recommender.recommend_individual(player_names=liked_players, similarity_type="all", user_id=user_id)
+        
+        return jsonify({'message': 'Successfully liked player and recommended players'}), 200
+        
+        # # Start the thread
+        # thread = threading.Thread(target=make_recommendations, kwargs={'user_id': user_id})
+
+        # thread.start()
+
+        # return jsonify({'message': 'Successfully liked player'}), 200
     except Exception as e:
         print(e)
         return jsonify({'error': 'Error while liking player'}), 500
@@ -332,7 +351,7 @@ def get_recommendations():
         # Convert underscores to spaces in player names
         liked_players = [player.replace('_', ' ') for player in liked_players]
 
-        recommended_players = recommender.recommend_individual(liked_players, similarity_type)
+        recommended_players = recommender.recommend_individual(liked_players, similarity_type, user_id)
 
         print('Recommended players: ', recommended_players)
         # Get attribute weights from query
@@ -342,48 +361,48 @@ def get_recommendations():
         print(e)
         return jsonify({'error': 'Error while getting recommendations'}), 500
     
-@app.route('/recommendations/players/to_db', methods=['PUT'])
-def update_recommendations():
-    try:
-        # Read request body
-        data = request.get_json()
+# @app.route('/recommendations/players/to_db', methods=['PUT'])
+# def update_recommendations():
+#     try:
+#         # Read request body
+#         data = request.get_json()
 
-        # Get user ID and recommended players from request body
-        user_id = data['user_id']
-        recommended_players = data['recommended_players']
+#         # Get user ID and recommended players from request body
+#         user_id = data['user_id']
+#         recommended_players = data['recommended_players']
 
-        # Get currently recommended players
-        neo4j_worker = Relation_Worker()
-        current_recommended_players = neo4j_worker.get_player_recommend_relations(user_id)
-        neo4j_worker.close()
-        print(f'\n\nCurrent recommended players: {current_recommended_players}\n\n')
-        # Extract player names from recommended players
-        recommended_player_names = [player['name'] for player in recommended_players]
+#         # Get currently recommended players
+#         neo4j_worker = Relation_Worker()
+#         current_recommended_players = neo4j_worker.get_player_recommend_relations(user_id)
+#         neo4j_worker.close()
+#         print(f'\n\nCurrent recommended players: {current_recommended_players}\n\n')
+#         # Extract player names from recommended players
+#         recommended_player_names = [player['name'] for player in recommended_players]
 
-        # Get players to add and remove
-        current_recommended_player_names = [player['player_name'] for player in current_recommended_players]
+#         # Get players to add and remove
+#         current_recommended_player_names = [player['player_name'] for player in current_recommended_players]
 
-        players_to_add = list(set(recommended_player_names) - set(current_recommended_player_names))
-        players_to_remove = list(set(current_recommended_player_names) - set(recommended_player_names))
+#         players_to_add = list(set(recommended_player_names) - set(current_recommended_player_names))
+#         players_to_remove = list(set(current_recommended_player_names) - set(recommended_player_names))
 
-        # Add and remove players
-        neo4j_worker = Relation_Worker()
-        for player_name in players_to_add:
-            # Find the player object that corresponds to the player name
-            player = next((player for player in recommended_players if player['name'] == player_name), None)
-            if player is not None:
-                neo4j_worker.create_player_recommend(user_id=user_id, player_name=player['name'], liked_player_name=player['liked_player'], similarity=player['similarity'], similarity_type=player['similarity_type'])
+#         # Add and remove players
+#         neo4j_worker = Relation_Worker()
+#         for player_name in players_to_add:
+#             # Find the player object that corresponds to the player name
+#             player = next((player for player in recommended_players if player['name'] == player_name), None)
+#             if player is not None:
+#                 neo4j_worker.create_player_recommend(user_id=user_id, player_name=player['name'], liked_player_name=player['liked_player'], similarity=player['similarity'], similarity_type=player['similarity_type'])
 
-        for player_name in players_to_remove:
-            neo4j_worker.delete_player_recommend(user_id, player_name)
-        neo4j_worker.close()
+#         for player_name in players_to_remove:
+#             neo4j_worker.delete_player_recommend(user_id, player_name)
+#         neo4j_worker.close()
 
 
-        return jsonify({'message': 'Successfully updated recommended players'}), 200
+#         return jsonify({'message': 'Successfully updated recommended players'}), 200
     
-    except Exception as e:
-        print(e)
-        return jsonify({'error': 'Error while updating recommended players'}), 500
+#     except Exception as e:
+#         print(e)
+#         return jsonify({'error': 'Error while updating recommended players'}), 500
     
 #################
 # Recommendations (matches)

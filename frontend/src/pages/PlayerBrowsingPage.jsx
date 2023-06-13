@@ -196,7 +196,6 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
     };
 
     // Get recommendations
-
     const getRecommendedPlayers = () => {
         if (userId && likedPlayers.length > 0) {
             setLoadingRecommendedPlayers(true);
@@ -209,7 +208,7 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
             };
             // Convert the data to a query string
             const queryString = Object.keys(data).map(key => key + '=' + encodeURIComponent(data[key])).join('&');
-
+    
             // Send the GET request
             fetch(`${process.env.REACT_APP_BACKEND_URL}/recommendations/players?${queryString}`, {
                 method: 'PUT',
@@ -220,18 +219,14 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                 .then(response => response.json())
                 .then(data => {
                     // Handle the response data
-                    // Find players in the players array that match the names in the response data with keys "rec_player". It's a list of objects.
-                    const recommendedPlayers = players.filter(player => data.some(recPlayer => recPlayer.rec_player === player.name)).map(player => {
-                        // Find the corresponding recommendation data
-                        const recommendationData = data.find(recPlayer => recPlayer.rec_player === player.name);
-
-                        // Add the similarity, similarity type, and liked player to the player object
+                    console.log('Success:', data)
+                    // Filter the players array to match the names in the response data.
+                    const recommendedPlayers = players.filter(player => data.includes(player.name)).map(player => {
+                        // Return a new object with just the player name, image_url, and rank
                         return {
-                            ...player,
-                            similarity: recommendationData.similarity,
-                            similarity_type: "all",
-                            liked_player: recommendationData.player,
-                            player: recommendationData.name
+                            name: player.name,
+                            image_url: player.image_url,
+                            rank: player.rank
                         };
                     });
                     setRecommendedPlayers(recommendedPlayers);
@@ -243,10 +238,11 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                 });
             setLoadingRecommendedPlayers(false);
             setUpdatingRecommendedPlayers(true);
-
+    
             trackEvent({ action: 'get_recommended_players' });
         }
     };
+    
 
 
     useEffect(() => {
@@ -260,30 +256,30 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
     }, [loadingLikedPlayers]);
 
     // Update recommended players in db (FE doesn't need to wait on this, nice!)
-    useEffect(() => {
-        if (userId && setUpdatingRecommendedPlayers) {
-            // Update in DB 
-            fetch(`${process.env.REACT_APP_BACKEND_URL}/recommendations/players/to_db`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ user_id: userId, recommended_players: recommendedPlayers }),
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to update recommended players in DB');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            setUpdatingRecommendedPlayers(false);
-        }
-    }, [userId, setUpdatingRecommendedPlayers, recommendedPlayers]);
+    // useEffect(() => {
+    //     if (userId && setUpdatingRecommendedPlayers) {
+    //         // Update in DB 
+    //         fetch(`${process.env.REACT_APP_BACKEND_URL}/recommendations/players/to_db`, {
+    //             method: 'PUT',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({ user_id: userId, recommended_players: recommendedPlayers }),
+    //         })
+    //             .then(response => {
+    //                 if (!response.ok) {
+    //                     throw new Error('Failed to update recommended players in DB');
+    //                 }
+    //                 return response.json();
+    //             })
+    //             .then(data => {
+    //             })
+    //             .catch(error => {
+    //                 console.error('Error:', error);
+    //             });
+    //         setUpdatingRecommendedPlayers(false);
+    //     }
+    // }, [userId, setUpdatingRecommendedPlayers, recommendedPlayers]);
 
     // View player 
     useEffect(() => {

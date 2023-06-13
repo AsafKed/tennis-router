@@ -193,10 +193,9 @@ class Relation_Worker:
                 MATCH (u:User {user_id: $user_id})
                 MATCH (p:Player {name: $player_name})
                 MERGE (u)-[r:RECOMMEND {recommendation_type: $recommendation_type, liked_player: $liked_player_name, similarity: $similarity, similarity_type: $similarity_type}]->(p)
-                ON CREATE SET r.time_created = $timestamp
-                ON MATCH SET r.time_created = $timestamp
-                MERGE (p)-[:RECOMMENDED_BY {time_created: $timestamp}]->(lp)
+                ON CREATE SET r.timestamp = $timestamp
                 """
+
         tx.run(query, user_id=user_id, player_name=player_name, timestamp=timestamp, liked_player_name=liked_player_name or "", similarity=similarity or "", similarity_type=similarity_type or "", recommendation_type=recommendation_type)
 
     ##############################

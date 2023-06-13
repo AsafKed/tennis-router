@@ -28,16 +28,16 @@ const PlayerCardMini = ({ player }) => {
     useEffect(() => {
         const fetchPlayerInfo = async () => {
             setLoading(true);
-            const storedPlayerInfo = localStorage.getItem(player.player2);
-            if (!storedPlayerInfo) {
+            // const storedPlayerInfo = localStorage.getItem(player.player2);
+            // if (!storedPlayerInfo) {
                 const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/data/${player.player2}`);
                 const text = await response.text();
                 const data = JSON.parse(text);
                 setPlayerInfo(data);
-                localStorage.setItem(player.player2, JSON.stringify(data));
-            } else {
-                setPlayerInfo(JSON.parse(storedPlayerInfo));
-            }
+                // localStorage.setItem(player.player2, JSON.stringify(data));
+            // } else {
+            //     setPlayerInfo(JSON.parse(storedPlayerInfo));
+            // }
             setLoading(false);
         };
 

@@ -153,11 +153,13 @@ function App() {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setLoggedIn(true);
+        localStorage.clear()
         localStorage.setItem('userId', user.uid);
         localStorage.removeItem('userPreLoginId');
         localStorage.removeItem('loggingOut');
       } else {
         setLoggedIn(false);
+        localStorage.clear()
         localStorage.setItem('loggingOut', 'true');
         if (!localStorage.getItem('userPreLoginId')) {
           localStorage.setItem('userPreLoginId', uuidv4());

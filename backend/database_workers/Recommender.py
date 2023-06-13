@@ -113,11 +113,17 @@ class Recommender:
 
         # Convert the list of dictionaries to a DataFrame
         _recommended_p_df = pd.DataFrame(_recommended_p)
+        return _recommended_p_df
 
         # Get the matches for those days
         formatted_days = []
         if days is not None:
             formatted_days = [datetime.strptime(day, "%d/%m/%Y").strftime("%Y-%m-%d") for day in days]
+
+        # Get recommendations for today
+        today = datetime.today().strftime("%Y-%m-%d")
+        print(today)
+        formatted_days = [today]
 
         # Get all matches
         player_worker = Player_Worker()

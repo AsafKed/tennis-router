@@ -20,7 +20,7 @@ const PlayerSimilarity = ({ open, handleClose, isLoggedIn }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    const userId = localStorage.getItem('user_id');
+    const userId = localStorage.getItem('userId');
     
     // Tracking
     const { trackEvent } = useTracking();
@@ -32,7 +32,7 @@ const PlayerSimilarity = ({ open, handleClose, isLoggedIn }) => {
             const text = await response.text();
             const data = JSON.parse(text);
             setSimilarityWeight(data);
-            localStorage.setItem('similarity_weight', JSON.stringify(data));
+            // localStorage.setItem('similarity_weight', JSON.stringify(data));
         };
 
         // Use locally stored similarity weight if it exists

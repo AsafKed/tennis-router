@@ -47,7 +47,7 @@ function ParameterBrowsing() {
         const data = JSON.parse(text);
         setLikedPlayers(data);
         setLoadingLikedPlayers(false);
-        localStorage.setItem('likedPlayers', JSON.stringify(data));
+        // localStorage.setItem('likedPlayers', JSON.stringify(data));
     }, [userId]);
 
     useEffect(() => {
@@ -81,7 +81,7 @@ function ParameterBrowsing() {
             const player = players.find(player => player.name === playerName);
             const updatedLikedPlayers = [...likedPlayers, player];
             setLikedPlayers(updatedLikedPlayers);
-            localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
+            // localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
         } catch (error) {
             console.error(error);
         }
@@ -105,7 +105,7 @@ function ParameterBrowsing() {
             // Update the likedPlayers state and local storage
             const updatedLikedPlayers = likedPlayers.filter(likedPlayer => likedPlayer.name !== playerName);
             setLikedPlayers(updatedLikedPlayers);
-            localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
+            // localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
         } catch (error) {
             console.error(error);
         }

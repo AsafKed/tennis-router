@@ -46,7 +46,7 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
 
     // Get all players
     useEffect(() => {
-        const storedPlayers = localStorage.getItem('players'); // Get players from local storage
+        // const storedPlayers = localStorage.getItem('players'); // Get players from local storage
         const fetchPlayers = async () => {
             setLoadingPlayers(true);
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players`);
@@ -54,16 +54,16 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
             const data = JSON.parse(text)
             setPlayers(data);
             setLoadingPlayers(false);
-            localStorage.setItem('players', JSON.stringify(data)); // Store players in local storage
+            // localStorage.setItem('players', JSON.stringify(data)); // Store players in local storage
         };
 
-        if (!storedPlayers) {
+        // if (!storedPlayers) {
             fetchPlayers();
-        } else {
-            setLoadingPlayers(true);
-            setPlayers(JSON.parse(storedPlayers));
-            setLoadingPlayers(false);
-        }
+        // } else {
+        //     setLoadingPlayers(true);
+        //     setPlayers(JSON.parse(storedPlayers));
+        //     setLoadingPlayers(false);
+        // }
     }, []);
 
     // Update liked players (only after UID is known though)
@@ -74,21 +74,21 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
         const data = JSON.parse(text);
         setLikedPlayers(data);
         setLoadingLikedPlayers(false);
-        localStorage.setItem('likedPlayers', JSON.stringify(data));
+        // localStorage.setItem('likedPlayers', JSON.stringify(data));
     }, [userId]);
 
 
     // Get liked players (only after userId is known)
     useEffect(() => {
         if (userId) {
-            const storedLikedPlayers = localStorage.getItem('likedPlayers');
-            if (!storedLikedPlayers) {
+            // const storedLikedPlayers = localStorage.getItem('likedPlayers');
+            // if (!storedLikedPlayers) {
                 fetchLikedPlayers();
-            } else {
-                setLoadingLikedPlayers(true);
-                setLikedPlayers(JSON.parse(storedLikedPlayers));
-                setLoadingLikedPlayers(false);
-            }
+            // } else {
+            //     setLoadingLikedPlayers(true);
+            //     setLikedPlayers(JSON.parse(storedLikedPlayers));
+            //     setLoadingLikedPlayers(false);
+            // }
         }
     }, [userId, fetchLikedPlayers]);
 
@@ -154,7 +154,7 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
             const player = players.find(player => player.name === playerName);
             const updatedLikedPlayers = [...likedPlayers, player];
             setLikedPlayers(updatedLikedPlayers);
-            localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
+            // localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
         } catch (error) {
             console.error(error);
         }
@@ -178,12 +178,12 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
             // Update the likedPlayers state and local storage
             const updatedLikedPlayers = likedPlayers.filter(likedPlayer => likedPlayer.name !== playerName);
             setLikedPlayers(updatedLikedPlayers);
-            localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
+            // localStorage.setItem('likedPlayers', JSON.stringify(updatedLikedPlayers));
 
             // Remove the recommended players related to the unliked player
             const updatedRecommendedPlayers = recommendedPlayers.filter(recommendedPlayer => recommendedPlayer.liked_player !== playerName);
             setRecommendedPlayers(updatedRecommendedPlayers);
-            localStorage.setItem('recommendedPlayers', JSON.stringify(updatedRecommendedPlayers));
+            // localStorage.setItem('recommendedPlayers', JSON.stringify(updatedRecommendedPlayers));
             setUpdatingRecommendedPlayers(true);
         } catch (error) {
             console.error(error);
@@ -236,7 +236,7 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                     });
                     setRecommendedPlayers(recommendedPlayers);
                     // Save the recommended players to local storage
-                    localStorage.setItem('recommendedPlayers', JSON.stringify(recommendedPlayers));
+                    // localStorage.setItem('recommendedPlayers', JSON.stringify(recommendedPlayers));
                 })
                 .catch((error) => {
                     console.error('Error:', error);

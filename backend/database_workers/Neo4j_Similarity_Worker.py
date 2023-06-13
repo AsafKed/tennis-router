@@ -395,6 +395,9 @@ class Similarity_Worker:
                 top_n=top_n,
                 same_gender=same_gender,
             )
+            print(f"\nTop {top_n} most similar players to {player_name}:")
+            print(result)
+            print()
             return result
 
     @staticmethod
@@ -403,21 +406,12 @@ class Similarity_Worker:
     ):
         query = (
             """
-                    MATCH (p1:Player {name: $player_name})-[s:SIMILARITY]->(p2:Player)
+                    MATCH (p1:Player {name: $player_name})-[s:SIMILARITY]-(p2:Player)
                     """
             + ("WHERE p1.gender = p2.gender " if same_gender else "")
             + """
-                    RETURN p1.name AS player1, p2.name AS player2,
-                    CASE $weighted_similarity_type
-                        WHEN 'numeric' THEN s.numeric
-                        WHEN 'tag_similarity' THEN s.tag_similarity
-                        WHEN 'categorical' THEN s.categorical
-                        WHEN 'tag_numeric' THEN s.tag_numeric
-                        WHEN 'tag_categorical' THEN s.tag_categorical
-                        WHEN 'numeric_categorical' THEN s.numeric_categorical
-                        WHEN 'all' THEN s.all
-                    END AS similarity
-                    ORDER BY similarity DESC
+                    RETURN p1.name AS player1, s.all as similarity, p2.name AS player2
+                    ORDER BY s.all DESC
                     LIMIT $top_n
                 """
         )

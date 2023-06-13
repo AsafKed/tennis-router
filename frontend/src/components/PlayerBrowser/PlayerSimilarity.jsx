@@ -47,6 +47,10 @@ const PlayerSimilarity = ({ open, handleClose, isLoggedIn }) => {
         const playerNameForURL = playerName.replace(/ /g, '_');
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/similar/${playerNameForURL}/?similarity_weight=${similarityWeight}`);
         const data = await response.json(); // Use response.json() instead of response.text()
+        console.log(`Similar players for ${playerName}:`)
+        for (const player of data) {
+            console.log(player);
+        }
         setSimilarPlayers(data);
         trackEvent({ action: 'fetch_similar_players', player_name: playerName, similarity_weight: similarityWeight });
     };

@@ -70,7 +70,6 @@ function RecommendationsView() {
     const navigateToPlayer = (player) => {
         // Convert spaces to underscores
         player = player.replace(/ /g, '_');
-        console.log(player);
         navigate(`/browser/player/${player}`);
     }
 

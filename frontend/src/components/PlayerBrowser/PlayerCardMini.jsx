@@ -14,7 +14,6 @@ import { track, useTracking } from 'react-tracking';
 import { dispatchTrackingData } from '../../TrackingDispatcher';
 
 const PlayerCardMini = ({ player }) => {
-    console.log(player);
     // Get info on the player
     const [playerInfo, setPlayerInfo] = useState({});
     const [dataType, setDataType] = useState('description');
@@ -34,7 +33,6 @@ const PlayerCardMini = ({ player }) => {
                 const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/players/data/${player.player2}`);
                 const text = await response.text();
                 const data = JSON.parse(text);
-                console.log(data);
                 setPlayerInfo(data);
                 // localStorage.setItem(player.player2, JSON.stringify(data));
             // } else {

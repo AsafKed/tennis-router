@@ -56,6 +56,10 @@ function RecommendationsView() {
         fetch(`${process.env.REACT_APP_BACKEND_URL}/recommendations/matches/${userId}`)
             .then(response => response.json())
             .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
                 data = sortData(data, sortBy);
                 setRecommendations(data);
             })

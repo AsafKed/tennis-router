@@ -150,13 +150,15 @@ class Recommender:
             match_player_names = list(set(match_player_names))  # Remove duplicates
 
             for player_name in match_player_names:
-                similarity_liked = self.similarity_dfs['all'].loc[player_name, liked_players].max()
-                similarity_recommended = self.similarity_dfs['all'].loc[player_name, _recommended_p_df['player_name']].max()
-                priority = max(similarity_liked, similarity_recommended)
+                # Add condition to check if the player_name exists in the DataFrame
+                if player_name in self.similarity_dfs['all'].index:
+                    similarity_liked = self.similarity_dfs['all'].loc[player_name, liked_players].max()
+                    similarity_recommended = self.similarity_dfs['all'].loc[player_name, _recommended_p_df['player_name']].max()
+                    priority = max(similarity_liked, similarity_recommended)
 
-                for match in matches_on_days:
-                    if player_name in match['match_name']:
-                        match['priority'] = priority
+                    for match in matches_on_days:
+                        if player_name in match['match_name']:
+                            match['priority'] = priority
 
         # Combine all the matches
         all_matches = liked_player_matches + recommended_player_matches + matches_on_days

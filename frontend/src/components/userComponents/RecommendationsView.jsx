@@ -51,21 +51,21 @@ function RecommendationsView() {
     }
 
 
-    // useEffect(() => {
-    //     setLoading(true);
-    //     fetch(`${process.env.REACT_APP_BACKEND_URL}/recommendations/matches/${userId}`)
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             if (data.error) {
-    //                 console.error(data.error);
-    //                 return;
-    //             }
-    //             data = sortData(data, sortBy);
-    //             setRecommendations(data);
-    //         })
-    //         .catch(error => console.error('Error:', error));
-    //     setLoading(false);
-    // }, [userId, sortBy]);
+    useEffect(() => {
+        setLoading(true);
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/recommendations/matches/${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+                data = sortData(data, sortBy);
+                setRecommendations(data);
+            })
+            .catch(error => console.error('Error:', error));
+        setLoading(false);
+    }, [userId, sortBy]);
 
     const navigateToPlayer = (player) => {
         // Convert spaces to underscores
@@ -85,7 +85,7 @@ function RecommendationsView() {
 
     return (
         <Box sx={{ flexGrow: 1, m: 2 }}>
-            {/* <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 2 }}>
                 <Typography variant="h2" gutterBottom>Recommended matches (individual)</Typography>
                 <InfoPopup infoText="These are today's matches, based on similar players to the ones you liked." />
             </Box>
@@ -135,7 +135,7 @@ function RecommendationsView() {
                         </CardContent>
                     </Card>
                 )
-            })} */}
+            })}
         </Box>
     )
 }

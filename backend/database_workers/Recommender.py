@@ -121,15 +121,10 @@ class Recommender:
         # Turn similarities into list of dictionaries
         # similarities = similarities.to_dict('records')
         # return similarities
-    
-    def recommend_matches(self, user_id: str):
-        """Recommend matches based on the players and the days.
 
-        This gives us 3 rankings:
-            1. The ranking of the matches with the liked players and the same day
-            2. The ranking of the matches with the recommended players and the same day
-            3. The ranking of the matches with the similar players and the same day
-        """
+    def recommend_matches(self, user_id: str):
+        """Recommend matches based on the players and the days."""
+
         # Get the days
         user_worker = User_Worker()
         days = user_worker.get_user_settings(user_id)['days']
@@ -146,7 +141,6 @@ class Recommender:
         # Convert the list of dictionaries to a DataFrame
         _recommended_p_df = pd.DataFrame(_recommended_p)
 
-        return _recommended_p_df
         # Get the matches for those days
         formatted_days = []
         if days is not None:
@@ -154,14 +148,12 @@ class Recommender:
 
         # Get recommendations for today
         today = datetime.today().strftime("%Y-%m-%d")
-        print(today)
         formatted_days = [today]
 
         # Get all matches
         player_worker = Player_Worker()
         matches = player_worker.get_all_matches()
         player_worker.close()
-
 
         # Extract the dates from the matches
         match_dates = [match['match_date'] for match in matches]
@@ -170,19 +162,53 @@ class Recommender:
         intersecting_days = list(set(formatted_days) & set(match_dates))
         matches_on_days = [match for match in matches if match['match_date'] in intersecting_days]
 
-        # 1. Check if the liked players are in the matches by checking if the player names are in the match_name. If so, add that match to a list of dictionaries with priority 1
+        # Define weights
+        weights = {
+            'liked': 1.0,
+            'recommended_by_player': 0.75,
+            'similar_by_player': 0.5,
+        }
+
+        # Change the lists of matches to a dictionary to avoid duplicates
+        all_matches = {}
+
+        # 1. Check if the liked players are in the matches
         liked_player_matches = [match for match in matches_on_days if any(player in match['match_name'] for player in liked_players)]
         for match in liked_player_matches:
-            match['priority'] = 1
+            match['priority'] = weights['liked']
+            match['recommendation_type'] = 'liked'
+            if match['match_name'] not in all_matches or match['priority'] > all_matches[match['match_name']]['priority']:
+                all_matches[match['match_name']] = match
 
-        # 2. Check if the recommended players are in the matches by checking if the player names are in the match_name. If so, add that match to a list of dictionaries with priority equal to similarity
+        # 2. Check if the recommended players are in the matches
         recommended_player_matches = [match for match in matches_on_days if any(player in match['match_name'] for player in _recommended_p_df['player_name'])]
         for match in recommended_player_matches:
-            player_name = next(player for player in _recommended_p_df['player_name'] if player in match['match_name'])
-            match['priority'] = _recommended_p_df[_recommended_p_df['player_name'] == player_name]['similarity'].values[0]
+            match_players = match['match_name'].split(' vs ')
+            similarity_scores = []
+            for player_name in match_players:
+                if player_name in _recommended_p_df['player_name'].values:
+                    similarity_scores.append(_recommended_p_df[_recommended_p_df['player_name'] == player_name]['similarity'].values[0])
+                else:
+                    # Calculate similarity to liked and recommended players
+                    if player_name in self.similarity_dfs['all'].index:
+                        similarity_liked = self.similarity_dfs['all'].loc[player_name, liked_players].max()
+                        similarity_recommended = self.similarity_dfs['all'].loc[player_name, _recommended_p_df['player_name']].max()
+                        similarity_scores.append(max(similarity_liked, similarity_recommended))
+            
+            # Filter out invalid entries (non-floats) in similarity_scores
+            similarity_scores = [score for score in similarity_scores if isinstance(score, (int, float))]
 
-        # If there are no found matches yet, extract the player names from the matches, then rank them by similarities to the liked players and to the recommended players. Then add the matches to the list of dictionaries with priority equal to the higher similarity (max similarity between those players and recommended players)
-        if not liked_player_matches and not recommended_player_matches:
+            max_similarity = max(similarity_scores) if similarity_scores else 0
+            match['priority'] = max_similarity * weights['recommended_by_player']
+            match['recommendation_type'] = 'recommended_by_player'
+            if match['match_name'] not in all_matches or match['priority'] > all_matches[match['match_name']]['priority']:
+                all_matches[match['match_name']] = match
+
+        # 3. Check for similar players
+        # get list of matches that are not in liked_player_matches or recommended_player_matches
+        matches_on_days = [match for match in matches_on_days if match not in liked_player_matches and match not in recommended_player_matches]
+        if matches_on_days:
+        # if not liked_player_matches and not recommended_player_matches:
             match_player_names = [name.split(' vs ')[0] for name in [match['match_name'] for match in matches_on_days]]
             match_player_names += [name.split(' vs ')[1] for name in [match['match_name'] for match in matches_on_days]]
             match_player_names = list(set(match_player_names))  # Remove duplicates
@@ -192,26 +218,21 @@ class Recommender:
                 if player_name in self.similarity_dfs['all'].index:
                     similarity_liked = self.similarity_dfs['all'].loc[player_name, liked_players].max()
                     similarity_recommended = self.similarity_dfs['all'].loc[player_name, _recommended_p_df['player_name']].max()
-                    priority = max(similarity_liked, similarity_recommended)
+                    priority = max(similarity_liked, similarity_recommended) * weights['similar_by_player']
 
                     for match in matches_on_days:
                         if player_name in match['match_name']:
                             match['priority'] = priority
+                            match['recommendation_type'] = 'similar_by_player'
+                            if match['match_name'] not in all_matches or match['priority'] > all_matches[match['match_name']]['priority']:
+                                all_matches[match['match_name']] = match
 
-        # Combine all the matches
-        all_matches = liked_player_matches + recommended_player_matches + matches_on_days
-
-        for match in all_matches:
-            match['recommendation_type'] = 'liked' if match in liked_player_matches else 'recommended_by_player' if match in recommended_player_matches else 'similar_by_player'
-            if 'priority' not in match:
-                match['priority'] = 0
-            if pd.isnull(match['priority']):
-                match['priority'] = 0
-
-        # Sort the matches by priority
-        all_matches.sort(key=lambda x: x.get('priority', 0), reverse=True)
+        # At the end, sort the matches by priority
+        all_matches = sorted(all_matches.values(), key=lambda x: x.get('priority', 0), reverse=True)
 
         return all_matches
+
+
     
     # def recommend_matches_for_groups(self, user_id: str):
         # Get the users of the groups the user is in

@@ -219,7 +219,6 @@ const PlayerBrowsing = ({ selectedPlayer }) => {
                 .then(response => response.json())
                 .then(data => {
                     // Handle the response data
-                    console.log('Success:', data)
                     // Filter the players array to match the names in the response data.
                     const recommendedPlayers = players.filter(player => data.includes(player.name)).map(player => {
                         // Return a new object with just the player name, image_url, and rank

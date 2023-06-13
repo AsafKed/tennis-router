@@ -52,43 +52,72 @@ class Recommender:
         self.similarity_dfs = similarity_dfs
 
 
-    def recommend_individual(self, player_names, similarity_type, used_id=None):
-        # TODO add filter options like "gender"
-        # Take the list of names and find the similarity scores for each player. Then return the top "amount" players
-        similarities = self.similarity_dfs[similarity_type][player_names].dropna()
+    def recommend_individual(self, player_names, similarity_type, user_id=None):
+        all_similarities = self.similarity_dfs[similarity_type][player_names].dropna()
+        all_similarities = all_similarities.stack().reset_index()
+        all_similarities.columns = ['rec_player', 'player', 'similarity']
 
-        # Transform the dataframe to a list of tuples
-        similarities = similarities.stack().reset_index().sort_values(0, ascending=False)
+        # Define a function that will return the top 2 players who are not in the liked list.
+        def top_2_not_liked(group):
+            group['similarity'] = pd.to_numeric(group['similarity'])
+            return group[~group['rec_player'].isin(player_names)].nlargest(2, 'similarity')
 
-        # Rename the columns
-        similarities.columns = ['rec_player', 'player', 'similarity']
+        # Group by player and apply the function
+        similarities = all_similarities.groupby('player').apply(top_2_not_liked).reset_index(drop=True)
 
-        # Give 2 recs per player in the list
-        similarities = similarities.groupby('player').head(2)
+        rec_players_dict = {}  # Initialize an empty dictionary for recommended players
+        for index, row in similarities.iterrows():
+            if row['rec_player'] in rec_players_dict:
+                # If the player already exists in the dictionary, update the similarity score to the maximum
+                rec_players_dict[row['rec_player']] = max(row['similarity'], rec_players_dict[row['rec_player']])
+            else:
+                # If the player does not exist in the dictionary, add it
+                rec_players_dict[row['rec_player']] = row['similarity']
 
-        if used_id is not None:
-            # Save recommendation relation to database
-
-            rec_players = similarities['rec_player'].unique()
-            similarities = similarities[similarities['rec_player'].isin(rec_players)]
-
+        if user_id is not None:
+            # Interaction with the database happens here.
             relation_worker = Relation_Worker()
-            prev_rec_players = relation_worker.get_player_recommend_relations(used_id)
-            prev_rec_players = prev_rec_players['player_name'].unique()
+            prev_rec_players = relation_worker.get_player_recommend_relations(user_id)
 
-            # Delete players from the db that were already recommended if they are not in rec_players
-            for prev_rec_player in prev_rec_players:
-                if prev_rec_player not in rec_players:
-                    relation_worker.delete_player_recommend(used_id, prev_rec_player)
-                else:
-                    rec_players = rec_players[rec_players != prev_rec_player]
+            prev_rec_players_set = set()
+            if prev_rec_players:
+                # Convert list of dictionaries to DataFrame
+                prev_rec_players_df = pd.DataFrame(prev_rec_players)
 
-            relation_worker.create_player_recommend(used_id, rec_players, similarities, similarity_type)
+                # Convert to a set for efficient membership testing.
+                prev_rec_players_set = set(prev_rec_players_df['player_name'].unique())
+
+            # Players to be removed from the database: those in the previous list but not in the current one.
+            to_be_removed = prev_rec_players_set - set(rec_players_dict.keys())
+            for player in to_be_removed:
+                relation_worker.delete_player_recommend(user_id, player)
+
+            # If less than 2 recommendations, add more while avoiding previous ones.
+            while len(rec_players_dict) < 2*len(player_names):
+                additional_recs = all_similarities[~all_similarities['rec_player'].isin(set(list(rec_players_dict.keys()) + list(prev_rec_players_set)))]
+                additional_recs = additional_recs.sort_values('similarity', ascending=False).head(1)
+                for index, row in additional_recs.iterrows():
+                    rec_players_dict[row['rec_player']] = row['similarity']
+
+            for player, similarity in rec_players_dict.items():
+                relation_worker.create_player_recommend(user_id, player, similarity, 'all', 'player')
+
             relation_worker.close()
+
+        return list(rec_players_dict.keys())
+
+
+
+
+            # Create new relations
+            # for player in rec_players:
+            #     relation_worker.create_player_recommend(user_id, player, similarities[similarities['rec_player'] == player]['similarity'].values[0], similarity_type)
+            # relation_worker.create_player_recommend(user_id, rec_players, similarities, similarity_type)
+            # relation_worker.close()
         
         # Turn similarities into list of dictionaries
-        similarities = similarities.to_dict('records')
-        return similarities
+        # similarities = similarities.to_dict('records')
+        # return similarities
     
     def recommend_matches(self, user_id: str):
         """Recommend matches based on the players and the days.
@@ -113,8 +142,8 @@ class Recommender:
 
         # Convert the list of dictionaries to a DataFrame
         _recommended_p_df = pd.DataFrame(_recommended_p)
-        return _recommended_p_df
 
+        return _recommended_p_df
         # Get the matches for those days
         formatted_days = []
         if days is not None:

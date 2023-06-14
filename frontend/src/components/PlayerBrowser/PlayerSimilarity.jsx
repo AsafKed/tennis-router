@@ -25,21 +25,21 @@ const PlayerSimilarity = ({ open, handleClose, isLoggedIn }) => {
     // Tracking
     const { trackEvent } = useTracking();
 
-    // Fetch similarity weight from the user
-    useEffect(() => {
-        const fetchSimilarityWeight = async () => {
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/get_similarity_weights`);
-            const text = await response.text();
-            const data = JSON.parse(text);
-            setSimilarityWeight(data);
-            // localStorage.setItem('similarity_weight', JSON.stringify(data));
-        };
+    // // Fetch similarity weight from the user
+    // useEffect(() => {
+    //     const fetchSimilarityWeight = async () => {
+    //         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/get_similarity_weights`);
+    //         const text = await response.text();
+    //         const data = JSON.parse(text);
+    //         setSimilarityWeight(data);
+    //         // localStorage.setItem('similarity_weight', JSON.stringify(data));
+    //     };
 
-        // Use locally stored similarity weight if it exists
-        const storedSimilarityWeight = localStorage.getItem('similarity_weight');
-        if (isLoggedIn && !similarityWeight) fetchSimilarityWeight();
-        else setSimilarityWeight(JSON.parse(storedSimilarityWeight));
-    }, [userId]);
+    //     // Use locally stored similarity weight if it exists
+    //     // const storedSimilarityWeight = localStorage.getItem('similarity_weight');
+    //     // if (isLoggedIn && !similarityWeight) fetchSimilarityWeight();
+    //     // else setSimilarityWeight(JSON.parse(storedSimilarityWeight));
+    // }, [userId]);
 
     // Fetch similar players
     const fetchSimilarPlayers = async () => {

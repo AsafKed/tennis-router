@@ -147,7 +147,8 @@ class Recommender:
             formatted_days = [datetime.strptime(day, "%d/%m/%Y").strftime("%Y-%m-%d") for day in days]
 
         # Get recommendations for today
-        today = datetime.today().strftime("%Y-%m-%d")
+        today = datetime(2023, 6, 13).strftime("%Y-%m-%d")
+        # today = datetime.today().strftime("%Y-%m-%d")
         formatted_days = [today]
 
         # Get all matches

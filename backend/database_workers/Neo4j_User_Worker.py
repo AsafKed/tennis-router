@@ -4,13 +4,13 @@ from neo4j.exceptions import ServiceUnavailable
 
 import os
 from datetime import datetime
+from collections import Counter
 
 # Import error raises
 from .Neo4j_Errors import Uniqueness_Check
 
 # This enables os.getenv() to read the .env file
 from dotenv import load_dotenv
-
 load_dotenv()
 
 
@@ -469,3 +469,28 @@ class User_Worker:
             """
         result = tx.run(query, group_name=group_name).data()
         return result
+
+    ############################
+    # Get all user IDs
+    ############################
+    def get_unique_user_ids(self):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(self._get_unique_user_ids)
+            return result
+        
+    @staticmethod
+    def _get_unique_user_ids(tx):
+        query = """
+            MATCH (u:User)
+            RETURN u.user_id AS user_id
+            """
+        result = tx.run(query).data()
+        
+        # Turn this from a list of dictionaries with the key "user_id" to a list of strings
+        users = [d["user_id"] for d in result]
+
+        # remove non unique users
+        non_unique_users = [k for k,v in Counter(users).items() if v>1]
+        users = [user for user in users if user not in non_unique_users]
+
+        return users

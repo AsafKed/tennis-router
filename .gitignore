@@ -270,4 +270,4 @@ cython_debug/
 .~lock.*
 
 # Don't count Jupyter Notebooks as code when counting lines of code on GitHub
-notebooks/** linguist-vendored
+backend/test.ipynb linguist-vendored

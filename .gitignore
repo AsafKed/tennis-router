@@ -268,3 +268,6 @@ cython_debug/
 
 # Excel
 .~lock.*
+
+# Don't count Jupyter Notebooks as code when counting lines of code on GitHub
+notebooks/** linguist-vendored

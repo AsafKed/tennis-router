@@ -58,3 +58,26 @@ class Event_Worker:
         result = tx.run(query, node_props=node_props, rel_props=rel_props, user_id=user_id, guest_id=guest_id)
 
         return result.single()
+
+    #############################
+    # Find all events for a user_id, sorted on PERFORMED.timestamp
+    #############################
+    def get_user_events(self, user_id):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(
+                self._get_user_events, user_id=user_id
+            )
+
+            return result
+        
+    @staticmethod
+    def _get_user_events(tx, user_id):
+        query = """
+            MATCH (u:User {user_id: $user_id})-[r:PERFORMED]->(e:Event)
+            RETURN r.timestamp AS timestamp, e {.*}, u.user_id as user
+            ORDER BY r.timestamp
+        """
+        result = tx.run(query, user_id=user_id)
+
+        events = [dict(record)['e'] | {'timestamp': dict(record)['timestamp'], 'user': dict(record)['user']} for record in result]
+        return events

@@ -494,3 +494,21 @@ class User_Worker:
         users = [user for user in users if user not in non_unique_users]
 
         return users
+    
+    ############################
+    # Get username
+    ############################
+    def get_username(self, user_id):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_read(self._get_username, user_id)
+            return result[0]["name"]
+        
+    @staticmethod
+    def _get_username(tx, user_id):
+        query = """
+            MATCH (u:User)
+            WHERE u.user_id = $user_id
+            RETURN u.name AS name
+            """
+        result = tx.run(query, user_id=user_id).data()
+        return result

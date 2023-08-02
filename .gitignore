@@ -138,7 +138,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-/backend/test.ipynb
+# /backend/test.ipynb
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -268,3 +268,6 @@ cython_debug/
 
 # Excel
 .~lock.*
+
+# Don't count Jupyter Notebooks as code when counting lines of code on GitHub
+backend/test.ipynb linguist-vendored

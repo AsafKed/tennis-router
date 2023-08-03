@@ -82,6 +82,7 @@ class Event_Worker:
         events = [dict(record)['e'] | {'timestamp': dict(record)['timestamp'], 'user': dict(record)['user']} for record in result]
         return events
 
+
     #############################
     # Return timestamps
     #############################
@@ -109,7 +110,7 @@ class Event_Worker:
         with self.driver.session(database="neo4j") as session:
             result = session.run("""
                 MATCH (e:Event {action: "view_player"})-[r]-(n) 
-                WHERE n.name <> "Asaf"
+                WHERE n.name <> "Asaf" AND n.name <> "Asaf Tester"
                 RETURN r.player_name as player_name, e.page as page, count(*) as count
             """)
 
@@ -141,7 +142,7 @@ class Event_Worker:
         with self.driver.session(database="neo4j") as session:
             result = session.run("""
                 MATCH (e:Event {action: "like_player"})-[r]-(n) 
-                WHERE n.name <> "Asaf"
+                WHERE n.name <> "Asaf" AND n.name <> "Asaf Tester"
                 RETURN r.player_name as player_name, e.page as page, count(*) as count
             """)
 

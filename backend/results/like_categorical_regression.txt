@@ -1,0 +1,37 @@
+\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}           &      likes       & \textbf{  No. Observations:  } &      115    \\
+\textbf{Model:}                   &       GLM        & \textbf{  Df Residuals:      } &       99    \\
+\textbf{Model Family:}            & NegativeBinomial & \textbf{  Df Model:          } &       15    \\
+\textbf{Link Function:}           &       Log        & \textbf{  Scale:             } &    1.0000   \\
+\textbf{Method:}                  &       IRLS       & \textbf{  Log-Likelihood:    } &   -156.75   \\
+\textbf{Date:}                    & Tue, 08 Aug 2023 & \textbf{  Deviance:          } &    68.272   \\
+\textbf{Time:}                    &     17:39:42     & \textbf{  Pearson chi2:      } &     76.3    \\
+\textbf{No. Iterations:}          &        13        & \textbf{  Pseudo R-squ. (CS):} &   0.6318    \\
+\textbf{Covariance Type:}         &    nonrobust     & \textbf{                     } &             \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                                  & \textbf{coef} & \textbf{std err} & \textbf{z} & \textbf{P$> |$z$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{intercept}                &     170.5562  &      157.995     &     1.080  &         0.280        &     -139.108    &      480.220     \\
+\textbf{country}                  &      -0.0308  &        0.017     &    -1.844  &         0.065        &       -0.064    &        0.002     \\
+\textbf{rank}                     &      -0.0012  &        0.002     &    -0.809  &         0.418        &       -0.004    &        0.002     \\
+\textbf{play\_style}              &      -0.3881  &        0.114     &    -3.397  &         0.001        &       -0.612    &       -0.164     \\
+\textbf{age}                      &      -0.0310  &        0.118     &    -0.262  &         0.793        &       -0.263    &        0.201     \\
+\textbf{height}                   &       0.0519  &        0.027     &     1.941  &         0.052        &       -0.001    &        0.104     \\
+\textbf{favorite\_shot}           &      -0.1242  &        0.084     &    -1.485  &         0.138        &       -0.288    &        0.040     \\
+\textbf{hand}                     &      -0.1800  &        0.361     &    -0.499  &         0.618        &       -0.888    &        0.528     \\
+\textbf{grass\_advantage}         &      -0.0447  &        0.427     &    -0.105  &         0.917        &       -0.882    &        0.793     \\
+\textbf{career\_high\_rank}       &      -0.0100  &        0.004     &    -2.289  &         0.022        &       -0.019    &       -0.001     \\
+\textbf{years\_on\_tour}          &      -0.0142  &        0.120     &    -0.119  &         0.906        &       -0.249    &        0.220     \\
+\textbf{coach}                    &      -0.0029  &        0.006     &    -0.495  &         0.620        &       -0.014    &        0.008     \\
+\textbf{gender}                   &       0.0991  &        0.567     &     0.175  &         0.861        &       -1.011    &        1.210     \\
+\textbf{career\_high\_year}       &      -0.0870  &        0.078     &    -1.118  &         0.264        &       -0.240    &        0.066     \\
+\textbf{previous\_libema\_winner} &       0.0496  &        0.642     &     0.077  &         0.938        &       -1.208    &        1.307     \\
+\textbf{country\_zone}            &       0.0207  &        0.050     &     0.416  &         0.677        &       -0.077    &        0.119     \\
+\bottomrule
+\end{tabular}
+%\caption{Generalized Linear Model Regression Results}
+\end{center}

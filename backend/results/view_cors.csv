@@ -1,9 +1,9 @@
 ,views
-career_high_year,0.138
-grass_advantage,-0.06
-height,-0.062
-years_on_tour,-0.111
-age,-0.162
-previous_libema_winner,-0.185
-career_high_rank,-0.256
-rank,-0.461
+height,0.071
+career_high_year,0.027
+grass_advantage,-0.062
+years_on_tour,-0.106
+previous_libema_winner,-0.121
+age,-0.163
+career_high_rank,-0.345
+rank,-0.487
